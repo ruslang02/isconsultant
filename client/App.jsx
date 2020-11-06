@@ -4,12 +4,12 @@ import { MainPage } from './views/MainPage';
 import { CallPage } from './views/CallPage';
 import './index.scss';
 
-function App() {
+export function App() {
   return (
     <Router>
       <main className="rz-container">
         <Switch>
-          <Route path="/" component={MainPage} />
+          <Route path="/" component={CallPage} />
           <Route path="/call" component={CallPage} />
           <Route>
             <p>This page was not found.</p>
@@ -19,4 +19,3 @@ function App() {
     </Router>
   );
 }
-export default App;

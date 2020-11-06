@@ -1,10 +1,22 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const { HotModuleReplacementPlugin } = require('webpack');
+
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 module.exports = {
+  mode: isDevelopment ? 'development' : 'production',
+  devServer: {
+    contentBase: './www',
+    hot: true,
+    historyApiFallback: true,
+    port: 9000
+  },
   entry: './client/index.jsx',
   output: {
     path: path.resolve(__dirname, 'www'),
+    publicPath: '/',
     filename: 'bundle.js',
   },
   module: {
@@ -31,6 +43,13 @@ module.exports = {
         use: [
           {
             loader: 'babel-loader',
+            options: {
+              // ... other options
+              plugins: [
+                // ... other plugins
+                isDevelopment && require.resolve('react-refresh/babel'),
+              ].filter(Boolean),
+            },
           },
           {
             loader: 'react-svg-loader',
@@ -46,7 +65,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: 'client/index.html',
-    })
+    }),
+    isDevelopment && new HotModuleReplacementPlugin(),
+    isDevelopment && new ReactRefreshWebpackPlugin(),
   ],
 
 };
