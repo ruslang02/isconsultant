@@ -1,17 +1,43 @@
-import { OnGatewayConnection, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { Socket, Client } from 'socket.io';
+import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { Socket, Server } from 'socket.io';
 
 @WebSocketGateway({
   path: 'gateway'
 })
-export class CallGateway implements OnGatewayConnection {
+export class CallGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  private activeSockets: string[] = [];
 
-  handleConnection(client: Client, ...args: any[]) {
-    throw new Error('Method not implemented.');
+  handleConnection(socket: Socket, ...args: any[]) {
+    const existingSocket = this.activeSockets.find(
+      existingSocket => existingSocket === socket.id
+    );
+
+    if (!existingSocket) {
+      this.activeSockets.push(socket.id);
+
+      socket.emit("update-user-list", {
+        users: this.activeSockets.filter(
+          existingSocket => existingSocket !== socket.id
+        )
+      });
+
+      socket.broadcast.emit("update-user-list", {
+        users: [socket.id]
+      });
+    }
+  }
+
+  handleDisconnect(socket: Socket) {
+    this.activeSockets = this.activeSockets.filter(
+      existingSocket => existingSocket !== socket.id
+    );
+    socket.broadcast.emit("remove-user", {
+      socketId: socket.id
+    });
   }
   
   @SubscribeMessage('message')
-  handleMessage(client: Client, payload: any): string {
+  handleMessage(socket: Socket, payload: any): string {
     return 'Hello world!';
   }
 }

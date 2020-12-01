@@ -53,6 +53,8 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
+    "socket.io": "^3.0.1",
+    "socket.io-client": "^3.0.1",
     "typeface-source-sans-pro": "^1.1.13"
   }
 }
