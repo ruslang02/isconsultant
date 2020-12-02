@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { CallModule } from './call/call.module';
+import { UsersModule } from './users/users.module';
+import { SchedulesModule } from './schedules/schedules.module';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../www'),
-      exclude: ['gateway']
+      exclude: ['api']
     }),
-    CallModule
+    UsersModule,
+    SchedulesModule,
   ]
 })
 export class AppModule {}
