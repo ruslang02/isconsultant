@@ -9,8 +9,18 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDirs": ["./client", "./common", "./server"],
+    "rootDirs": [
+      "./client",
+      "./common",
+      "./server"
+    ],
+    "baseUrl": ".",
     "skipLibCheck": true,
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@common/*": [
+        "common/*"
+      ]
+    }
   }
 }

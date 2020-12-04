@@ -1,5 +1,5 @@
 node_modules/
 dist/
 www/
-*.tsbuildinfo
 production.env
+*.tsbuildinfo

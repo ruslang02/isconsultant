@@ -10,9 +10,11 @@
     "db": {
       "env_file": "./development.env",
       "image": "postgres",
-      "networks": [
-        "db"
-      ],
+      "networks": {
+        "db": {
+          "aliases": ["webrtc-db"]
+        }
+      },
       "ports": [
         "5432:5432"
       ],
@@ -30,7 +32,10 @@
       "ports": [
         "8080:8080"
       ],
-      "restart": "always"
+      "restart": "always",
+      "volumes": [
+        "./:/app"
+      ]
     }
   }
 }
