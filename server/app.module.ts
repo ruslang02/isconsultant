@@ -1,3 +1,4 @@
+import { CalendarEvent } from '@common/models/CalendarEvent';
 import { User } from '@common/models/User';
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -17,12 +18,12 @@ const { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES
       username: POSTGRES_USER,
       password: POSTGRES_PASSWORD,
       database: POSTGRES_DB,
-      entities: [User],
+      entities: [CalendarEvent, User],
       synchronize: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../www'),
-      exclude: ['/api/**']
+      exclude: ['/api/**', '/docs/**']
     }),
     UsersModule,
     SchedulesModule,
