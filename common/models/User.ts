@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, ManyToMany, OneToMany } from 'typeorm';
+import { Comment } from './Comment';
 
 export enum UserType {
   ADMIN = "admin",
@@ -18,21 +19,33 @@ export class User {
 
   @Column()
   @ApiProperty({
+    description: 'Адрес электронной почты пользователя.'
+  })
+  email: string;
+
+  @Column()
+  @ApiProperty({
+    description: 'Захешированный пароль пользователя.'
+  })
+  password: string;
+
+  @Column()
+  @ApiProperty({
     description: 'Имя пользователя.'
   })
-  firstName: string;
+  first_name: string;
 
   @Column()
   @ApiProperty({
     description: 'Отчество пользователя.'
   })
-  middleName: string;
+  middle_name: string;
 
   @Column()
   @ApiProperty({
     description: 'Фамилия пользователя.'
   })
-  lastName: string;
+  last_name: string;
   
   @Column({
     type: 'enum',
@@ -47,17 +60,29 @@ export class User {
   @ApiProperty({
     description: 'Отчество пользователя.'
   })
-  phoneNumber: string;
+  phone: string;
 
   @Column()
   @ApiProperty({
-    description: 'Ссылка на изображение на аватаре пользователя.'
+    description: 'Хэш-код изображения на аватаре пользователя.'
   })
-  avatarUrl: string;
+  avatar: string;
 
   @Column({ default: false })
   @ApiProperty({
     description: 'Флаг о подтверждении аккаунта.'
   })
   verified: boolean;
+
+  @Column({ default: 0 })
+  @ApiProperty({
+    description: 'Рейтинг пользователя.'
+  })
+  rating: number;
+
+  @OneToMany(() => Comment, comment => comment.recipient)
+  @ApiProperty({
+    description: 'Комментарии о пользователе.'
+  })
+  comments: Comment[];
 }
