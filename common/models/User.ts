@@ -79,10 +79,4 @@ export class User {
     description: 'Рейтинг пользователя.'
   })
   rating: number;
-
-  @OneToMany(() => Comment, comment => comment.recipient)
-  @ApiProperty({
-    description: 'Комментарии о пользователе.'
-  })
-  comments: Comment[];
 }

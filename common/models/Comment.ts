@@ -9,14 +9,14 @@ export class Comment {
     description: 'Уникальный идентификатор комментария.'
   })
   id: number;
-
+  
   @OneToOne(() => User)
   @JoinColumn({ name: 'author_id' })
   @ApiProperty({
     description: 'Автор комментария.'
   })
   author: User;
-
+  
   @Column({
     type: 'text'
   })
@@ -31,8 +31,7 @@ export class Comment {
   })
   created_timestamp: Date;
 
-  @ManyToOne(() => User, user => user.comments, { })
-  @JoinColumn({ name: 'recipient_id' })
+  @OneToOne(() => User)
   @ApiProperty({
     description: 'Пользователь, которому направлен комментарий.'
   })

@@ -10,6 +10,7 @@ async function bootstrap() {
     .setTitle('Приложение для проведения юридических консультаций.')
     .setDescription('Интегрируемое в юридическое организацию решение, позволяющую организовать консультации через Интернет при помощи аудио- и видеоконференций при помощи технологии WebRTC.')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
