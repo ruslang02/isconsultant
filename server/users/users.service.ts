@@ -14,7 +14,19 @@ export class UsersService {
     return this.users.findOne(uid);
   }
 
+  findOneByEmail(email: string): Promise<User> {
+    return this.users.findOne({
+      where: {
+        email
+      }
+    });
+  }
+
   updateOne(uid: string, user: Partial<User>) {
     return this.users.update(uid, user);
+  }
+
+  deleteOne(uid: string) {
+    return this.users.delete(uid);
   }
 }

@@ -17,4 +17,8 @@ export class ReportsService {
     } as Partial<Report>);
     return this.reports.save(report);
   }
+
+  find() {
+    return this.reports.find();
+  }
 }
