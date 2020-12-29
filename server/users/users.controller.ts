@@ -1,18 +1,19 @@
 import { Comment } from '@common/models/Comment';
 import { Report } from '@common/models/Report';
 import { User, UserType } from '@common/models/User';
+import { Locale, LocaleString } from '@common/utils/Locale';
 import {
   BadRequestException,
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   NotFoundException,
   Param,
   Patch,
   Post,
   Request,
+  Response,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -28,13 +29,14 @@ import {
   OmitType,
   PickType,
 } from '@nestjs/swagger';
+import { I18n, I18nContext, I18nLang, I18nService } from 'nestjs-i18n';
+import { Types } from 'server/guards/type.decorator';
+import { UserGuard } from 'server/guards/user.guard';
 import { JwtAuthGuard } from '../guards/jwt.guard';
-import { ExtendedRequest } from '../utils/ExtendedRequest';
 import { ReportsService } from '../reports/reports.service';
+import { ExtendedRequest } from '../utils/ExtendedRequest';
 import { CommentsService } from './comments.service';
 import { UsersService } from './users.service';
-import { UserGuard } from 'server/guards/user.guard';
-import { Types } from 'server/guards/type.decorator';
 
 @ApiTags('Управление пользователями')
 @Controller('/api/users')
@@ -42,8 +44,30 @@ export class UsersController {
   constructor(
     private comments: CommentsService,
     private reports: ReportsService,
-    private users: UsersService
+    private users: UsersService,
   ) {}
+
+  async hydrateUser(user: User, i18n: I18nContext) {
+    delete user.password;
+    user.type_localized = await i18n.t(
+      `USER_TYPE_${user.type.toUpperCase()}` as LocaleString
+    );
+    return user;
+  }
+
+  @Types(UserType.ADMIN, UserType.MODERATOR)
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @Get('')
+  @ApiOperation({
+    description: 'Получение всех зарегистрированных пользователей.',
+  })
+  async listUsers(
+    @I18n() i18n: I18nContext
+  ): Promise<User[]> {
+    const users = await this.users.findMany();
+    const hydrated = users.map((user) => this.hydrateUser(user, i18n));
+    return Promise.all(hydrated);
+  }
 
   @Get(':id')
   @ApiOkResponse({
@@ -188,11 +212,38 @@ export class UsersController {
   @ApiOperation({
     description: 'Удаление пользователя.',
   })
-  deleteUser(
-    @Param('id') userId: string
-  ) {
+  deleteUser(@Param('id') userId: string) {
     try {
       return this.users.deleteOne(userId);
+    } catch (e) {
+      throw new NotFoundException('The user does not exist.');
+    }
+  }
+
+  @Types(UserType.MODERATOR, UserType.ADMIN)
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @Post(':id/verified')
+  @ApiForbiddenResponse({
+    description: 'У пользователя нет прав на совершение этого действия.',
+  })
+  @ApiNoContentResponse({
+    description: 'Профиль пользователя был успешно подтвержден.',
+  })
+  @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
+  @ApiBearerAuth()
+  @ApiOperation({
+    description: 'Установка флага подтверждения пользователя.',
+  })
+  @ApiBody({
+    description: 'Флаг подтверждения.',
+    type: PickType(User, ['verified'] as const),
+  })
+  async setUserVerified(
+    @Param('id') userId: string,
+    @Body() { verified }: Pick<User, 'verified'>
+  ) {
+    try {
+      await this.users.updateOne(userId, { verified });
     } catch (e) {
       throw new NotFoundException('The user does not exist.');
     }

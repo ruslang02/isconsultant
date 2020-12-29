@@ -1,0 +1,6 @@
+{
+  "USER_TYPE_ADMIN": "Administrator",
+  "USER_TYPE_MODERATOR": "Moderator",
+  "USER_TYPE_LAWYER": "Lawyer",
+  "USER_TYPE_CLIENT": "Client"
+}

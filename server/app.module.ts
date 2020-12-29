@@ -1,44 +1,30 @@
-import { CalendarEvent } from '@common/models/CalendarEvent';
-import { Comment } from '@common/models/Comment';
-import { Report } from '@common/models/Report';
-import { User } from '@common/models/User';
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import { join } from 'path';
-import { AuthModule } from './auth/auth.module';
-import { ReportsModule } from './reports/reports.module';
-import { SchedulesModule } from './schedules/schedules.module';
-import { UsersModule } from './users/users.module';
-
-const {
-  POSTGRES_HOST,
-  POSTGRES_PORT,
-  POSTGRES_USER,
-  POSTGRES_PASSWORD,
-  POSTGRES_DB,
-} = process.env;
-
+import { ApiModule } from './api.module';
+import { AppController } from './app.controller';
+console.log(join(__dirname, '../common/locales'));
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: POSTGRES_HOST,
-      port: +POSTGRES_PORT,
-      username: POSTGRES_USER,
-      password: POSTGRES_PASSWORD,
-      database: POSTGRES_DB,
-      entities: [CalendarEvent, Comment, Report, User],
-      synchronize: true,
+    I18nModule.forRoot({
+      fallbackLanguage: 'ru',
+      fallbacks: {
+        'en-*': 'en',
+        'ru-*': 'ru',
+      },
+      parser: I18nJsonParser,
+      parserOptions: {
+        path: join(__dirname, '../common/locales'),
+        watch: true,
+      },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../www'),
-      exclude: ['/api/**', '/docs/**'],
+      serveRoot: '/admin/',
     }),
-    UsersModule,
-    SchedulesModule,
-    AuthModule,
-    ReportsModule,
+    ApiModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

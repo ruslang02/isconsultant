@@ -55,6 +55,8 @@ export class User {
     description: 'Тип пользователя.'
   })
   type: UserType;
+  
+  type_localized: string;
 
   @Column()
   @ApiProperty({
@@ -74,7 +76,7 @@ export class User {
   })
   verified: boolean;
 
-  @Column({ default: 0 })
+  @Column({ default: 0, type: 'real' })
   @ApiProperty({
     description: 'Рейтинг пользователя.'
   })

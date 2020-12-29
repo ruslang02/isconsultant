@@ -7,15 +7,15 @@ import { UsersService } from '../users/users.service';
 export class AuthService {
   constructor(private users: UsersService, private jwt: JwtService) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<Omit<User, 'password'> | null> {
     const user = await this.users.findOneByEmail(email);
     if (user) {
       if (!user.verified) {
         throw new BadRequestException('Your account was not verified yet.');
       }
       if (user.password === pass) {
-        const { id, type } = user;
-        return { id, type };
+        const { password, ...safeUser } = user;
+        return safeUser;
       }
     }
     return null;
@@ -23,8 +23,6 @@ export class AuthService {
 
   async login(user: Pick<User, 'id' | 'type'>) {
     const payload = { id: user.id, type: user.type };
-    return {
-      access_token: this.jwt.sign(payload),
-    };
+    return this.jwt.sign(payload);
   }
 }

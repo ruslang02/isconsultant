@@ -2,15 +2,16 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
+    "esModuleInterop": true,
     "removeComments": true,
+    "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
-    "sourceMap": true,
+    "sourceMap": false,
     "outDir": "./dist",
     "rootDirs": [
-      "./client",
       "./common",
       "./server"
     ],
@@ -21,6 +22,7 @@
       "@common/*": [
         "common/*"
       ]
-    }
+    },
+    "jsx": "react"
   }
 }

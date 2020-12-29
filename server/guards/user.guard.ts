@@ -3,10 +3,12 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ExtendedRequest } from '../utils/ExtendedRequest';
 
+@Injectable()
 export class UserGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
@@ -17,7 +19,7 @@ export class UserGuard implements CanActivate {
       params,
     } = context.switchToHttp().getRequest<ExtendedRequest>();
 
-    if (+params.id === user.id || !types || types.includes(user.type)) {
+    if (+params.id === user?.id || !types || types.includes(user?.type)) {
       return true;
     }
 

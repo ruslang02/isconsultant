@@ -1,7 +1,7 @@
 import { User } from '@common/models/User';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -9,6 +9,10 @@ export class UsersService {
     @InjectRepository(User)
     private users: Repository<User>
   ) {}
+
+  async findMany(options?: FindManyOptions<any>): Promise<User[]> {
+    return this.users.find(options);
+  }
 
   findOne(uid: string): Promise<User> {
     return this.users.findOne(uid);

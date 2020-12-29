@@ -1,34 +1,48 @@
-const path = require('path');
+const { resolve } = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
-const { HotModuleReplacementPlugin } = require('webpack');
-
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { DefinePlugin } = require('webpack');
 
 module.exports = {
-  mode: isDevelopment ? 'development' : 'production',
   devServer: {
     contentBase: './www',
     hot: true,
     historyApiFallback: true,
     port: 9000
   },
-  entry: './client/index.jsx',
+  entry: './admin/index.tsx',
   output: {
-    path: path.resolve(__dirname, 'www'),
-    publicPath: '/',
+    path: resolve(__dirname, 'www'),
+    publicPath: '/admin/',
     filename: 'bundle.js',
   },
   module: {
     rules: [
-      { test: /\.(js|jsx)$/, resolve: { extensions: ['.js', '.jsx'] }, use: 'babel-loader' },
-      { test: /\.s[ac]ss$/i, use: ['style-loader', 'css-loader', 'sass-loader'] },
-      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       {
-        test: /\.(png|jpe?g|gif)$/i,
+        test: /\.(tsx?)$/,
+        resolve: {
+          alias: {
+            '@common': resolve(__dirname, 'common'),
+          },
+          extensions: ['.ts', '.tsx', '.js'],
+        },
+        use: [{
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.client.json',
+          },      
+        }],
+      },
+      { 
+        test: /\.s?css$/, 
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+      },
+      {
+        test: /\.(png|jpe?g|svg)$/,
         loader: 'file-loader',
         options: {
-          outputPath: 'images',
+          name: 'assets/[name].[ext]',
         },
       },
       {
@@ -40,34 +54,28 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              // ... other options
-              plugins: [
-                // ... other plugins
-                isDevelopment && require.resolve('react-refresh/babel'),
-              ].filter(Boolean),
-            },
-          },
+        use: ['babel-loader',
           {
             loader: 'react-svg-loader',
             options: {
-              jsx: true, // true outputs JSX tags
+              jsx: true,
             },
           },
         ],
       },
     ],
   },
-  mode: 'development',
   plugins: [
-    new HtmlWebpackPlugin({
-      template: 'client/index.html',
+    process.env.WEBPACK_MODE === 'production' ? new CleanWebpackPlugin() : () => {},
+    new MiniCssExtractPlugin({
+      filename: 'style.css',
     }),
-    isDevelopment && new HotModuleReplacementPlugin(),
-    isDevelopment && new ReactRefreshWebpackPlugin(),
+    new DefinePlugin({
+      'process.env.EXPERIMENTAL_ENABLED': false,
+      'process.env.NODE_ENV': JSON.stringify(process.env.WEBPACK_MODE || 'production')
+    }),
+    new HtmlWebpackPlugin({
+      title: 'WebRTC Admin',
+    }),
   ],
-
 };
