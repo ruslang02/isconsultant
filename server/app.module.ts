@@ -4,7 +4,7 @@ import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import { join } from 'path';
 import { ApiModule } from './api.module';
 import { AppController } from './app.controller';
-console.log(join(__dirname, '../common/locales'));
+
 @Module({
   imports: [
     I18nModule.forRoot({
@@ -21,7 +21,7 @@ console.log(join(__dirname, '../common/locales'));
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../www'),
-      serveRoot: '/admin/',
+      serveRoot: '/admin',
     }),
     ApiModule,
   ],

@@ -8,6 +8,7 @@
     "outDir": "www",
     "rootDirs": ["admin", "common"],
     "target": "ES6",
+    "declaration": false
   },
   "include": ["admin/**/*", "common/**/*"]
 }

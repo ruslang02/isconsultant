@@ -5,6 +5,12 @@ export class AppController {
   @Get()
   @Render('index')
   root() {
-    return { message: 'Hello world!' };
+    return { name: 'ISConsultant' };
+  }
+
+  @Get('call')
+  @Render('video')
+  renderVideo() {
+    return { name: 'ISConsultant демо' };
   }
 }

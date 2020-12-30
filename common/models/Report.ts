@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
@@ -18,6 +19,12 @@ export enum ReportStatus {
 export class Report {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @CreateDateColumn()
+  @ApiProperty({
+    description: 'Время создания жалобы.',
+  })
+  created_timestamp: Date;
 
   @Column('text')
   description: string;
@@ -44,7 +51,7 @@ export class Report {
 
   @Column({
     type: 'text',
-    nullable: true
+    nullable: true,
   })
   decision?: string;
 }

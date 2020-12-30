@@ -50,7 +50,7 @@ export class UsersController {
   async hydrateUser(user: User, i18n: I18nContext) {
     delete user.password;
     user.type_localized = await i18n.t(
-      `USER_TYPE_${user.type.toUpperCase()}` as LocaleString
+      `global.USER_TYPE_${user.type.toUpperCase()}` as LocaleString
     );
     return user;
   }

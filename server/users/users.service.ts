@@ -26,6 +26,10 @@ export class UsersService {
     });
   }
 
+  insertOne(user: Partial<User>) {
+    return this.users.insert(user);
+  }
+
   updateOne(uid: string, user: Partial<User>) {
     return this.users.update(uid, user);
   }

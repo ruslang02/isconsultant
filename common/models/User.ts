@@ -1,84 +1,104 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, ManyToMany, OneToMany } from 'typeorm';
-import { Comment } from './Comment';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 export enum UserType {
-  ADMIN = "admin",
-  MODERATOR = "moderator",
-  LAWYER = "lawyer",
-  CLIENT = "client"
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+  LAWYER = 'lawyer',
+  CLIENT = 'client',
 }
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   @ApiProperty({
-    description: 'Уникальный идентификатор пользователя.'
+    description: 'Уникальный идентификатор пользователя.',
+    readOnly: true,
   })
   id: number;
 
   @Column()
   @ApiProperty({
-    description: 'Адрес электронной почты пользователя.'
+    description: 'Адрес электронной почты пользователя.',
   })
   email: string;
 
   @Column()
   @ApiProperty({
-    description: 'Захешированный пароль пользователя.'
+    description: 'Захешированный пароль пользователя.',
   })
   password: string;
 
   @Column()
   @ApiProperty({
-    description: 'Имя пользователя.'
+    description: 'Имя пользователя.',
   })
   first_name: string;
 
   @Column()
   @ApiProperty({
-    description: 'Отчество пользователя.'
+    description: 'Отчество пользователя.',
   })
   middle_name: string;
 
   @Column()
   @ApiProperty({
-    description: 'Фамилия пользователя.'
+    description: 'Фамилия пользователя.',
   })
   last_name: string;
-  
+
   @Column({
     type: 'enum',
-    enum: UserType
+    enum: UserType,
   })
   @ApiProperty({
-    description: 'Тип пользователя.'
+    description: 'Тип пользователя.',
+    enum: UserType,
   })
   type: UserType;
-  
+
   type_localized: string;
 
-  @Column()
-  @ApiProperty({
-    description: 'Отчество пользователя.'
+  @Column({
+    nullable: true,
   })
-  phone: string;
+  @ApiProperty({
+    description: 'Номер телефона пользователя.',
+    required: false,
+  })
+  phone?: string;
 
-  @Column()
-  @ApiProperty({
-    description: 'Хэш-код изображения на аватаре пользователя.'
+  @Column({
+    nullable: true,
   })
-  avatar: string;
+  @ApiProperty({
+    description: 'Хэш-код изображения на аватаре пользователя.',
+    required: false,
+  })
+  avatar?: string;
 
   @Column({ default: false })
   @ApiProperty({
-    description: 'Флаг о подтверждении аккаунта.'
+    description: 'Флаг о подтверждении аккаунта.',
   })
   verified: boolean;
 
   @Column({ default: 0, type: 'real' })
   @ApiProperty({
-    description: 'Рейтинг пользователя.'
+    description: 'Рейтинг пользователя.',
+    readOnly: true,
   })
   rating: number;
+
+  @CreateDateColumn()
+  @ApiProperty({
+    description: 'Время создания пользователя.',
+    readOnly: true,
+  })
+  created_timestamp: Date;
 }

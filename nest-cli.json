@@ -1,3 +1,9 @@
 {
-  "sourceRoot": "server"
+  "sourceRoot": "server",
+  "generateOptions": {
+    "spec": false
+  },
+  "compilerOptions": {
+    "deleteOutDir": true
+  }
 }
