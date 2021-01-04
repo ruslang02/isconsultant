@@ -1,3 +1,4 @@
+import { LocalizedString } from '@common/utils/Locale';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
@@ -37,17 +38,19 @@ export class Report {
   author: User;
 
   @OneToOne(() => User)
-  @JoinColumn({ name: 'reciever_id' })
+  @JoinColumn({ name: 'receiver_id' })
   @ApiProperty({
     description: 'Получатель жалобы.',
   })
-  reciever: User;
+  receiver: User;
 
   @Column({
     type: 'enum',
     enum: ReportStatus,
   })
   status: ReportStatus;
+
+  status_localized: LocalizedString;
 
   @Column({
     type: 'text',

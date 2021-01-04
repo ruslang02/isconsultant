@@ -8,6 +8,7 @@ import EventsPage from './pages/EventsPage';
 import MaintenancePage from './pages/MaintenancePage';
 import OverviewPage from './pages/OverviewPage';
 import ReportsPage from './pages/ReportsPage';
+import RequestsPage from './pages/RequestsPage';
 import UsersPage from './pages/UsersPage';
 import UserContext from './utils/UserContext';
 
@@ -27,6 +28,7 @@ function LoggedInApp() {
         <Switch>
           <Route path="/users" component={UsersPage} />
           <Route path="/events" component={EventsPage} />
+          <Route path="/requests" component={RequestsPage} />
           <Route path="/reports" component={ReportsPage} />
           <Route path="/maintenance" component={MaintenancePage} />
           <Route component={OverviewPage} />

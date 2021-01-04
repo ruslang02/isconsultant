@@ -1,3 +1,4 @@
+import { LocalizedString } from '@common/utils/Locale';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
@@ -28,7 +29,9 @@ export class User {
   })
   email: string;
 
-  @Column()
+  @Column({
+    select: false,
+  })
   @ApiProperty({
     description: 'Захешированный пароль пользователя.',
   })
@@ -62,7 +65,7 @@ export class User {
   })
   type: UserType;
 
-  type_localized: string;
+  type_localized: LocalizedString;
 
   @Column({
     nullable: true,

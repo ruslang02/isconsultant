@@ -2,5 +2,8 @@
   "USER_TYPE_ADMIN": "Администратор",
   "USER_TYPE_MODERATOR": "Модератор",
   "USER_TYPE_LAWYER": "Юрист",
-  "USER_TYPE_CLIENT": "Клиент"
+  "USER_TYPE_CLIENT": "Клиент",
+  "REPORT_STATUS_AWAITING": "Ожидает модерации",
+  "REPORT_STATUS_PROCESSING": "В процессе",
+  "REPORT_STATUS_COMPLETE": "Завершено"
 }

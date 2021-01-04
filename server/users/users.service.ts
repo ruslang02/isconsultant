@@ -7,7 +7,7 @@ import { FindManyOptions, Repository } from 'typeorm';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private users: Repository<User>
+    private users: Repository<User>,
   ) {}
 
   async findMany(options?: FindManyOptions<any>): Promise<User[]> {
@@ -18,12 +18,18 @@ export class UsersService {
     return this.users.findOne(uid);
   }
 
-  findOneByEmail(email: string): Promise<User> {
-    return this.users.findOne({
-      where: {
-        email
-      }
-    });
+  findOneByEmail(
+    email: string,
+    options?: { withPassword: boolean }
+  ): Promise<User> {
+    let query = this.users
+      .createQueryBuilder('user');
+    if (options?.withPassword) {
+      query = query.addSelect('user.password');
+    }
+    query = query.where('email = :email', { email });
+
+    return query.getOne();
   }
 
   insertOne(user: Partial<User>) {

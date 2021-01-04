@@ -10,7 +10,7 @@ export class ReportsService {
     private reports: Repository<Report>
   ) {}
 
-  createOne(data: Pick<Report, 'author' & 'description' & 'reciever'>) {
+  createOne(data: Pick<Report, 'author' & 'description' & 'receiver'>) {
     const report = new Report();
     Object.assign(report, data, {
       status: ReportStatus.AWAITING,
@@ -18,7 +18,9 @@ export class ReportsService {
     return this.reports.save(report);
   }
 
-  find() {
-    return this.reports.find();
+  find({ resolveUsers }: { resolveUsers: boolean }) {
+    return this.reports.find({
+      relations: resolveUsers ? ['author', 'receiver'] : [],
+    });
   }
 }

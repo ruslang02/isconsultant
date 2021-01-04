@@ -30,6 +30,7 @@ function Header() {
         <Tab label="Статистика" value="/" />
         <Tab label="Пользователи" value="/users" />
         <Tab label="События" value="/events" />
+        <Tab label="Заявки" value="/requests" />
         <Tab label="Жалобы" value="/reports" />
         <Tab label="Обслуживание" value="/maintenance" />
       </Tabs>

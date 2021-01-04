@@ -8,7 +8,8 @@ export class AuthService {
   constructor(private users: UsersService, private jwt: JwtService) {}
 
   async validateUser(email: string, pass: string): Promise<Omit<User, 'password'> | null> {
-    const user = await this.users.findOneByEmail(email);
+    const user = await this.users.findOneByEmail(email, { withPassword: true });
+    console.log(user);
     if (user) {
       if (!user.verified) {
         throw new BadRequestException('Your account was not verified yet.');

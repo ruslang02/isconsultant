@@ -1,7 +1,7 @@
 import { Comment } from '@common/models/Comment';
 import { Report } from '@common/models/Report';
 import { User, UserType } from '@common/models/User';
-import { Locale, LocaleString } from '@common/utils/Locale';
+import { Locale, LocalizedStringID } from '@common/utils/Locale';
 import {
   BadRequestException,
   Body,
@@ -48,11 +48,12 @@ export class UsersController {
   ) {}
 
   async hydrateUser(user: User, i18n: I18nContext) {
-    delete user.password;
-    user.type_localized = await i18n.t(
-      `global.USER_TYPE_${user.type.toUpperCase()}` as LocaleString
+    const hydratedUser = { ...user };
+    delete hydratedUser.password;
+    hydratedUser.type_localized = await i18n.t(
+      `global.USER_TYPE_${user.type.toUpperCase()}` as LocalizedStringID
     );
-    return user;
+    return hydratedUser;
   }
 
   @Types(UserType.ADMIN, UserType.MODERATOR)

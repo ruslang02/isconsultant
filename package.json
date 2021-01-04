@@ -14,7 +14,8 @@
     "build:server": "nest build",
     "start": "nest start",
     "start:client": "webpack serve --mode=development",
-    "watch:client": "webpack -w --mode=development"
+    "watch:client": "webpack -w --mode=development",
+    "watch:server": "nest build -w"
   },
   "keywords": [],
   "author": "",
