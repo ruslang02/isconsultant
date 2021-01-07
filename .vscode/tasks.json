@@ -1,26 +1,46 @@
 {
-	"version": "2.0.0",
-	"tasks": [
+  "version": "2.0.0",
+  "tasks": [
     {
       "type": "npm",
-      "script": "watch:client",
+      "script": "watch",
       "problemMatcher": [
         "$tsc-watch"
       ],
+      "options": {
+        "cwd": "admin"
+      },
+      "path": "admin",
       "group": "build",
-      "label": "npm: watch:client",
-      "detail": "webpack -w --mode=development",
+      "label": "Watch admin",
       "isBackground": true
     },
     {
       "type": "npm",
-      "script": "watch:server",
+      "script": "watch",
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "options": {
+        "cwd": "client"
+      },
+      "path": "client",
+      "group": "build",
+      "label": "Watch client",
+      "isBackground": true
+    },
+    {
+      "type": "npm",
+      "script": "watch",
       "problemMatcher": [
         "$tsc-watch"
       ],
       "group": "build",
-      "label": "npm: watch:server",
-      "detail": "nest build -w",
+      "label": "Watch server",
+      "options": {
+        "cwd": "server"
+      },
+      "path": "server",
       "isBackground": true
     }
   ]

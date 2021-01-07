@@ -1,0 +1,16 @@
+{
+  "name": "isc-server-common",
+  "version": "1.0.0",
+  "description": "WebRTC-application for real-time legal consultations.",
+  "repository": {
+    "url": "https://git.infostrategic.com/hse/webrtchse1",
+    "type": "git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@nestjs/swagger": "^4.7.9",
+    "typeorm": "^0.2.29"
+  }
+}

@@ -3,3 +3,4 @@ dist/
 www/
 production.env
 *.tsbuildinfo
+.next/

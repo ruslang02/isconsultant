@@ -11,11 +11,13 @@
     "target": "es2017",
     "sourceMap": false,
     "outDir": "./dist",
-    "rootDirs": [
-      "./common",
-      "./server"
-    ],
     "baseUrl": ".",
+    "rootDirs": [
+      "admin",
+      "client",
+      "common",
+      "server"
+    ],
     "skipLibCheck": true,
     "incremental": true,
     "paths": {
@@ -24,5 +26,8 @@
       ]
     },
     "jsx": "react"
-  }
+  },
+  "include": [
+    "common/**/*"
+  ]
 }

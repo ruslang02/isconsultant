@@ -1,0 +1,9 @@
+{
+  "sourceRoot": "src",
+  "generateOptions": {
+    "spec": false
+  },
+  "compilerOptions": {
+    "deleteOutDir": true
+  }
+}
