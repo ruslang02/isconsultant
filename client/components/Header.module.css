@@ -1,0 +1,30 @@
+.Header {
+  position: sticky;
+  top: 0;
+  background-color: #eee;
+  height: 84px;
+  z-index: 100;
+}
+
+.Header_container {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  justify-content: space-between;
+}
+
+.CallPanel {
+  display: flex;
+  align-items: center;
+}
+
+.CallPanel_text {
+  margin-left: 1rem;
+  font-size: 14pt;
+  line-height: 24px;
+}
+
+.CallPanel_text b {
+  font-size: 16pt;
+  color: green;
+}

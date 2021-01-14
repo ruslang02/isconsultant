@@ -2,7 +2,7 @@ import React from 'react'
 import '../styles/globals.css'
 import 'semantic-ui-css/semantic.min.css'
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: {Component: React.Component, pageProps: Record<string, string>}) {
   return <Component {...pageProps} />
 }
 

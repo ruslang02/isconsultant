@@ -6,18 +6,29 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
-    "strict": false,
+    "rootDirs": [
+      "client",
+      "common"
+    ],
+    "allowJs": false,
+    "baseUrl": ".",
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "moduleResolution": "node",
     "isolatedModules": true,
+    "paths": {
+      "@common/*": [
+        "../common/*"
+      ]
+    },
     "jsx": "preserve"
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "common/**/*"
   ],
   "exclude": [
     "node_modules"
