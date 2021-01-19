@@ -135,7 +135,7 @@ const Actions: React.FC = () => (
     </div>
 );
 
-const File: React.FC<{ href: string, icon: string, name: string } = ({ href, icon, name }) => (
+const File: React.FC < { href: string, icon: string, name: string } > = ({ href, icon, name }) => (
       <div
         style={{
           background: "lightgray",
