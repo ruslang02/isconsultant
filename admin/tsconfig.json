@@ -7,13 +7,19 @@
     ],
     "outDir": "www",
     "rootDirs": [
-      "admin",
-      "common"
+      "src",
+      "../common"
     ],
     "target": "ES6",
-    "declaration": false
-  },
-  "include": [
-    "../common/**/*"
-  ]
+    "paths": {
+      "@common/*": [
+        "../common/*"
+      ]
+    },
+    "declaration": false,
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
+  }
 }

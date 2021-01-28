@@ -1,6 +1,6 @@
 import { CalendarEvent } from '@common/models/calendar-event.entity';
-import { Comment } from '@common/models/comment.entity.ts';
-import { PendingEvent } from '@common/models/pending-event.entity.ts';
+import { Comment } from '@common/models/comment.entity';
+import { PendingEvent } from '@common/models/pending-event.entity';
 import { Report } from '@common/models/report.entity';
 import { User } from '@common/models/user.entity';
 import { Module } from '@nestjs/common';

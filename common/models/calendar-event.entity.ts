@@ -12,6 +12,12 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 
+export enum RoomAccess {
+  NO_PASSWORD = 0,
+  PASSWORD = 1,
+  ONLY_PARTICIPANTS = 2
+}
+
 @Entity()
 export class CalendarEvent {
   @PrimaryGeneratedColumn()
@@ -67,4 +73,21 @@ export class CalendarEvent {
     description: 'Пользователи, участвующие в этом событии.',
   })
   participants: User[];
+
+  @ApiProperty({
+    description: "Идентификатор комнаты в Janus."
+  })
+  roomId: number;
+
+  @ApiProperty({
+    description: "Пароль для доступа к комнате в Janus (заполняется только если roomAccess = PASSWORD)."
+  })
+  roomPassword?: string;
+
+  @ApiProperty({
+    default: RoomAccess.NO_PASSWORD,
+    description: "Уровень доступа к комнате Janus.",
+    enum: RoomAccess,
+  })
+  roomAccess: RoomAccess
 }

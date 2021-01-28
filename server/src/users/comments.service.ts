@@ -1,4 +1,4 @@
-import { Comment } from '@common/models/comment.entity.ts';
+import { Comment } from '@common/models/comment.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

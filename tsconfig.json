@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
+    "allowJs": false,
     "esModuleInterop": true,
     "removeComments": true,
     "resolveJsonModule": true,
@@ -10,24 +11,14 @@
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": false,
-    "outDir": "./dist",
-    "baseUrl": ".",
     "rootDirs": [
-      "admin",
-      "client",
+      "admin/src/",
+      "client/src",
       "common",
-      "server"
+      "server/src"
     ],
     "skipLibCheck": true,
     "incremental": true,
-    "paths": {
-      "@common/*": [
-        "common/*"
-      ]
-    },
     "jsx": "react"
-  },
-  "include": [
-    "common/**/*"
-  ]
+  }
 }
