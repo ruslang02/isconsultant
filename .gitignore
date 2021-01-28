@@ -4,3 +4,4 @@ www/
 production.env
 *.tsbuildinfo
 .next/
+webrtc-app.code-workspace

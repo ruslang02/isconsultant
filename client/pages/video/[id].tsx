@@ -214,7 +214,7 @@ const Sidebar: React.FC = () => (
 );
 
 
-janus = new Janus.Client('ws://localhost:8188', {
+janus = new Janus.Client('wss://consultant.infostrategic.com/gateway2', {
     token: '',
     apisecret: '',
     keepalive: 'true'
