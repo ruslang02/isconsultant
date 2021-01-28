@@ -25,9 +25,10 @@
         "common/*"
       ]
     },
-    "jsx": "react"
+    "jsx": "react",
+    "strictPropertyInitialization": false
   },
   "include": [
     "common/**/*"
-  ]
+  ],
 }
