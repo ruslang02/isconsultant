@@ -14,6 +14,7 @@ var isPublishing: boolean = false;
 var janus: any = undefined;
 var connectionHandle: any = undefined;
 var subscriberHandles: any[] = [];
+var running: boolean = false;
 
 
 type VideoStream = {
@@ -136,8 +137,8 @@ const Actions: React.FC = () => (
     </div>
 );
 
-const File: React.FC < { href: string, icon: string, name: string } > = ({ href, icon, name }) => (
-      <div
+const File: React.FC<{ href: string, icon: string, name: string }> = ({ href, icon, name }) => (
+    <div
         style={{
             background: "lightgray",
             border: "1px solid rgba(0, 0, 0, 0.3)",
@@ -214,6 +215,12 @@ const Sidebar: React.FC = () => (
 );
 
 
+// janus = new Janus.Client('ws://localhost:8188', {
+//     token: '',
+//     apisecret: '',
+//     keepalive: 'true'
+// });
+
 janus = new Janus.Client('wss://consultant.infostrategic.com/gateway2', {
     token: '',
     apisecret: '',
@@ -226,27 +233,60 @@ export default function Video() {
 
     const [streams, setStreams] = useState<VideoStream[]>([]);
 
-    const addToStreams = (stream: VideoStream) => {
-        if (!streams.find((a) => a.user === stream.user)) {
-            setStreams(streams => (
-                [...streams, stream]
-            ));
-        } else {
-            console.warn("Was trying to add the same user.");
-        }
-    };
 
-    const removeFromStreams = (id: number) => {
-        const index = streams.findIndex((a) => a.user === id);
-        if (index === -1) {
-            return;
-        }
-        const newStreams = [...streams]
-        newStreams.splice(index, 1);
-        setStreams(newStreams);
-    }
 
     useEffect(() => {
+        const addToStreams = (stream: VideoStream) => {
+            // Похоже, чтобы видеть streams, нужно все действия с ними проворачивать
+            // из setStreams
+            // @ruslang
+
+            // if (!streams.find((a) => a.user === stream.user)) {
+            //     setStreams(streams => (
+            //         [...streams, stream]
+            //     ));
+            // } else {
+            //     console.warn("Was trying to add the same user.");
+            // }
+
+            setStreams(function (previousStreams) {
+                if (!previousStreams.find((a) => a.user === stream.user)) {
+                        return [...previousStreams, stream]
+                } else {
+                    console.warn("Was trying to add the same user.");
+                }
+
+                return previousStreams;
+            });
+        };
+
+        const removeFromStreams = (id: number) => {
+            // Похоже, чтобы видеть streams, нужно все действия с ними проворачивать
+            // из setStreams
+            // @ruslang
+
+
+            // const index = streams.findIndex((a) => a.user === id);
+            // if (index === -1) {
+            //     return;
+            // }
+            // const newStreams = [...streams]
+            // newStreams.splice(index, 1);
+            // setStreams(newStreams);
+
+            setStreams(function (previousStreams) {
+                const index = previousStreams.findIndex((a) => a.user === id);
+                if (index === -1) {
+                    return previousStreams;
+                }
+
+                const newStreams = [...previousStreams]
+                newStreams.splice(index, 1);
+                return newStreams;
+            });
+        }
+
+
         console.log("mounted");
         function processPublisher(publisher: any) {
             roomSession.attachPlugin("janus.plugin.videoroom")
@@ -289,12 +329,12 @@ export default function Video() {
 
             //console.log(data);
 
-            if (data["videoroom"] == "joined") {
-                participants = data["publishers"]
-                participants.forEach((element: any) => {
-                    processPublisher(element);
-                });
-            }
+            // if (data["videoroom"] == "joined") {
+            //     participants = data["publishers"]
+            //     participants.forEach((element: any) => {
+            //         processPublisher(element);
+            //     });
+            // }
 
             if (data["videoroom"] == "event") {
                 participants = data["publishers"]
@@ -364,10 +404,14 @@ export default function Video() {
             });
         }
 
-        janus.createConnection('123').then(function (connection: any) {
-            connectionHandle = connection;
-            connection.createSession().then(onSessionCreated);
-        });
+        if (!running) {
+            running = true;
+            janus.createConnection('123').then(function (connection: any) {
+                connectionHandle = connection;
+                connection.createSession().then(onSessionCreated);
+            });
+
+        }
 
         return () => {
             connectionHandle.close();
