@@ -41,7 +41,7 @@ export class ReportsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch(':uid')
   updateReportStatus() {
     throw new NotImplementedException();
   }

@@ -1,4 +1,4 @@
-import { Comment } from '@common/models/comment.entity.ts';
+import { Comment } from '@common/models/comment.entity';
 import { Report } from '@common/models/report.entity';
 import { User, UserType } from '@common/models/user.entity';
 import { Locale, LocalizedStringID } from '@common/utils/Locale';
@@ -73,7 +73,7 @@ export class UsersController {
     return Promise.all(hydrated);
   }
 
-  @Get(':id')
+  @Get(':uid')
   @ApiOkResponse({
     description: 'Предоставлена информация о пользователе.',
     type: GetUserInfoDto,
@@ -82,7 +82,7 @@ export class UsersController {
   @ApiOperation({
     description: 'Получение информации о пользователе.',
   })
-  async getUserInfo(@Param('id') userId: string): Promise<GetUserInfoDto> {
+  async getUserInfo(@Param('uid') userId: string): Promise<GetUserInfoDto> {
     try {
       const {
         id,
@@ -111,7 +111,7 @@ export class UsersController {
 
   @Types(UserType.ADMIN, UserType.MODERATOR)
   @UseGuards(JwtAuthGuard, UserGuard)
-  @Patch(':id')
+  @Patch(':uid')
   @ApiOkResponse({
     description: 'Данные пользователя были успешно изменены.',
     type: User,
@@ -132,7 +132,7 @@ export class UsersController {
     description: 'Обновление пользовательских данных.',
   })
   async updateUserInfo(
-    @Param('id') userId: string,
+    @Param('uid') userId: string,
     @Body() data: PatchUserDto
   ): Promise<GetUserDto> {
     /*
@@ -153,7 +153,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/contacts')
+  @Get(':uid/contacts')
   @ApiOkResponse({
     description: 'Предоставлена информация о контактных данных пользователя.',
     type: GetUserContactsDto,
@@ -164,7 +164,7 @@ export class UsersController {
     description: 'Получение информации о контактных данных пользователя.',
   })
   async getUserContacts(
-    @Param('id') userId: string
+    @Param('uid') userId: string
   ): Promise<GetUserContactsDto> {
     try {
       const { id, phone, email } = await this.users.findOne(userId);
@@ -175,7 +175,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(':id/report')
+  @Post(':uid/report')
   @ApiOkResponse({
     description: 'Жалоба успешно оставлена.',
     type: Report,
@@ -187,7 +187,7 @@ export class UsersController {
   })
   async createUserReport(
     @Request() request: ExtendedRequest,
-    @Param('id') receiverId: string,
+    @Param('uid') receiverId: string,
     @Body() data: Pick<Report, 'description'>
   ) {
     const authorId = request.user.toString();
@@ -204,7 +204,7 @@ export class UsersController {
     this.reports.createOne(report);
   }
 
-  @Get(':id/comments')
+  @Get(':uid/comments')
   @ApiOkResponse({
     description: 'Приведен список комментариев для пользователя.',
     isArray: true,
@@ -214,7 +214,7 @@ export class UsersController {
   @ApiOperation({
     description: 'Получение комментарии пользователя.',
   })
-  getUserComments(@Param('id') userId: string) {
+  getUserComments(@Param('uid') userId: string) {
     try {
       return this.comments.listAll(userId);
     } catch (e) {
@@ -224,7 +224,7 @@ export class UsersController {
 
   @Types(UserType.MODERATOR, UserType.ADMIN)
   @UseGuards(JwtAuthGuard, UserGuard)
-  @Delete(':id')
+  @Delete(':uid')
   @ApiForbiddenResponse({
     description: 'У пользователя нет прав на совершение этого действия.',
   })
@@ -236,7 +236,7 @@ export class UsersController {
   @ApiOperation({
     description: 'Удаление пользователя.',
   })
-  deleteUser(@Param('id') userId: string) {
+  deleteUser(@Param('uid') userId: string) {
     try {
       return this.users.deleteOne(userId);
     } catch (e) {
@@ -246,7 +246,7 @@ export class UsersController {
 
   @Types(UserType.MODERATOR, UserType.ADMIN)
   @UseGuards(JwtAuthGuard, UserGuard)
-  @Post(':id/verified')
+  @Post(':uid/verified')
   @ApiForbiddenResponse({
     description: 'У пользователя нет прав на совершение этого действия.',
   })
@@ -263,7 +263,7 @@ export class UsersController {
     type: PatchUserVerifiedDto,
   })
   async setUserVerified(
-    @Param('id') userId: string,
+    @Param('uid') userId: string,
     @Body() { verified }: PatchUserVerifiedDto
   ) {
     try {

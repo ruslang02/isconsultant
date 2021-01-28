@@ -1,5 +1,5 @@
 import { CalendarEvent } from '@common/models/calendar-event.entity';
-import { PendingEvent } from '@common/models/pending-event.entity.ts';
+import { PendingEvent } from '@common/models/pending-event.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from '../users/users.module';

@@ -1,9 +1,7 @@
 {
   "sourceRoot": "src",
+  "entryFile": "../dist/main.js",
   "generateOptions": {
     "spec": false
-  },
-  "compilerOptions": {
-    "deleteOutDir": true
   }
 }

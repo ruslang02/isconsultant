@@ -1,4 +1,4 @@
-import { LocalizedString } from '@common/utils/Locale';
+import { LocalizedString } from '../utils/Locale';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,

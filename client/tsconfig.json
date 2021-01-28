@@ -3,32 +3,31 @@
   "compilerOptions": {
     "lib": [
       "dom",
-      "dom.iterable",
       "esnext"
     ],
     "rootDirs": [
-      "client",
-      "common"
+      ".",
+      "../common"
     ],
-    "allowJs": false,
-    "baseUrl": ".",
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "moduleResolution": "node",
-    "isolatedModules": true,
     "paths": {
       "@common/*": [
         "../common/*"
       ]
     },
-    "jsx": "preserve"
+    "baseUrl": ".",
+    "jsx": "preserve",
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "strict": false,
+    "tsBuildInfoFile": "../dist/client.tsbuildinfo"
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "common/**/*"
+    "../common/**/*"
   ],
   "exclude": [
     "node_modules"

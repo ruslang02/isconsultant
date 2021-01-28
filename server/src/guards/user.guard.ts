@@ -19,7 +19,7 @@ export class UserGuard implements CanActivate {
       params,
     } = context.switchToHttp().getRequest<ExtendedRequest>();
 
-    if (+params.id === user?.id || !types || types.includes(user?.type)) {
+    if (+params.uid === user?.id || !types || types.includes(user?.type)) {
       return true;
     }
 
