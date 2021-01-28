@@ -1,0 +1,89 @@
+.TopYar {
+  display: flex;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  height: 55px;
+  z-index: 100;
+}
+
+.TopYar_info {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 2rem;
+}
+
+.TopYar_roomName {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.TopYar_actions {
+  width: 30%;
+  min-width: 350px;
+  max-width: 450px;
+  display: flex;
+  padding: 0.5rem;
+  justify-content: center;
+}
+
+.TopYar_actions > * {
+  flex-grow: 1;
+}
+
+.TopYar_actions > *:not(:last-child) {
+  margin-right: .5rem;
+}
+
+.Video_container {
+  background: linear-gradient(white, lightblue);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.Video_container_items {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1rem;
+  justify-content: center;
+}
+
+.Video_item {
+  border-radius: 10px;
+  background-color: black;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 1rem;
+  overflow: hidden;
+}
+
+.Video_item_name {
+  font-weight: bold;
+  text-align: center;
+  font-size: 13pt;
+}
+
+.Video_item, .Video_item_element {
+  width: 320px;
+  height: 180px;
+}
+
+.Actions {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.Files {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  flex-grow: 1;
+  padding: .5rem;
+  overflow: auto;
+}
