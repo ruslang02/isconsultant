@@ -6,6 +6,7 @@ import "./videoroom"
 
 //@ts-ignore
 import Janus from "janus-gateway-js";
+import { send } from "process";
 
 var roomSession: any = undefined;
 var publisherHandle: any = undefined;
@@ -15,15 +16,21 @@ var janus: any = undefined;
 var connectionHandle: any = undefined;
 var subscriberHandles: any[] = [];
 var running: boolean = false;
-
+var muted = false;
+var video = true;
+var dataChannel: any = null;
 
 type VideoStream = {
     user: number,
     stream: any,
-    streaming: boolean
+    streaming: boolean,
+    muted: boolean,
+    data: any
 }
 
 const StreamsContext = createContext([] as VideoStream[]);
+const StremChangeContext = createContext(null as Function)
+
 
 const TopBar: React.FC = function () {
     const [roomId, setRoomId] = useState(0);
@@ -51,34 +58,33 @@ const TopBar: React.FC = function () {
     )
 };
 
-const VideoItem: React.FC<{ name: number, stream: any, streaming: boolean }> = function ({ name, stream, streaming }) {
+const VideoItem: React.FC<{ videoStream:VideoStream }> = function ({ videoStream }) {
     const ref = useRef<HTMLVideoElement>(null)
 
     useEffect(() => {
         if (ref.current) {
-            ref.current.muted = true;
+            ref.current.muted = (videoStream.user == -1) || videoStream.muted;
             ref.current.autoplay = true;
-            ref.current.srcObject = stream;
+            ref.current.srcObject = videoStream.stream;
         }
     }, [])
 
     return (
         <div className={styles.Video_item}>
-            {streaming ?
-                <video className={styles.Video_item_element} ref={ref} />
-                :
-                <div className={styles.Video_item_name}>{name}</div>}
+                <video className={styles.Video_item_element} ref={ref} hidden={!videoStream.streaming}/>
+                <div className={styles.Video_item_name} hidden={videoStream.streaming}>{videoStream.user}</div>
         </div>
     )
 }
 
 const VideoContainer: React.FC = function () {
     const streams = useContext(StreamsContext);
+
     return (<section className={styles.Video_container}>
         <div style={{ flexGrow: 1 }}></div>
         <div className={styles.Video_container_items}>
-            {streams.map(({ stream, streaming, user }) =>
-                <VideoItem name={user} key={user} stream={stream} streaming={streaming} />
+            {streams.map(e =>
+                <VideoItem key={e.user} videoStream={e} />
             )}
         </div>
         <div style={{ flexGrow: 1 }}></div>
@@ -86,8 +92,53 @@ const VideoContainer: React.FC = function () {
     </section>);
 };
 
-const Actions: React.FC = () => (
-    <div className={styles.Actions}>
+const Actions: React.FC = function(){
+    const streams = useContext(StreamsContext)
+    const setStreams = useContext(StremChangeContext)
+
+    const [mutedIcon, setMutedIcon] = useState(Boolean)
+    const [videoIcon, setVideoIcon] = useState(Boolean)
+
+    function sendData(){
+        var localStream = streams.find(a=> a.user == -1)
+        localStream.data.send(JSON.stringify({muted:muted, streaming: video}))
+        console.log(localStream.data)
+    }
+
+    function onMuteClick() {
+        muted = !muted;
+        var localStream = streams.find(a=> a.user == -1)
+        localStream.stream.getAudioTracks()[0].enabled = !muted;
+        setMutedIcon((a) => muted)
+        sendData()
+        setStreams(h=>{
+            var i = h.findIndex(a=> a.user == -1)
+            var k = h.find(a=> a.user == -1)
+            k.muted = muted
+            var newH = [...h]
+            newH.splice(i,1)
+            return [...newH, k]
+        })
+    }
+
+    function onVideoClick() {
+        video = !video;
+        var localStream = streams.find(a=> a.user == -1)
+        localStream.stream.getVideoTracks()[0].enabled = video;
+        setVideoIcon((a) => video)
+        sendData()
+        setStreams(h=>{
+            var i = h.findIndex(a=> a.user == -1)
+            var k = h.find(a=> a.user == -1)
+            k.streaming = video;
+            var newH = [...h]
+            newH.splice(i,1)
+            return [...newH, k]
+        })
+    }
+
+
+    return (<div className={styles.Actions}>
         <Button
             icon
             secondary
@@ -100,6 +151,7 @@ const Actions: React.FC = () => (
             <Icon style={{ width: "26px" }} name="tv" size="large"></Icon>
         </Button>
         <Button
+            onClick={onVideoClick}
             icon
             primary
             circular
@@ -108,9 +160,10 @@ const Actions: React.FC = () => (
                 height: "64px",
                 marginRight: "1rem"
             }}>
-            <Icon style={{ width: "26px" }} name="video camera" size="large"></Icon>
+            <Icon style={{ width: "26px" }} name={videoIcon ? "video camera" : "video play"} size="large"></Icon>
         </Button>
         <Button
+            onClick={onMuteClick}
             icon
             secondary
             circular
@@ -121,7 +174,7 @@ const Actions: React.FC = () => (
             }}>
             <Icon
                 style={{ width: "26px" }}
-                name="microphone slash"
+                name={mutedIcon? "microphone slash" : "microphone"}
                 size="large"></Icon>
         </Button>
         <Button
@@ -134,8 +187,8 @@ const Actions: React.FC = () => (
                 name="phone volume"
                 size="large"></Icon>
         </Button>
-    </div>
-);
+    </div>)
+};
 
 const File: React.FC<{ href: string, icon: string, name: string }> = ({ href, icon, name }) => (
     <div
@@ -300,8 +353,37 @@ export default function Video() {
                                 var pc: any = plugin.createPeerConnection();
                                 pc.onaddstream = function (obj: any) {
                                     const { stream } = obj;
-                                    addToStreams({ stream, streaming: true, user: publisher["id"] });
+                                    addToStreams({ stream, streaming: true, user: publisher["id"], muted: false, data: undefined });
                                 }
+
+                                pc.ondatachannel = function (obj: any) {
+                                    //console.log(obj)
+                                    setStreams(a=>{
+                                        var s = a.find(e => e.user == publisher["id"])
+
+                                        obj.channel.onmessage = (event: any) =>{
+                                            console.log(event)
+                                            var data = JSON.parse(event["data"]);
+                                            setStreams(b=>{
+                                                var i = b.findIndex(e => e.user == publisher["id"])
+                                                var d = b.find(e => e.user == publisher["id"])
+                                                var newB = [...b]
+                                                newB.splice(i, 1);
+                                                d.muted = data["muted"]
+                                                d.streaming = data["streaming"]
+                                                console.log(d);
+                                                console.log(b);
+                                                return [...newB, d];
+                                            })
+                                        }
+                                        
+                                        s.data = obj.channel;
+                                        return a;
+                                    })
+                                }
+
+                                dataChannel = pc.createDataChannel("events")
+
                                 plugin.createAnswer(jsep).then(function (jsep: any) {
                                     plugin.sendWithTransaction({ jsep: jsep, body: { request: "start" } }).then(function (response: any) {
                                         if (response.getPluginData()["started"] == "ok") {
@@ -315,7 +397,7 @@ export default function Video() {
 
 
                     subscriberHandles.push(plugin);
-                    plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "subscriber", "feed": publisher["id"] } }).then(onRoomAsSubJoin);
+                    plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "subscriber", "feed": publisher["id"], "data":true } }).then(onRoomAsSubJoin);
                     //plugin.on('message', onMessage);
                     //plugin.detach();
                 }).catch(console.warn.bind(console));
@@ -361,8 +443,9 @@ export default function Video() {
 
             publisherHandle.getUserMedia({ "video": true, "audio": true })
                 .then(function (stream: any) {
-                    addToStreams({ stream, streaming: true, user: -1 });
-                    publisherHandle.createPeerConnection();
+                    var pc = publisherHandle.createPeerConnection();
+                    dataChannel = pc.createDataChannel("events")
+                    addToStreams({ stream, streaming: true, user: -1, muted: false, data: dataChannel });
                     stream.getTracks().forEach(function (track: any) {
                         publisherHandle.addTrack(track, stream);
                     });
@@ -371,7 +454,7 @@ export default function Video() {
                     return publisherHandle.createOffer();
                 })
                 .then(function (jsep: any) {
-                    return publisherHandle.sendWithTransaction({ body: { audio: true, video: true, request: "publish" }, jsep: jsep });
+                    return publisherHandle.sendWithTransaction({ body: { audio: true, video: true, data: true, request: "publish" }, jsep: jsep });
                 })
                 .then(function (response: any) {
                     var jsep = response.get("jsep");
@@ -420,6 +503,7 @@ export default function Video() {
     }, []);
 
     return (
+        <StremChangeContext.Provider value={setStreams}>
         <StreamsContext.Provider value={streams}>
             <main
                 style={{
@@ -442,5 +526,6 @@ export default function Video() {
                 </section>
             </main>
         </StreamsContext.Provider>
+        </StremChangeContext.Provider>
     );
 }
