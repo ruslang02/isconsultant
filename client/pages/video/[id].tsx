@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 import { Button, Icon, Input } from "semantic-ui-react";
 import {io} from "socket.io-client";
 import styles from './[id].module.css';
+import "./videoroom"
 
 //@ts-ignore
 import Janus from "janus-gateway-js";
