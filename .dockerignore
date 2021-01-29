@@ -1,4 +1,5 @@
-node_modules/
-dist/
-www/
-production.env
+**/node_modules/
+**/dist/
+**/www/
+**.env
+**/.next

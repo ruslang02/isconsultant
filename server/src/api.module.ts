@@ -38,5 +38,6 @@ const {
     AdminModule,
   ],
   controllers: [],
+  providers: [],
 })
 export class ApiModule {}

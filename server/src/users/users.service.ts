@@ -14,8 +14,8 @@ export class UsersService {
     return this.users.find(options);
   }
 
-  findOne(uid: string): Promise<User> {
-    return this.users.findOne(uid);
+  findOne(uid: string | number): Promise<User> {
+    return this.users.findOne(uid.toString());
   }
 
   findOneByEmail(
@@ -35,11 +35,11 @@ export class UsersService {
     return this.users.insert(user);
   }
 
-  updateOne(uid: string, user: Partial<User>) {
-    return this.users.update(uid, user);
+  updateOne(uid: string | number, user: Partial<User>) {
+    return this.users.update(uid.toString(), user);
   }
 
-  deleteOne(uid: string) {
-    return this.users.delete(uid);
+  deleteOne(uid: string | number) {
+    return this.users.delete(uid.toString());
   }
 }

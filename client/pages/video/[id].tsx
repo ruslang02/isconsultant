@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Button, Icon, Input } from "semantic-ui-react";
+import {io} from "socket.io-client";
 import styles from './[id].module.css';
-import "./videoroom"
 
 //@ts-ignore
 import Janus from "janus-gateway-js";
@@ -174,26 +174,32 @@ const Files: React.FC = () => (
     </section>
 );
 
-const Chat: React.FC = () => (
+const Chat: React.FC = () => {
+  useEffect(() => {
+    const client = io('/', {path: '/chat/socket.io', upgrade: true})
+  }, [])
+
+  return (
     <section
-        style={{
-            flexGrow: 1,
-            padding: ".5rem",
-            display: "flex",
-            flexDirection: "column"
-        }}>
-        <b>Текстовый чат</b>
-        <div style={{ flexGrow: 1 }}></div>
-        <div style={{ display: "flex" }}>
-            <Input
-                style={{ flexGrow: 1, marginRight: ".5rem" }}
-                placeholder="Ваше сообщение..."></Input>
-            <Button icon primary>
-                <Icon name="send" />
-            </Button>
-        </div>
+      style={{
+        flexGrow: 1,
+        padding: ".5rem",
+        display: "flex",
+        flexDirection: "column"
+      }}>
+      <b>Текстовый чат</b>
+      <div style={{ flexGrow: 1 }}></div>
+      <div style={{ display: "flex" }}>
+        <Input
+          style={{ flexGrow: 1, marginRight: ".5rem" }}
+          placeholder="Ваше сообщение..."></Input>
+        <Button icon primary>
+          <Icon name="send" />
+        </Button>
+      </div>
     </section>
-);
+  );
+};
 
 const Sidebar: React.FC = () => (
     <section
@@ -312,7 +318,7 @@ export default function Video() {
         }
 
         function publish(state: boolean) {
-            if (state) {
+            if (state || !publisherHandle || !publisherHandle.getUserMedia) {
                 return;
             }
 

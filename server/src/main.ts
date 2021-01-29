@@ -1,8 +1,11 @@
+const alias = require('module-alias');
+alias.addAlias("@common", __dirname);
+alias.addPath(__dirname);
+
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder } from '@nestjs/swagger/dist/document-builder';
 import { SwaggerModule } from '@nestjs/swagger/dist/swagger-module';
-import { join } from 'path';
 import { AppModule } from './app.module';
 import { AuthModule } from './auth/auth.module';
 import { ReportsModule } from './reports/reports.module';
@@ -11,10 +14,6 @@ import { UsersModule } from './users/users.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  app.useStaticAssets(join(__dirname, '../../public'));
-  app.setBaseViewsDir(join(__dirname, '../../views'));
-  app.setViewEngine('hbs');
 
   const options = new DocumentBuilder()
     .setTitle('Приложение для проведения юридических консультаций.')

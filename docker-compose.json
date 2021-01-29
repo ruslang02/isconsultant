@@ -1,0 +1,47 @@
+{
+  "version": "3.4",
+  "networks": {
+    "db": {}
+  },
+  "volumes": {
+    "db": {}
+  },
+  "services": {
+    "db": {
+      "env_file": "./development.env",
+      "image": "postgres",
+      "networks": {
+        "db": {
+          "aliases": ["webrtc-db"]
+        }
+      },
+      "restart": "always"
+    },
+    "server": {
+      "build": {
+        "dockerfile": "./Dockerfile.server",
+        "context": "."
+      },
+      "env_file": "./development.env",
+      "networks": [
+        "db"
+      ],
+      "ports": [
+        "8080:8080",
+        "8081:8081"
+      ],
+      "restart": "always"
+    },
+    "client": {
+      "build": {
+        "dockerfile": "./Dockerfile.client",
+        "context": "."
+      },
+      "env_file": "./development.env",
+      "ports": [
+        "8090:8080"
+      ],
+      "restart": "always"
+    }
+  }
+}

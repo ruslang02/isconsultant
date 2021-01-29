@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ChatModule } from "chat/chat.module";
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import { join } from 'path';
 import { ApiModule } from './api.module';
-import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -20,11 +20,11 @@ import { AppController } from './app.controller';
       },
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../../www'),
+      rootPath: join(__dirname, '../www'),
       serveRoot: '/admin',
     }),
     ApiModule,
-  ],
-  controllers: [AppController],
+    ChatModule,
+  ]
 })
 export class AppModule {}
