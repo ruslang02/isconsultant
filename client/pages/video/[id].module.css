@@ -87,3 +87,8 @@
   padding: .5rem;
   overflow: auto;
 }
+
+.Video_Menu {
+  position: absolute;
+  z-index: 3;
+}

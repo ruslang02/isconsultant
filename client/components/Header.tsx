@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { Button, Container, Icon, Image } from 'semantic-ui-react';
 import { UserContext } from '../utils/UserContext';
 import { PHONE_NUMBER } from '../utils/Constants';
-import styles from './Header.module.css';
+import styles from 'styles/Header.module.css';
 
 function AccountMenu() {
   const user = useContext(UserContext);
