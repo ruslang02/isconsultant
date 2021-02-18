@@ -58,8 +58,7 @@ function connect(userId: number, session: any, changeUser: React.Dispatch<React.
   return
 }
 
-
-export const VideoItemContainer: React.FC<{ userId: number, session: any, changeMenu: any }> = function ({ userId, session, changeMenu }) {
+export const VideoItemContainer: React.FC<{ userId: number, session: any, changeMenu: any, publisherHandle: any }> = function ({ userId, session, changeMenu, publisherHandle }) {
   const connected = useRef<boolean>(false);
   const [user, changeUser] = useState<User>({
     name: "Connecting...",
