@@ -1,4 +1,5 @@
 export class GetEventDto {
+  id: string;
   title: string;
   description: string;
   timespan_start: string;

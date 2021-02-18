@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { File } from './file.entity';
 
 export enum UserType {
   ADMIN = 'admin',
@@ -104,4 +106,7 @@ export class User {
     readOnly: true,
   })
   created_timestamp: Date;
+
+  @OneToMany(() => File, f => f.owner)
+  files: File[];
 }

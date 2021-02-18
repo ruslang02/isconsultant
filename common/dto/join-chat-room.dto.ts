@@ -1,3 +1,3 @@
 export class JoinChatRoomDto {
-  roomId: string;
+  id: number;
 }

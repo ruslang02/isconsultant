@@ -1,14 +1,19 @@
+import { JoinChatRoomDto } from "@common/dto/join-chat-room.dto";
+import { NewFileNotificationDto } from "@common/dto/new-file-notification.dto";
 import { PostChatMessageDto } from "@common/dto/post-chat-message.dto";
 import { ReceiveChatMessageDto } from "@common/dto/receive-chat-message.dto";
+import { File } from "@common/models/file.entity";
 import { User } from "@common/models/user.entity";
 import { Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Request } from "express";
-import { Server, Socket } from "socket.io";
 import { UsersService } from "users/users.service";
+import Socket, { Server } from "ws";
 
-type ChatSocket = Socket & { user: User };
+type ChatSocket = Socket & { room?: string, user: User };
+
+type Answer<T> = { event: string, data: T };
 
 @WebSocketGateway(+process.env.CHAT_PORT)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -19,37 +24,64 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   constructor(private jwt: JwtService, private users: UsersService) {}
 
-  async handleConnection(@ConnectedSocket() socket: ChatSocket) {
+  async handleConnection(@ConnectedSocket() socket: ChatSocket, req: Request) {
     try {
-      const token = (socket.request as Request).headers.authorization.replace(/Bearer /g, "");
+      const params = req.url.split("/");
+      const token = params[params.length - 1];
+      console.log(token);
       const { id } = this.jwt.verify<{ id: number }>(token);
       const user = await this.users.findOne(id);
       socket.user = user;
     } catch (e) {
       this.logger.error('User was not authorized to enter this websocket.');
+      socket.close(1001);
     }
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    socket.leaveAll();
   }
 
   afterInit(server: any) {
   }
 
+  notifyNewFile(file: File, roomId: string) {
+    this.server.clients.forEach((socket: ChatSocket) => {
+      if (socket.room === roomId) {
+        socket.send(
+          JSON.stringify(
+            {
+              event: 'new_file',
+              data: { file }
+            } as Answer<NewFileNotificationDto>
+          )
+        )
+      }
+    })
+  }
+
   @SubscribeMessage('join')
-  handleJoin(@ConnectedSocket() socket: ChatSocket, @MessageBody() payload: { id: number, userId: number }) {
-    socket.join(`room${payload.id}`);
-    this.logger.log(`Connected user ${socket.client.id} to room ${payload.id}.`);
+  handleJoin(socket: ChatSocket, payload: JoinChatRoomDto) {
+    socket.room = `${payload.id}`;
+    this.logger.log(`Connected user to room ${payload.id}.`);
   }
 
   @SubscribeMessage('post_message')
   handlePost(@ConnectedSocket() socket: ChatSocket, @MessageBody() payload: PostChatMessageDto) {
-    const room = Object.keys(socket.rooms).find((value) => value.includes("room"));
-    if (!room) {
-      socket.disconnect(true);
+    if (!socket.room) {
+      socket.close(1001);
       return;
+    } else {
+      for (const client of this.server.clients as Set<ChatSocket>) {
+        if (client.room === socket.room) {
+          return {
+            event: 'message',
+            data: {
+              message: payload.message,
+              userId: socket.user.id
+            }
+          } as Answer<ReceiveChatMessageDto>;
+        }
+      }
     }
-    this.server.in(room).emit('message', { message: payload.message, userId: socket.user.id } as ReceiveChatMessageDto);
   }
 }
