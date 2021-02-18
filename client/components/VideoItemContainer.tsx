@@ -10,8 +10,8 @@ function processPublisher(publisher: any, roomSession: any, changeUser: React.Di
           var jsep = response.get("jsep");
           if (jsep) {
             var pc: any = plugin.createPeerConnection();
-            pc.onaddstream = function (obj: any) {
-              const { stream } = obj;
+            pc.ontrack = function (obj: any) {
+              const stream = obj.streams[0];
               changeUser(e => ({
                 ...e,
                 stream: stream,
