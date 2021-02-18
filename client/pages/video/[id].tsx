@@ -6,29 +6,6 @@ import styles from './[id].module.css';
 import VideoContainer from "components/VideoContainer"
 import VideoMenu from "components/VideoMenu"
 
-//@ts-ignore
-import Janus from "janus-gateway-js";
-import { send } from "process";
-import { create } from "domain";
-
-type VideoStream = {
-    user: number,
-    stream: any,
-    streaming: boolean,
-    muted: boolean,
-    data: any
-}
-
-type Menu = {
-    xPos: number,
-    yPos: number,
-    show: boolean
-}
-
-const StreamsContext = createContext([] as VideoStream[])
-const StremChangeContext = createContext(null as Function)
-const MenuContextProvider = createContext(null as Function)
-
 const TopBar: React.FC = function () {
     const [roomId, setRoomId] = useState(0);
 
@@ -142,14 +119,7 @@ export default function Video() {
     const router = useRouter();
     const { id } = router.query;
 
-    const [streams, setStreams] = useState<VideoStream[]>([]);
-    const [menuState, changeMenuState] = useState<Menu>({xPos: 0, yPos: 0, show: false})
-
     return (
-        <MenuContextProvider.Provider value={changeMenuState}>
-        <StremChangeContext.Provider value={setStreams}>
-        <StreamsContext.Provider value={streams}>
-            <VideoMenu menuState={menuState}></VideoMenu>
             <main
                 style={{
                     display: "flex",
@@ -170,8 +140,5 @@ export default function Video() {
                     <Sidebar />
                 </section>
             </main>
-        </StreamsContext.Provider>
-        </StremChangeContext.Provider>
-        </MenuContextProvider.Provider>
     );
 }

@@ -13,7 +13,7 @@ const VideoContainer: React.FC = function () {
   const userStream = useRef<MediaStream>(null)
   const [video, setVideo] = useState<boolean>(false)
   const [audio, setAudio] = useState<boolean>(false)
-  const [menuState, changeMenuState] = useState<Menu>({xPos:0, yPos:0, show: false, user: null, changeUser: null})
+  const [menuState, changeMenuState] = useState<Menu>({ xPos: 0, yPos: 0, show: false, user: null, changeUser: null })
 
   // Not sure what to do with those just yet, but those have to go
   // Perhaps a class will be nice? 
@@ -25,8 +25,6 @@ const VideoContainer: React.FC = function () {
   const roomSession = useRef<any>(null)
   const publisherHandle = useRef<any>(null)
   const isPublishing = useRef<boolean>(false)
-
-  var changeMenu: any;
 
   useEffect(() => {
     console.log("mounted");
@@ -53,12 +51,32 @@ const VideoContainer: React.FC = function () {
           console.log(userState)
           setState(e => {
             var i = e.indexOf(left)
-            if(i == -1) return e
+            if (i == -1) return e
             const n = [...e]
             n.splice(i, 1)
             return n
           })
           console.log(userState)
+        }
+
+        var left: number = data["kicked"]
+        if (left) {
+          console.log(userState)
+          setState(e => {
+            var i = e.indexOf(left)
+            if (i == -1) return e
+            const n = [...e]
+            n.splice(i, 1)
+            return n
+          })
+          console.log(userState)
+        }
+
+        var leaving: string = data["leaving"]
+        var reason: string = data["reason"]
+        if (leaving) {
+          if (reason == "kicked")
+            alert("Вас исключили из комнаты.")
         }
       }
     }
@@ -160,24 +178,28 @@ const VideoContainer: React.FC = function () {
   }
 
   function resetMenu() {
-    changeMenuState(e => ({...e, show: false}))
+    changeMenuState(e => ({ ...e, show: false }))
+  }
+
+  function kick(id: number) {
+    publisherHandle.current.sendWithTransaction({ body: { "request": "kick", "secret": "adminpwd", "room": 1234, "id": id } }).then();
   }
 
   return (
-  <section className={styles.Video_container} onContextMenu={onContainerClick} onClick={onContainerClick}>
-    <VideoMenu menuState={menuState}/>
-    <div style={{ flexGrow: 1 }}></div>
-    <div className={styles.Video_container_items}>
-      <VideoItem user={{ name: "Me", id: -1, muted: true, streaming: video, stream: userStream.current, data: null, volume: 0 }} changeMenu={(e) => e} />
+    <section className={styles.Video_container} onContextMenu={onContainerClick} onClick={onContainerClick}>
+      <VideoMenu menuState={menuState} functions={{ kick: kick }} />
+      <div style={{ flexGrow: 1 }}></div>
+      <div className={styles.Video_container_items}>
+        <VideoItem user={{ name: "Me", id: -1, muted: true, streaming: video, stream: userStream.current, data: null, volume: 0 }} changeMenu={(e) => e} />
 
 
-      {userState.map(e =>
-        <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} />
-      )}
-    </div>
-    <div style={{ flexGrow: 1 }}></div>
-    <Actions audio={audio} video={video} changeAudio={changeAudio} changeVideo={changeVideo} />
-  </section>);
+        {userState.map(e =>
+          <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} publisherHandle={publisherHandle} />
+        )}
+      </div>
+      <div style={{ flexGrow: 1 }}></div>
+      <Actions audio={audio} video={video} changeAudio={changeAudio} changeVideo={changeVideo} />
+    </section>);
 };
 
 export default VideoContainer
