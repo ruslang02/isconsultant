@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "lib": [
+      "es2020"
+    ],
+    "moduleResolution": "node",
     "declaration": true,
     "allowJs": false,
     "esModuleInterop": true,
@@ -9,7 +13,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
+    "target": "es2020",
     "sourceMap": false,
     "rootDirs": [
       "admin/src/",

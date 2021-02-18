@@ -8,6 +8,7 @@ import { ChatGateway } from './chat.gateway';
     AuthModule,
     UsersModule
   ],
-  providers: [ChatGateway]
+  providers: [ChatGateway],
+  exports: [ChatGateway]
 })
 export class ChatModule {}

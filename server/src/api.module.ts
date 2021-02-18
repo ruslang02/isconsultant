@@ -10,6 +10,7 @@ import { ReportsModule } from './reports/reports.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { UsersModule } from './users/users.module';
 import { AdminModule } from './admin/admin.module';
+import { File } from '@common/models/file.entity';
 
 const {
   POSTGRES_HOST,
@@ -28,7 +29,7 @@ const {
       username: POSTGRES_USER,
       password: POSTGRES_PASSWORD,
       database: POSTGRES_DB,
-      entities: [CalendarEvent, Comment, PendingEvent, Report, User],
+      entities: [CalendarEvent, Comment, File, PendingEvent, Report, User],
       synchronize: true,
     }),
     UsersModule,

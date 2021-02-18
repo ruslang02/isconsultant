@@ -39,6 +39,10 @@ export class SchedulesService {
     })) as GetEventDto[];
   }
 
+  async findEvent(eid: string) {
+    return this.events.findOne(eid, {relations: ["files"]});
+  }
+
   async createEvent(data: CreateEventDto & { user_id: string }): Promise<CalendarEvent> {
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
     event.title = data.title;

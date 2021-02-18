@@ -17,7 +17,7 @@
     },
     {
       "type": "npm",
-      "script": "watch",
+      "script": "dev",
       "problemMatcher": [
         "$tsc-watch"
       ],

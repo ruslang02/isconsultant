@@ -10,6 +10,7 @@ import {
   JoinTable,
   CreateDateColumn,
 } from 'typeorm';
+import { File } from './file.entity';
 import { User } from './user.entity';
 
 export enum RoomAccess {
@@ -74,6 +75,22 @@ export class CalendarEvent {
   })
   participants: User[];
 
+  @ManyToMany(() => File, {
+    cascade: true,
+  })
+  @JoinTable({
+    joinColumn: {
+      name: 'event_id',
+    },
+    inverseJoinColumn: {
+      name: 'file_id',
+    },
+  })
+  @ApiProperty({
+    description: 'Файлы, принадлежащие этому событию.',
+  })
+  files: File[];
+
   @ApiProperty({
     description: "Идентификатор комнаты в Janus."
   })
@@ -89,5 +106,5 @@ export class CalendarEvent {
     description: "Уровень доступа к комнате Janus.",
     enum: RoomAccess,
   })
-  roomAccess: RoomAccess
+  roomAccess: RoomAccess;
 }
