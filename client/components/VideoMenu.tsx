@@ -1,11 +1,28 @@
-import React from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Menu, Input } from "semantic-ui-react"
 import styles from "styles/VideoMenu.module.css"
 
-const VideoMenu: React.FC<{ menuState: Menu }> = function (menuState) {
-  if (menuState.menuState.show)
+const VideoMenu: React.FC<{ menuState: Menu }> = function ({menuState: menuState}) {  
+  const ref = useRef<HTMLInputElement>(null)
+  
+  useEffect(()=>{
+    if(ref.current && menuState.user)
+      ref.current.valueAsNumber = menuState.user.volume
+  })
+
+  function onRangeChange(e: React.ChangeEvent<HTMLInputElement>){
+    menuState.changeUser(prev => ({
+      ...prev,
+      volume: e.target.valueAsNumber
+    }))
+
+    if(ref.current)
+    ref.current.value = e.target.value
+  }
+  
+  if (menuState.show)
     return (
-      <div className={styles.Video_Menu} style={{ top: menuState.menuState.yPos, left: menuState.menuState.xPos }} >
+      <div className={styles.Video_Menu} style={{ top: menuState.yPos, left: menuState.xPos }} >
         <Menu vertical>
           <Menu.Item>
             Исключить
@@ -17,7 +34,7 @@ const VideoMenu: React.FC<{ menuState: Menu }> = function (menuState) {
             123
               </Menu.Item>
           <Menu.Item>
-            <Input type="range"></Input>
+            <input type="range" min={0} max={1} step={0.01} onChange={onRangeChange} ref={ref}></input>
           </Menu.Item>
         </Menu>
       </div>

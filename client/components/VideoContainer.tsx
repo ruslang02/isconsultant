@@ -6,12 +6,14 @@ import { VideoItemContainer } from "./VideoItemContainer"
 import Janus from "janus-gateway-js";
 import VideoItem from "./VideoItem";
 import "pages/video/videoroom"
+import VideoMenu from "./VideoMenu";
 
 const VideoContainer: React.FC = function () {
   const [userState, setState] = useState<number[]>([]);
-  const userStream = useRef<any>(null)
+  const userStream = useRef<MediaStream>(null)
   const [video, setVideo] = useState<boolean>(false)
   const [audio, setAudio] = useState<boolean>(false)
+  const [menuState, changeMenuState] = useState<Menu>({xPos:0, yPos:0, show: false, user: null, changeUser: null})
 
   // Not sure what to do with those just yet, but those have to go
   // Perhaps a class will be nice? 
@@ -152,14 +154,25 @@ const VideoContainer: React.FC = function () {
     setVideo(enabled)
   }
 
-  return (<section className={styles.Video_container}>
+  function onContainerClick(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+    e.preventDefault()
+    resetMenu()
+  }
+
+  function resetMenu() {
+    changeMenuState(e => ({...e, show: false}))
+  }
+
+  return (
+  <section className={styles.Video_container} onContextMenu={onContainerClick} onClick={onContainerClick}>
+    <VideoMenu menuState={menuState}/>
     <div style={{ flexGrow: 1 }}></div>
     <div className={styles.Video_container_items}>
-      <VideoItem user={{ name: "Me", id: -1, muted: true, streaming: video, stream: userStream.current, data: null }} changeMenu={(e) => e} />
+      <VideoItem user={{ name: "Me", id: -1, muted: true, streaming: video, stream: userStream.current, data: null, volume: 0 }} changeMenu={(e) => e} />
 
 
       {userState.map(e =>
-        <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenu} />
+        <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} />
       )}
     </div>
     <div style={{ flexGrow: 1 }}></div>

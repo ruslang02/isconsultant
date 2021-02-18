@@ -4,13 +4,16 @@ type User = {
   muted: boolean,
   stream: any,
   streaming: boolean,
-  data: any
+  data: any,
+  volume: number
 }
 
 type Menu = {
   xPos: number,
   yPos: number,
-  show: boolean
+  show: boolean,
+  user: User
+  changeUser: (k:(e:User) => User) => void
 }
 
 

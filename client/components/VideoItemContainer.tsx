@@ -64,11 +64,25 @@ export const VideoItemContainer: React.FC<{ userId: number, session: any, change
   const [user, changeUser] = useState<User>({
     name: "Connecting...",
     id: userId,
-    muted: true,
+    muted: false,
     stream: null,
     streaming: false,
-    data: null
+    data: null,
+    volume: 1
   });
+
+  function menuShow(e: React.MouseEvent<HTMLDivElement, MouseEvent>){
+    e.preventDefault()
+    e.stopPropagation()
+    changeMenu(prev => ({
+      ...prev,
+      show: true,
+      xPos: e.pageX,
+      yPos: e.pageY,
+      changeUser: changeUser,
+      user: user
+    }))
+  }
 
   useEffect(() => {
     if (!connected.current) {
@@ -77,5 +91,5 @@ export const VideoItemContainer: React.FC<{ userId: number, session: any, change
     }
   })
 
-  return <VideoItem user={user} changeMenu={changeMenu} />
+  return <VideoItem user={user} changeMenu={menuShow} />
 }
