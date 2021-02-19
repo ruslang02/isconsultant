@@ -68,7 +68,7 @@ function EventsPage() {
     
   return (
     <div style={{ flexGrow: 1 }}>
-      <DataGrid columns={columns} rows={events} onRowClick={(row) => setCurrentEvent(row.row)} />
+      <DataGrid columns={columns} rows={events} />
       <Snackbar open={!!error} message={error} onClose={() => setError(null)} autoHideDuration={6000} anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }} />
       <Dialog open={false}>
         <DialogTitle>Information about this event</DialogTitle>

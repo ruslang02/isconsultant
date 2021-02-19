@@ -5,7 +5,7 @@ import styles from "../styles/VideoContainer.module.css"
 import { VideoItemContainer } from "./VideoItemContainer"
 import Janus from "janus-gateway-js";
 import VideoItem from "./VideoItem";
-import "pages/video/videoroom"
+import "../videoroom"
 import VideoMenu from "./VideoMenu";
 import { useTranslation } from "react-i18next";
 
