@@ -1,0 +1,11 @@
+stage:
+  only:
+    - master
+  script:
+    - docker login -u webrtc -p $PASSWORD hub.ruzik.xyz
+    - VERSION=`echo $CI_COMMIT_TAG | sed -En "s/v?(.+)/\1/p"`
+    - echo "Building hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_TAG"
+    - docker build -f Dockerfile.server .
+    - echo "Building hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_TAG"
+    - docker build -f Dockerfile.client .
+
