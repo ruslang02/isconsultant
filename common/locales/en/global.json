@@ -5,5 +5,41 @@
   "USER_TYPE_CLIENT": "Client",
   "REPORT_STATUS_AWAITING": "Awaiting moderation",
   "REPORT_STATUS_PROCESSING": "In process",
-  "REPORT_STATUS_COMPLETE": "Completed"
+  "REPORT_STATUS_COMPLETE": "Completed",
+  "pages": {
+    "index": {
+      "title": "Get your own legal advice for no cost!",
+      "subtitle": "Obtain a legal advice and have a talk with our experts using this service for free. Your issue will be taken with the most care to help you with solving your legal issues and have your questions answered.\n\nFill in the form and get arrange a meeting with our experts right now.",
+      "arrange_event": "Arrange a meeting",
+      "promo_title1": "Highly-acclaimed experts",
+      "promo_content1": "All our experts have respectable degrees on the subject of legal advice and are happy to assist you with their endless experience. When using this service you may are ensured to receive useful advices and have your questions answered as professionally, as visiting a real legal advice agency.",
+      "promo_title2": "On the edge of the technology",
+      "promo_content2": "You can start a call using any device you have: a mobile phone, a tablet, a laptop etc. thanks to the WebRTC technologies that make it possible without any additional apps, right on our website."
+    },
+    "video": {
+      "join_room": "Join",
+      "chat_input_placeholder": "Message...",
+      "text_chat_title": "Text chat",
+      "files_title": "Shared Files",
+      "download_file": "Download",
+      "leave_call": "Leave call",
+      "room_settings": "Settings",
+      "room_title": "Room",
+      "room_kicked": "You have been kicked from this room.",
+      "you": "You",
+      "kick": "Kick user",
+      "mute": "Mute user",
+      "upload_file": "Upload file..."
+    }
+  },
+  "header": {
+    "register": "Register",
+    "login": "Login",
+    "call_us": "Contact us!"
+  },
+  "promo_header": {
+    "advantages": "Advantages",
+    "arrange_event": "Arrange a meeting",
+    "lawyers": "Our lawyers"
+  }
 }

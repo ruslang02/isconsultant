@@ -11,8 +11,10 @@ import {
     TextArea
 } from "semantic-ui-react";
 import { Header } from "../components/Header";
+import { useTranslation } from "react-i18next";
 
 function Promo() {
+    const { t } = useTranslation();
     return (
         <Form style={{ height: "600px", background: '#000 url(https://motionarray.imgix.net/preview-400914-6SoVGPExfQJ2chbx-large.jpg?w=1400&q=60&fit=max&auto=format) center no-repeat', backgroundSize: 'cover' }}>
             <Container style={{ display: "flex", height: "100%" }}>
@@ -31,20 +33,13 @@ function Promo() {
                             borderRadius: "10px",
                             padding: "2rem"
                         }}>
-                        <h2>Получите юридическую консультацию бесплатно!</h2>
+                        <h2>{t('pages.index.title')}</h2>
                         <p style={{ fontSize: "13pt" }}>
-                            С помощью нашего сервера вы можете получить помощь
-                            по вопросам права совершенно бесплатно. Вам поможет
-                            команда специалистов нашей компании, имеющих высокую
-                            квалификацию в юридической сфере.
-                            <br />
-                            <br />
-                            Заполните форму сейчас и получите консультацию в
-                            течение текущего дня.
+                            {t('pages.index.subtitle')}
                         </p>
                         <TextArea style={{ resize: "none" }}></TextArea>
                         <div style={{ textAlign: "right", marginTop: "1rem" }}>
-                            <Button primary>Оставить заявку</Button>
+                            <Button primary>{t('pages.index.arrange_event')}</Button>
                         </div>
                     </section>
                 </div>
@@ -54,29 +49,23 @@ function Promo() {
 }
 
 function PromoAdvantages() {
+    const { t } = useTranslation();
     return (
         <Segment style={{ padding: "8em 0em" }} vertical>
             <Grid container stackable verticalAlign="middle">
                 <Grid.Row>
                     <Grid.Column width={8}>
                         <SHeader as="h3" style={{ fontSize: "2em" }}>
-                            Высококвалифицированные специалисты
+                            {t('pages.index.promo_title1')}
                         </SHeader>
                         <p style={{ fontSize: "1.33em" }}>
-                            Все консультанты являются действующими юристами с
-                            большим опытом и багажем знаний. Используя наш
-                            сервис, вы можете доверять нашим сотрудникам так же,
-                            как и при походе к нотариусу или иному центру
-                            юридической помощи.
+                            {t('pages.index.promo_content1')}
                         </p>
                         <SHeader as="h3" style={{ fontSize: "2em" }}>
-                            Современные технологии
+                            {t('pages.index.promo_title2')}
                         </SHeader>
                         <p style={{ fontSize: "1.33em" }}>
-                            Благодаря технологии WebRTC, вы можете начать Вашу
-                            консультацию на любом устройстве: ноутбук, смартфон,
-                            планшет - не устанавливая никаких приложений, прямо
-                            на нашем веб-сайте.
+                            {t('pages.index.promo_content2')}
                         </p>
                     </Grid.Column>
                     <Grid.Column floated="right" width={6}>
@@ -88,7 +77,7 @@ function PromoAdvantages() {
                 </Grid.Row>
                 <Grid.Row>
                     <Grid.Column textAlign="center">
-                        <Button size="huge">Оставить заявку</Button>
+                        <Button size="huge">{t('pages.index.arrange_event')}</Button>
                     </Grid.Column>
                 </Grid.Row>
             </Grid>

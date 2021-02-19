@@ -22,7 +22,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import {
   ApiBearerAuth,
-
+  ApiOkResponse,
   ApiOperation,
   ApiTags
 } from "@nestjs/swagger";
@@ -43,20 +43,37 @@ export class SchedulesController {
     private schedules: SchedulesService,
     private storage: StorageService
   ) { }
-  /*
-    @UseGuards(JwtAuthGuard, UserGuard)
-    @Get(":uid/events")
-    @ApiOkResponse({
-      description: "Возвращены события в календаре для данного пользователя.",
-    })
-    @ApiBearerAuth()
-    @ApiOperation({
-      description: "Получение событий для данного пользователя.",
-    })
-    getEvents(@Param("uid") userId: string) {
-      return this.schedules.findManyByUser(userId);
+
+  @Types(UserType.ADMIN, UserType.MODERATOR)
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @Get("/all")
+  @ApiOkResponse({
+    description: "Возвращены все события в календаре.",
+  })
+  @ApiBearerAuth()
+  @ApiOperation({
+    description: "Получение событий (встреч).",
+  })
+  async getEvents() {
+    try {
+      const events = await this.schedules.findAllEvents();
+      return events.map(event => ({
+        id: event.id.toString(),
+        description: event.description,
+        owner: event.description,
+        participants: (event.participants ?? []).map(p => p.id.toString()),
+        room_access: event.roomAccess,
+        room_id: event.roomId,
+        timespan_end: event.end_timestamp.toISOString(),
+        timespan_start: event.start_timestamp.toISOString(),
+        title: event.title,
+        room_password: event.roomPassword,
+      }));
+    } catch (e) {
+      console.log(e);
+      throw new NotFoundException();
     }
-  */
+  }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

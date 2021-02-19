@@ -20,7 +20,7 @@ import { ApiModule } from './api.module';
       },
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../www'),
+      rootPath: join(__dirname, '../admin/www'),
       serveRoot: '/admin',
     }),
     ApiModule,

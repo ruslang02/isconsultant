@@ -9,10 +9,14 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "i18next": "^19.8.9",
+    "i18next-browser-languagedetector": "^6.0.1",
+    "i18next-fetch-backend": "^3.0.0",
     "janus-gateway-js": "^2.0.2",
     "next": "10.0.5",
     "react": "17.0.1",
     "react-dom": "17.0.1",
+    "react-i18next": "^11.8.7",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.1",
     "socket.io-client": "^3.1.0"
