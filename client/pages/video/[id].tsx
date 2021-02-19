@@ -316,7 +316,6 @@ const Sidebar: React.FC = () => (
 );
 
 export default function Video() {
-<<<<<<< HEAD
     const router = useRouter();
     const { id } = router.query;
     const pin = router.query["pin"]
@@ -372,57 +371,4 @@ export default function Video() {
             </FilesContext.Provider>
         </UserStoreContext.Provider>
     );
-=======
-  const router = useRouter();
-  const { id } = router.query;
-
-  const [users, setUsers] = useState<GetUserInfoDto[]>([]);
-  const [files, setFiles] = useState<RemoteFile[]>([]);
-  const [event, setEvent] = useState<GetEventDto | null>(null);
-  const { auth } = useContext(AuthContext);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get<GetEventDto>(`/events/${id}`, {
-          headers: {
-            Authorization: `Bearer ${auth?.access_token}`,
-          },
-        });
-        setEvent(data);
-      } catch (e) {}
-    })();
-  }, [id]);
-
-  return (
-    <UserStoreContext.Provider value={{ users, setUsers }}>
-      <FilesContext.Provider value={{ files, setFiles }}>
-        <EventContext.Provider value={event}>
-          <main
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              overflow: "hidden",
-              flexGrow: 1,
-            }}
-          >
-            <TopBar />
-            <section
-              style={{
-                display: "flex",
-                background: "white",
-                borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
-                flexGrow: 1,
-              }}
-            >
-              <VideoContainer />
-              <Sidebar />
-            </section>
-          </main>
-        </EventContext.Provider>
-      </FilesContext.Provider>
-    </UserStoreContext.Provider>
-  );
->>>>>>> 6ac9f094984db831528d97df78185bae475c48c9
 }

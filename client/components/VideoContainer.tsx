@@ -80,14 +80,8 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
         var leaving: string = data["leaving"]
         var reason: string = data["reason"]
         if (leaving) {
-<<<<<<< HEAD
-          if (reason == "kicked"){
-            alert("Вас исключили из комнаты.")
-          } 
-=======
           if (reason == "kicked")
             alert(t('pages.video.room_kicked'))
->>>>>>> 6ac9f094984db831528d97df78185bae475c48c9
         }
       }
     }
