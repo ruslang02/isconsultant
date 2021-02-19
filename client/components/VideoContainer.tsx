@@ -7,6 +7,7 @@ import Janus from "janus-gateway-js";
 import VideoItem from "./VideoItem";
 import "pages/video/videoroom"
 import VideoMenu from "./VideoMenu";
+import { useTranslation } from "react-i18next";
 
 const VideoContainer: React.FC = function () {
   const [userState, setState] = useState<number[]>([]);
@@ -25,6 +26,8 @@ const VideoContainer: React.FC = function () {
   const roomSession = useRef<any>(null)
   const publisherHandle = useRef<any>(null)
   const isPublishing = useRef<boolean>(false)
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     console.log("mounted");
@@ -76,7 +79,7 @@ const VideoContainer: React.FC = function () {
         var reason: string = data["reason"]
         if (leaving) {
           if (reason == "kicked")
-            alert("Вас исключили из комнаты.")
+            alert(t('pages.video.room_kicked'))
         }
       }
     }
@@ -190,7 +193,7 @@ const VideoContainer: React.FC = function () {
       <VideoMenu menuState={menuState} functions={{ kick: kick }} />
       <div style={{ flexGrow: 1 }}></div>
       <div className={styles.Video_container_items}>
-        <VideoItem user={{ name: "Me", id: -1, muted: true, streaming: video, stream: userStream.current, data: null, volume: 0 }} changeMenu={(e) => e} />
+        <VideoItem user={{ name: t('pages.video.you'), id: -1, muted: true, streaming: video, stream: userStream.current, data: null, volume: 0 }} changeMenu={(e) => e} />
 
 
         {userState.map(e =>

@@ -1,0 +1,23 @@
+{
+  "name": "isc",
+  "version": "1.0.0",
+  "description": "Возможен запуск в виде Docker-образа.",
+  "main": "index.js",
+  "dependencies": {
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruslang02/lc-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ruslang02/lc-app/issues"
+  },
+  "homepage": "https://github.com/ruslang02/lc-app#readme"
+}
