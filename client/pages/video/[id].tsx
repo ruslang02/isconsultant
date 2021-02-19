@@ -11,16 +11,11 @@ import styles from "./[id].module.css";
 import "./videoroom";
 import axios from "axios";
 
-//@ts-ignore
-import Janus from "janus-gateway-js";
 import { JoinChatRoomDto } from "@common/dto/join-chat-room.dto";
 import { AuthContext } from "utils/AuthContext";
 import { GetUserInfoDto } from "@common/dto/get-user-info.dto";
 import { ReceiveChatMessageDto } from "@common/dto/receive-chat-message.dto";
-import { User } from "@common/models/user.entity";
 import { PostChatMessageDto } from "@common/dto/post-chat-message.dto";
-import { join } from "path";
-import { url } from "inspector";
 import { File as RemoteFile } from "@common/models/file.entity";
 import { NewFileNotificationDto } from "@common/dto/new-file-notification.dto";
 import { GetEventDto } from "@common/dto/get-event.dto";
@@ -313,6 +308,8 @@ const Sidebar: React.FC = () => (
 export default function Video() {
     const router = useRouter();
     const { id } = router.query;
+    const pin = router.query["pin"]
+    const secret = router.query["secret"]
 
     const [users, setUsers] = useState<GetUserInfoDto[]>([]);
     const [files, setFiles] = useState<RemoteFile[]>([]);
@@ -334,8 +331,6 @@ export default function Video() {
 
     return (
         <UserStoreContext.Provider value={{ users, setUsers }}>
-
-
             <FilesContext.Provider value={{ files, setFiles }}>
                 <EventContext.Provider value={event}>
                     <main
@@ -356,7 +351,9 @@ export default function Video() {
                                 flexGrow: 1,
                             }}
                         >
-                            <VideoContainer />
+                            {!("id" in router.query) ? <></> :
+                                <VideoContainer roomNumber={id} roomPin={pin} roomSecret={secret} />
+                            }
                             <Sidebar />
                         </section>
                     </main>

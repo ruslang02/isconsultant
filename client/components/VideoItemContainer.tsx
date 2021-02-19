@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react"
 import VideoItem from "./VideoItem"
 import "./User.d.ts"
 
-function processPublisher(publisher: any, roomSession: any, changeUser: React.Dispatch<React.SetStateAction<User>>) {
+function processPublisher(publisher: any, roomSession: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin) {
   roomSession.attachPlugin("janus.plugin.videoroom")
     .then(function (plugin: any) {
       function onRoomAsSubJoin(response: any) {
@@ -21,15 +21,17 @@ function processPublisher(publisher: any, roomSession: any, changeUser: React.Di
 
             pc.ondatachannel = function (obj: any) {
               changeUser(e => {
+                obj.channel.send({"request":true})
+
                 obj.channel.onmessage = (event: any) => {
                   var data = JSON.parse(event["data"])
-                  changeUser(b => ({
-                    ...b,
-                    muted: data["muted"],
-                    streaming: data["streaming"]
-                  }))
+                    changeUser(b => ({
+                      ...b,
+                      muted: data["muted"],
+                      streaming: data["streaming"]
+                    }))
                 }
-                
+
                 return {
                   ...e,
                   data: obj.channel
@@ -42,6 +44,7 @@ function processPublisher(publisher: any, roomSession: any, changeUser: React.Di
             plugin.createAnswer(jsep).then(function (jsep: any) {
               plugin.sendWithTransaction({ jsep: jsep, body: { request: "start" } }).then(function (response: any) {
                 if (response.getPluginData()["started"] == "ok") {
+
                 }
               })
             });
@@ -49,16 +52,20 @@ function processPublisher(publisher: any, roomSession: any, changeUser: React.Di
         }
       }
 
-      plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "subscriber", "feed": publisher, "data": true } }).then(onRoomAsSubJoin);
+      if (roomPin)
+        plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "subscriber", "feed": publisher, "data": true, "pin": roomPin.toString() } }).then(onRoomAsSubJoin);
+      else
+        plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "subscriber", "feed": publisher, "data": true } }).then(onRoomAsSubJoin);
+
     }).catch(console.warn.bind(console));
 }
 
-function connect(userId: number, session: any, changeUser: React.Dispatch<React.SetStateAction<User>>): User {
-  processPublisher(userId, session, changeUser)
+function connect(userId: number, session: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin: any): User {
+  processPublisher(userId, session, changeUser, roomPin)
   return
 }
 
-export const VideoItemContainer: React.FC<{ userId: number, session: any, changeMenu: any, publisherHandle: any }> = function ({ userId, session, changeMenu, publisherHandle }) {
+export const VideoItemContainer: React.FC<{ userId: number, session: any, changeMenu: any, publisherHandle: any, roomPin: any }> = function ({ userId, session, changeMenu, publisherHandle, roomPin }) {
   const connected = useRef<boolean>(false);
   const [user, changeUser] = useState<User>({
     name: "Connecting...",
@@ -70,7 +77,7 @@ export const VideoItemContainer: React.FC<{ userId: number, session: any, change
     volume: 1
   });
 
-  function menuShow(e: React.MouseEvent<HTMLDivElement, MouseEvent>){
+  function menuShow(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault()
     e.stopPropagation()
     changeMenu(prev => ({
@@ -85,7 +92,7 @@ export const VideoItemContainer: React.FC<{ userId: number, session: any, change
 
   useEffect(() => {
     if (!connected.current) {
-      connect(userId, session, changeUser);
+      connect(userId, session, changeUser, roomPin);
       connected.current = true;
     }
   })

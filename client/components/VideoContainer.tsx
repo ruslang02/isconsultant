@@ -8,12 +8,14 @@ import VideoItem from "./VideoItem";
 import "pages/video/videoroom"
 import VideoMenu from "./VideoMenu";
 
-const VideoContainer: React.FC = function () {
+const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any }> = function ({ roomNumber, roomPin, roomSecret }) {
   const [userState, setState] = useState<number[]>([]);
   const userStream = useRef<MediaStream>(null)
   const [video, setVideo] = useState<boolean>(false)
   const [audio, setAudio] = useState<boolean>(false)
   const [menuState, changeMenuState] = useState<Menu>({ xPos: 0, yPos: 0, show: false, user: null, changeUser: null })
+  const [audioAvailable, changeAudioAvailable] = useState<boolean>(false)
+  const [videoAvailable, changeVideoAvailable] = useState<boolean>(false)
 
   // Not sure what to do with those just yet, but those have to go
   // Perhaps a class will be nice? 
@@ -75,8 +77,9 @@ const VideoContainer: React.FC = function () {
         var leaving: string = data["leaving"]
         var reason: string = data["reason"]
         if (leaving) {
-          if (reason == "kicked")
+          if (reason == "kicked"){
             alert("Вас исключили из комнаты.")
+          } 
         }
       }
     }
@@ -88,30 +91,72 @@ const VideoContainer: React.FC = function () {
 
       state = true;
 
-      publisherHandle.current.getUserMedia({ "video": true, "audio": true })
-        .then(function (stream: any) {
-          var pc = publisherHandle.current.createPeerConnection();
-          dataChannel.current = pc.createDataChannel("events")
-          userStream.current = stream
-          setVideo(true)
-          setAudio(true)
-          stream.getTracks().forEach(function (track: any) {
-            publisherHandle.current.addTrack(track, stream);
+      var audio = false;
+      var video = false
+
+      navigator.getUserMedia({ video: true }, function (stream: any) {
+        video = true;
+        changeVideoAvailable(true);
+        navigator.getUserMedia({ audio: true }, function (stream: any) {
+          audio = true;
+          changeAudioAvailable(true);
+          go()
+        }, function (stream: any) {
+          go()
+        })
+      }, function (stream: any) {
+        navigator.getUserMedia({ audio: true }, function (stream: any) {
+          audio = true;
+          changeAudioAvailable(true);
+          go()
+        }, function (stream: any) {
+          go()
+        })
+      })
+
+      function go() {
+        if (!audio && !video) {
+          return
+        }
+
+        publisherHandle.current.getUserMedia({ "video": video, "audio": audio })
+          .then(function (stream: any) {
+            var pc = publisherHandle.current.createPeerConnection();
+            dataChannel.current = pc.createDataChannel("events")
+
+            dataChannel.current.onmessage = function (e: any) {
+              console.log(e)
+              if (JSON.parse(e["data"]["request"]))
+                setAudio(a => {
+                  setVideo(v => {
+                    dataChannel.current.send({ "muted": !a, "streaming": v })
+                    return v
+                  })
+                  return a
+                })
+            }
+
+            userStream.current = stream
+            setVideo(video)
+            setAudio(audio)
+            stream.getTracks().forEach(function (track: any) {
+              publisherHandle.current.addTrack(track, stream);
+            });
+          })
+          .then(function () {
+            return publisherHandle.current.createOffer();
+          })
+          .then(function (jsep: any) {
+            return publisherHandle.current.sendWithTransaction({ body: { audio: audio, video: video, data: true, request: "publish" }, jsep: jsep });
+          })
+          .then(function (response: any) {
+            var jsep = response.get("jsep");
+            if (jsep) {
+              publisherHandle.current.setRemoteSDP(jsep);
+              return jsep;
+            }
           });
-        })
-        .then(function () {
-          return publisherHandle.current.createOffer();
-        })
-        .then(function (jsep: any) {
-          return publisherHandle.current.sendWithTransaction({ body: { audio: true, video: true, data: true, request: "publish" }, jsep: jsep });
-        })
-        .then(function (response: any) {
-          var jsep = response.get("jsep");
-          if (jsep) {
-            publisherHandle.current.setRemoteSDP(jsep);
-            return jsep;
-          }
-        });
+      }
     }
 
     function onVideoroomJoin(response: any) {
@@ -137,7 +182,11 @@ const VideoContainer: React.FC = function () {
       roomSession.current = session
       session.attachPlugin("janus.plugin.videoroom").then(function (plugin: any) {
         publisherHandle.current = plugin
-        plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "publisher" } }).then(onVideoroomJoin);
+
+        if (roomPin)
+          plugin.sendWithTransaction({ body: { "request": "join", "room": parseInt(roomNumber), "ptype": "publisher", "pin": roomPin.toString() } }).then(onVideoroomJoin);
+        else
+          plugin.sendWithTransaction({ body: { "request": "join", "room": parseInt(roomNumber), "ptype": "publisher" } }).then(onVideoroomJoin);
         plugin.on('message', onMessage);
         //plugin.detach();
       });
@@ -182,7 +231,12 @@ const VideoContainer: React.FC = function () {
   }
 
   function kick(id: number) {
-    publisherHandle.current.sendWithTransaction({ body: { "request": "kick", "secret": "adminpwd", "room": 1234, "id": id } }).then();
+    if(!roomSecret)
+    {
+      alert("You don't have priveleges to do this.")
+      return
+    }
+    publisherHandle.current.sendWithTransaction({ body: { "request": "kick", "secret": roomSecret, "room": parseInt(roomNumber), "id": id, "pin": roomPin } }).then();
   }
 
   return (
@@ -194,11 +248,11 @@ const VideoContainer: React.FC = function () {
 
 
         {userState.map(e =>
-          <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} publisherHandle={publisherHandle} />
+          <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} publisherHandle={publisherHandle} roomPin={roomPin} />
         )}
       </div>
       <div style={{ flexGrow: 1 }}></div>
-      <Actions audio={audio} video={video} changeAudio={changeAudio} changeVideo={changeVideo} />
+      <Actions audioAvailable={audioAvailable} videoAvailable={videoAvailable} audio={audio} video={video} changeAudio={changeAudio} changeVideo={changeVideo} />
     </section>);
 };
 
