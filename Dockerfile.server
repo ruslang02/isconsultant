@@ -12,7 +12,7 @@ FROM node:alpine AS runner
 WORKDIR /app
 COPY --from=builder /app/common/locales ./common/locales
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/admin/www ./www
+COPY --from=builder /app/admin/www ./admin/www
 COPY --from=builder /app/server/package*.json ./
 RUN npm ci --production
 USER node
