@@ -9,7 +9,6 @@ import React, {
 import { Button, Comment, Icon, Input } from "semantic-ui-react";
 import styles from "./[id].module.css";
 import "./videoroom";
-import axios from "axios";
 
 //@ts-ignore
 import Janus from "janus-gateway-js";
@@ -26,10 +25,7 @@ import { NewFileNotificationDto } from "@common/dto/new-file-notification.dto";
 import { GetEventDto } from "@common/dto/get-event.dto";
 import { useTranslation } from "react-i18next";
 import VideoContainer from "components/VideoContainer";
-
-const api = axios.create({
-  baseURL: "/api",
-});
+import { api } from "utils/api";
 
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
