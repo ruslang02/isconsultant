@@ -3,9 +3,12 @@ stage:
     - master
   script:
     - docker login -u webrtc -p $PASSWORD hub.ruzik.xyz
-    - VERSION=`echo $CI_COMMIT_TAG | sed -En "s/v?(.+)/\1/p"`
-    - echo "Building hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_TAG"
-    - docker build -f Dockerfile.server .
-    - echo "Building hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_TAG"
-    - docker build -f Dockerfile.client .
+    - echo "Building hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_SHORT_SHA"
+    - docker build -f Dockerfile.server -t isconsultant:$CI_COMMIT_SHORT_SHA .
+    - echo "Building hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_TAG$CI_COMMIT_SHORT_SHA"
+    - docker build -f Dockerfile.client -t isconsultant-client:$CI_COMMIT_SHORT_SHA .
+    - docker tag isconsultant:$CI_COMMIT_SHORT_SHA hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_SHORT_SHA
+    - docker tag isconsultant-client:$CI_COMMIT_SHORT_SHA hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_SHORT_SHA
+    - docker push hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_SHORT_SHA
+    - docker push hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_SHORT_SHA
 
