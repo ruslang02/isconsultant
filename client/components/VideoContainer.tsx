@@ -79,9 +79,12 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
         var leaving: string = data["leaving"]
         var reason: string = data["reason"]
+        console.log(data)
+
         if (leaving) {
           if (reason == "kicked")
             alert(t('pages.video.room_kicked'))
+            location.href = "/video"
         }
       }
     }
@@ -250,7 +253,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
 
         {userState.map(e =>
-          <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} publisherHandle={publisherHandle} roomPin={roomPin} />
+          <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} publisherHandle={publisherHandle} roomPin={roomPin} roomNumber={roomNumber}/>
         )}
       </div>
       <div style={{ flexGrow: 1 }}></div>
