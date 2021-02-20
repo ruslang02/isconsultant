@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { Button, Comment, Icon, Input } from "semantic-ui-react";
 import styles from "./[id].module.css";
-import "./videoroom";
+import "../../videoroom";
 
 import { JoinChatRoomDto } from "@common/dto/join-chat-room.dto";
 import { AuthContext } from "utils/AuthContext";
@@ -28,8 +28,8 @@ const UserStoreContext = createContext<{
 }>({ users: [], setUsers: () => {} });
 const FilesContext = createContext<{
   files: RemoteFile[];
-  setFiles: (files: RemoteFile[]) => void;
-}>({ files: [], setFiles: () => {} });
+  setFiles: (reducer: (prevFiles: RemoteFile[]) => RemoteFile[]) => void;
+}>({ files: [], setFiles: () => () => {} });
 const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
@@ -158,7 +158,7 @@ interface WSMessage<T> {
 
 const Chat: React.FC = () => {
   const { users, setUsers } = useContext(UserStoreContext);
-  const { files, setFiles } = useContext(FilesContext);
+  const { setFiles } = useContext(FilesContext);
   const { auth } = useContext(AuthContext);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -206,7 +206,7 @@ const Chat: React.FC = () => {
           break;
         case "new_file":
           const { file } = data;
-          setFiles([...files, file]);
+          setFiles((files: RemoteFile[]) => ([...files, file]));
           break;
         default:
           console.error(data);
