@@ -3,7 +3,7 @@ client-build:
   only:
     - master
   script:
-    - docker login -u $CI_JOB_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA"
     - docker build -f Dockerfile.client -t $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA
@@ -13,7 +13,7 @@ server-build:
   only:
     - master
   script:
-    - docker login -u $CI_JOB_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA"
     - docker build -f Dockerfile.server -t $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA
