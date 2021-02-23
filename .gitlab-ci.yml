@@ -30,9 +30,9 @@ server-deploy:
     - deploy-prod
   script: 
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker rm -f isc-server
+    - docker rm -f isconfultant
     - docker run -d \
-    - --env-file=/home/falcon/production.env \
+      --env-file=/home/falcon/production.env \
       -p 8080:8080 \
       -p 8081:8081 \
       --pull always \
@@ -47,8 +47,9 @@ client-deploy:
   tags: 
     - deploy-prod
   script:
-      docker rm -f isc-client
-      docker run -d \
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker rm -f isconsultant-client
+    - docker run -d
       --env-file=/home/falcon/production.env \
       -p 8090:8080 \
       --pull always \
