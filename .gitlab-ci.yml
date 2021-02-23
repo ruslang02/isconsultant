@@ -30,7 +30,7 @@ server-deploy:
     - deploy-prod
   script: 
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker rm -f isconfultant
+    - docker rm -f isconsultant
     - docker run -d \
       --env-file=/home/falcon/production.env \
       -p 8080:8080 \
@@ -38,7 +38,7 @@ server-deploy:
       --pull always \
       --name isc-server \
       --restart always \
-      $CI_REGISTRY/hse/webrtchse1:$CI_COMMIT_SHORT_SHA/isconsultant:$CI_COMMIT_SHORT_SHA
+      $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA
 
 client-deploy:
   stage: deploy
@@ -55,7 +55,7 @@ client-deploy:
       --pull always \
       --name isc-client \
       --restart always \
-      $CI_REGISTRY/hse/webrtchse1:$CI_COMMIT_SHORT_SHA/isconsultant-client:$CI_COMMIT_SHORT_SHA
+      $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA
 
 
 
