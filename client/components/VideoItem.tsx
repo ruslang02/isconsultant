@@ -8,13 +8,15 @@ const VideoItem: React.FC<{ user: User, changeMenu: (event: React.MouseEvent<HTM
 
   useEffect(() => {
     if (ref.current) {
+      console.log(user.streaming)
+      console.log(user.stream)
       ref.current.volume = user.volume
       ref.current.muted = user.muted
       ref.current.autoplay = true
       if (!ref.current.srcObject)
         ref.current.srcObject = user.stream
     }
-  }, [user.streaming, user.volume])
+  }, [user.streaming, user.volume, user.stream])
 
   return (
     <div onContextMenu={changeMenu} className={styles.Video_item}>
