@@ -18,7 +18,7 @@ cleanup:
 client-build:
   stage: build
   tags: 
-    - deploy-prod
+    - build
   only:
     - master
   script:
