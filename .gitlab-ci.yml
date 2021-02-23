@@ -1,6 +1,7 @@
 client-build:
   stage: build
-  tags: build
+  tags: 
+    - build
   only:
     - master
   script:
@@ -11,7 +12,8 @@ client-build:
 
 server-build:
   stage: build
-  tags: build
+  tags: 
+    - build
   only:
     - master
   script:
@@ -24,7 +26,8 @@ server-deploy:
   stage: deploy
   only:
     - master
-  tags: deploy-prod
+  tags: 
+    - deploy-prod
   script: 
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker rm -f isc-server
@@ -41,7 +44,8 @@ client-deploy:
   stage: deploy
   only: 
     - master
-  tags: deploy-prod
+  tags: 
+    - deploy-prod
   script:
     - docker rm -f isc-client
     - docker run -d \
