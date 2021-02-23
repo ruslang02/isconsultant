@@ -33,12 +33,12 @@ server-deploy:
     - docker rm -f isc-server
     - docker run -d \
     - --env-file=/home/falcon/production.env \
-    - -p 8080:8080 \
-    - -p 8081:8081 \
-    - --pull always \
-    - --name isc-server \
-    - --restart always \
-    - $CI_REGISTRY/hse/webrtchse1:$CI_COMMIT_SHORT_SHA/isconsultant:$CI_COMMIT_SHORT_SHA
+      -p 8080:8080 \
+      -p 8081:8081 \
+      --pull always \
+      --name isc-server \
+      --restart always \
+      $CI_REGISTRY/hse/webrtchse1:$CI_COMMIT_SHORT_SHA/isconsultant:$CI_COMMIT_SHORT_SHA
 
 client-deploy:
   stage: deploy
@@ -47,14 +47,14 @@ client-deploy:
   tags: 
     - deploy-prod
   script:
-    - docker rm -f isc-client
-    - docker run -d \
-    - --env-file=/home/falcon/production.env \
-    - -p 8090:8080 \
-    - --pull always \
-    - --name isc-client \
-    - --restart always \
-    - $CI_REGISTRY/hse/webrtchse1:$CI_COMMIT_SHORT_SHA/isconsultant-client:$CI_COMMIT_SHORT_SHA
+      docker rm -f isc-client
+      docker run -d \
+      --env-file=/home/falcon/production.env \
+      -p 8090:8080 \
+      --pull always \
+      --name isc-client \
+      --restart always \
+      $CI_REGISTRY/hse/webrtchse1:$CI_COMMIT_SHORT_SHA/isconsultant-client:$CI_COMMIT_SHORT_SHA
 
 
 
