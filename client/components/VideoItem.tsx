@@ -13,6 +13,7 @@ const VideoItem: React.FC<{ user: User, changeMenu: (event: React.MouseEvent<HTM
       ref.current.volume = user.volume
       ref.current.muted = user.muted
       ref.current.autoplay = true
+      ref.current.playsInline = true
       if (!ref.current.srcObject)
         ref.current.srcObject = user.stream
     }
