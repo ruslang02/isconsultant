@@ -44,13 +44,7 @@ client-deploy:
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker rm -f isconsultant-client
-    - docker run -d
-      --env-file="/home/falcon/production.env" \
-      -p 8090:8080 \
-      --pull always \
-      --name isc-client \
-      --restart always \
-      "$CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA"
+    - docker run -d --env-file="/home/falcon/production.env" -p 8090:8080 --pull always --name isc-client --restart always "$CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA"
 
 
 
