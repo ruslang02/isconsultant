@@ -1,7 +1,7 @@
 client-build:
   stage: build
   tags: 
-    - build
+    - deploy-prod
   only:
     - master
   script:
