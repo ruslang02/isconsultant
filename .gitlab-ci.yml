@@ -1,3 +1,20 @@
+stages:
+  - cleanup
+  - build
+  - deploy
+
+cleanup:
+  stage: cleanup
+  tags: 
+    - build
+  variables:
+    GIT_STRATEGY: none
+  only:
+    - master
+  script:
+    - docker system prune -f
+
+
 client-build:
   stage: build
   tags: 
@@ -5,7 +22,6 @@ client-build:
   only:
     - master
   script:
-    - docker system prune -f
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA"
     - docker build -f Dockerfile.client -t $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA .
@@ -18,7 +34,6 @@ server-build:
   only:
     - master
   script:
-    - docker system prune -f
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA"
     - docker build -f Dockerfile.server -t $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA .
