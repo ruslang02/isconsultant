@@ -58,8 +58,15 @@ server-deploy:
   needs: ["server-build"]
   stage: deploy
   only:
-    - master
-    
+    refs:
+      - master
+    changes:
+      - types/**/*
+      - server/**/*
+      - common/**/*
+      - admin/**/*
+      - Dockerfile.server
+      - tsconfig.json
   tags: 
     - deploy-prod
   script: 
@@ -70,8 +77,14 @@ server-deploy:
 client-deploy:
   needs: ["client-build"]
   stage: deploy
-  only: 
-    - master
+  only:
+    regs:
+      - master
+    changes:
+      - common/**/*
+      - client/**/*
+      - tsconfig.json
+      - Dockerfile.client
   tags: 
     - deploy-prod
   script:
