@@ -8,6 +8,7 @@ import VideoItem from "./VideoItem";
 import "../videoroom"
 import VideoMenu from "./VideoMenu";
 import { useTranslation } from "react-i18next";
+import { AuthContext } from "utils/AuthContext"
 
 const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any }> = function ({ roomNumber, roomPin, roomSecret }) {
   const [userState, setState] = useState<number[]>([]);
@@ -17,6 +18,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
   const [menuState, changeMenuState] = useState<Menu>({ xPos: 0, yPos: 0, show: false, user: null, changeUser: null })
   const [audioAvailable, changeAudioAvailable] = useState<boolean>(false)
   const [videoAvailable, changeVideoAvailable] = useState<boolean>(false)
+  const { auth } = useContext(AuthContext);
 
   // Not sure what to do with those just yet, but those have to go
   // Perhaps a class will be nice? 
@@ -196,7 +198,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
       });
     }
 
-    if (!running.current) {
+    if (!running.current && auth) {
       var janus = new Janus.Client('wss://consultant.infostrategic.com/gateway2', {
         token: '',
         apisecret: '',
