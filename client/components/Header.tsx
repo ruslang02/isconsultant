@@ -4,18 +4,20 @@ import { Button, Container, Icon, Image } from 'semantic-ui-react';
 import { UserContext } from '../utils/UserContext';
 import { PHONE_NUMBER } from '../utils/Constants';
 import styles from 'styles/Header.module.css';
+import { useRouter } from 'next/router';
 
 
 function AccountMenu() {
   const user = useContext(UserContext);
   const { t } = useTranslation();
+  const router = useRouter();
 
   return user ? (
     <Image src={user.avatar} />
   ) : (
       <div>
-        <Button primary>{t('header.register')}</Button>
-        <Button secondary>{t('header.login')}</Button>
+        <Button primary onClick={() => router.push("/register")}>{t('header.register')}</Button>
+        <Button secondary onClick={() => router.push("/login")}>{t('header.login')}</Button>
       </div>
     )
 }

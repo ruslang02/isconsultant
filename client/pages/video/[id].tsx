@@ -167,7 +167,7 @@ const Chat: React.FC = () => {
   useEffect(() => {
     console.log("Loading chat...");
     const client = new WebSocket(
-      `ws://${location.hostname}${
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${
         location.port ? ":" + location.port : ""
       }/chat/${auth?.access_token}`
     );

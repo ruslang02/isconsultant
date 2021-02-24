@@ -1,0 +1,13 @@
+{
+  "name": "isc",
+  "version": "1.0.0",
+  "description": "WebRTC-application for real-time legal consultations.",
+  "repository": {
+    "url": "https://git.infostrategic.com/hse/webrtchse1",
+    "type": "git"
+  },
+  "main": "dist/main.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,7 +1,8 @@
 {
     "editor.tabSize": 2,
     "i18n-ally.localesPaths": [
-        "common/locales"
+        "common/locales",
+        "client/public/locales"
     ],
     "i18n-ally.defaultNamespace": "global",
     "i18n-ally.dirStructure": "dir",
