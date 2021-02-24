@@ -25,11 +25,11 @@ import { api } from "utils/api";
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
   setUsers: (users: GetUserInfoDto[]) => void;
-}>({ users: [], setUsers: () => {} });
+}>({ users: [], setUsers: () => { } });
 const FilesContext = createContext<{
   files: RemoteFile[];
   setFiles: (reducer: (prevFiles: RemoteFile[]) => RemoteFile[]) => void;
-}>({ files: [], setFiles: () => () => {} });
+}>({ files: [], setFiles: () => () => { } });
 const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
@@ -171,6 +171,11 @@ const Chat: React.FC = () => {
         location.port ? ":" + location.port : ""
       }/chat/${auth?.access_token}`
     );
+
+    client.addEventListener("error", (ev: Event) =>{
+      console.log("WS-Error: " + ev)
+    })
+
     client.addEventListener("open", () => {
       client.send(
         JSON.stringify({
@@ -316,59 +321,62 @@ const Sidebar: React.FC = () => (
 );
 
 export default function Video() {
-    const router = useRouter();
-    const { id } = router.query;
-    const pin = router.query["pin"]
-    const secret = router.query["secret"]
+  const router = useRouter();
+  const { id } = router.query;
+  const pin = router.query["pin"]
+  const secret = router.query["secret"]
 
-    const [users, setUsers] = useState<GetUserInfoDto[]>([]);
-    const [files, setFiles] = useState<RemoteFile[]>([]);
-    const [event, setEvent] = useState<GetEventDto | null>(null);
-    const { auth } = useContext(AuthContext);
+  const [users, setUsers] = useState<GetUserInfoDto[]>([]);
+  const [files, setFiles] = useState<RemoteFile[]>([]);
+  const [event, setEvent] = useState<GetEventDto | null>(null);
+  const { auth } = useContext(AuthContext);
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const { data } = await api.get<GetEventDto>(`/events/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${auth?.access_token}`,
-                    },
-                });
-                setEvent(data);
-            } catch (e) { }
-        })();
-    }, [id]);
+  useEffect(() => {
+    if (!id)
+      return
 
-    return (
-        <UserStoreContext.Provider value={{ users, setUsers }}>
-            <FilesContext.Provider value={{ files, setFiles }}>
-                <EventContext.Provider value={event}>
-                    <main
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            height: "100%",
-                            overflow: "hidden",
-                            flexGrow: 1,
-                        }}
-                    >
-                        <TopBar />
-                        <section
-                            style={{
-                                display: "flex",
-                                background: "white",
-                                borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
-                                flexGrow: 1,
-                            }}
-                        >
-                            {!("id" in router.query) ? <></> :
-                                <VideoContainer roomNumber={id} roomPin={pin} roomSecret={secret} />
-                            }
-                            <Sidebar />
-                        </section>
-                    </main>
-                </EventContext.Provider>
-            </FilesContext.Provider>
-        </UserStoreContext.Provider>
-    );
+    (async () => {
+      try {
+        const { data } = await api.get<GetEventDto>(`/events/${id}`, {
+          headers: {
+            Authorization: `Bearer ${auth?.access_token}`,
+          },
+        });
+        setEvent(data);
+      } catch (e) { }
+    });
+  }, [id]);
+
+  return (
+    <UserStoreContext.Provider value={{ users, setUsers }}>
+      <FilesContext.Provider value={{ files, setFiles }}>
+        <EventContext.Provider value={event}>
+          <main
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+              overflow: "hidden",
+              flexGrow: 1,
+            }}
+          >
+            <TopBar />
+            <section
+              style={{
+                display: "flex",
+                background: "white",
+                borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
+                flexGrow: 1,
+              }}
+            >
+              {!("id" in router.query) ? <></> :
+                <VideoContainer roomNumber={id} roomPin={pin} roomSecret={secret} />
+              }
+              <Sidebar />
+            </section>
+          </main>
+        </EventContext.Provider>
+      </FilesContext.Provider>
+    </UserStoreContext.Provider>
+  );
 }

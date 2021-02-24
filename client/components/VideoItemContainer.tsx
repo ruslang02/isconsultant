@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react"
 import VideoItem from "./VideoItem"
 import "./User.d.ts"
 
-function processPublisher(publisher: any, roomSession: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin) {
+function processPublisher(publisher: any, roomSession: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin, roomNumber) {
   roomSession.attachPlugin("janus.plugin.videoroom")
     .then(function (plugin: any) {
       function onRoomAsSubJoin(response: any) {
@@ -53,19 +53,19 @@ function processPublisher(publisher: any, roomSession: any, changeUser: React.Di
       }
 
       if (roomPin)
-        plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "subscriber", "feed": publisher, "data": true, "pin": roomPin.toString() } }).then(onRoomAsSubJoin);
+        plugin.sendWithTransaction({ body: { "request": "join", "room": parseInt(roomNumber), "ptype": "subscriber", "feed": publisher, "data": true, "pin": roomPin.toString() } }).then(onRoomAsSubJoin);
       else
-        plugin.sendWithTransaction({ body: { "request": "join", "room": 1234, "ptype": "subscriber", "feed": publisher, "data": true } }).then(onRoomAsSubJoin);
+        plugin.sendWithTransaction({ body: { "request": "join", "room": parseInt(roomNumber), "ptype": "subscriber", "feed": publisher, "data": true } }).then(onRoomAsSubJoin);
 
     }).catch(console.warn.bind(console));
 }
 
-function connect(userId: number, session: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin: any): User {
-  processPublisher(userId, session, changeUser, roomPin)
+function connect(userId: number, session: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin: any, roomNumber: any): User {
+  processPublisher(userId, session, changeUser, roomPin, roomNumber)
   return
 }
 
-export const VideoItemContainer: React.FC<{ userId: number, session: any, changeMenu: any, publisherHandle: any, roomPin: any }> = function ({ userId, session, changeMenu, publisherHandle, roomPin }) {
+export const VideoItemContainer: React.FC<{ userId: number, session: any, changeMenu: any, publisherHandle: any, roomPin: any, roomNumber: any }> = function ({ userId, session, changeMenu, publisherHandle, roomPin, roomNumber }) {
   const connected = useRef<boolean>(false);
   const [user, changeUser] = useState<User>({
     name: "Connecting...",
@@ -92,7 +92,7 @@ export const VideoItemContainer: React.FC<{ userId: number, session: any, change
 
   useEffect(() => {
     if (!connected.current) {
-      connect(userId, session, changeUser, roomPin);
+      connect(userId, session, changeUser, roomPin, roomNumber);
       connected.current = true;
     }
   })

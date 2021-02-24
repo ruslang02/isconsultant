@@ -79,9 +79,13 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
         var leaving: string = data["leaving"]
         var reason: string = data["reason"]
+        console.log(data)
+
         if (leaving) {
-          if (reason == "kicked")
+          if (reason == "kicked") {
             alert(t('pages.video.room_kicked'))
+            location.href = "/video"
+          }
         }
       }
     }
@@ -93,36 +97,32 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
       state = true;
 
-      var audio = false;
-      var video = false
-
-      navigator.getUserMedia({ video: true }, function (stream: any) {
-        video = true;
+      publisherHandle.current.getUserMedia({ video: true }).then(function (stream: any) {
         changeVideoAvailable(true);
-        navigator.getUserMedia({ audio: true }, function (stream: any) {
-          audio = true;
+        publisherHandle.current.getUserMedia({ audio: true }).then(function (stream: any) {
           changeAudioAvailable(true);
-          go()
-        }, function (stream: any) {
-          go()
+          go(true, true)
+        }).catch(function (stream: any) {
+          go(true, false)
         })
-      }, function (stream: any) {
-        navigator.getUserMedia({ audio: true }, function (stream: any) {
-          audio = true;
+      }).catch(function (stream: any) {
+        publisherHandle.current.getUserMedia({ audio: true }).then(function (stream: any) {
           changeAudioAvailable(true);
-          go()
-        }, function (stream: any) {
-          go()
+          go(false, true)
+        }).catch(function (stream: any) {
+          go(false, false)
         })
       })
 
-      function go() {
-        if (!audio && !video) {
+      function go(vi: boolean, au: boolean) {
+        if (!au && !vi) {
           return
         }
 
-        publisherHandle.current.getUserMedia({ "video": video, "audio": audio })
+        console.log("hh")
+        publisherHandle.current.getUserMedia({ "video": vi, "audio": au })
           .then(function (stream: any) {
+
             var pc = publisherHandle.current.createPeerConnection();
             dataChannel.current = pc.createDataChannel("events")
 
@@ -139,8 +139,10 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
             }
 
             userStream.current = stream
-            setVideo(video)
-            setAudio(audio)
+
+            setAudio(au)
+            setVideo(vi)
+
             stream.getTracks().forEach(function (track: any) {
               publisherHandle.current.addTrack(track, stream);
             });
@@ -149,7 +151,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
             return publisherHandle.current.createOffer();
           })
           .then(function (jsep: any) {
-            return publisherHandle.current.sendWithTransaction({ body: { audio: audio, video: video, data: true, request: "publish" }, jsep: jsep });
+            return publisherHandle.current.sendWithTransaction({ body: { audio: au, video: vi, data: true, request: "publish" }, jsep: jsep });
           })
           .then(function (response: any) {
             var jsep = response.get("jsep");
@@ -207,16 +209,16 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
       });
       running.current = true;
     }
-  }, [userState])
+  }, [userState, video, audio])
 
-  function changeAudio(enabled: boolean) {
+  function clickAudio(enabled: boolean) {
     userStream.current.getAudioTracks()[0].enabled = enabled;
     dataChannel.current.send(JSON.stringify({ muted: !enabled, streaming: video }))
 
     setAudio(enabled)
   }
 
-  function changeVideo(enabled: boolean) {
+  function clickVideo(enabled: boolean) {
     userStream.current.getVideoTracks()[0].enabled = enabled;
     dataChannel.current.send(JSON.stringify({ muted: !audio, streaming: enabled }))
 
@@ -233,8 +235,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
   }
 
   function kick(id: number) {
-    if(!roomSecret)
-    {
+    if (!roomSecret) {
       alert("You don't have priveleges to do this.")
       return
     }
@@ -250,11 +251,11 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
 
         {userState.map(e =>
-          <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} publisherHandle={publisherHandle} roomPin={roomPin} />
+          <VideoItemContainer key={e} userId={e} session={roomSession.current} changeMenu={changeMenuState} publisherHandle={publisherHandle} roomPin={roomPin} roomNumber={roomNumber} />
         )}
       </div>
       <div style={{ flexGrow: 1 }}></div>
-      <Actions audioAvailable={audioAvailable} videoAvailable={videoAvailable} audio={audio} video={video} changeAudio={changeAudio} changeVideo={changeVideo} />
+      <Actions audioAvailable={audioAvailable} videoAvailable={videoAvailable} audio={audio} video={video} changeAudio={clickAudio} changeVideo={clickVideo} />
     </section>);
 };
 

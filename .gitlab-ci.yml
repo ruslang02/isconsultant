@@ -1,18 +1,65 @@
-stage:
+stages:
+  - cleanup
+  - build
+  - deploy
+
+cleanup:
+  stage: cleanup
+  tags: 
+    - build
+  variables:
+    GIT_STRATEGY: none
   only:
     - master
   script:
-    - docker login -u webrtc -p $PASSWORD hub.ruzik.xyz
-    - echo "Building hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_SHORT_SHA"
-    - docker build -f Dockerfile.server -t isconsultant:$CI_COMMIT_SHORT_SHA .
-    - echo "Building hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_SHORT_SHA"
-    - docker build -f Dockerfile.client -t isconsultant-client:$CI_COMMIT_SHORT_SHA .
-    - docker tag isconsultant:$CI_COMMIT_SHORT_SHA hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_SHORT_SHA
-    - docker tag isconsultant-client:$CI_COMMIT_SHORT_SHA hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_SHORT_SHA
-    - docker push hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_SHORT_SHA
-    - docker push hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_SHORT_SHA
-    - docker tag hub.ruzik.xyz/webrtc/isconsultant:$CI_COMMIT_SHORT_SHA hub.ruzik.xyz/webrtc/isconsultant:latest
-    - docker tag hub.ruzik.xyz/webrtc/isconsultant-client:$CI_COMMIT_SHORT_SHA hub.ruzik.xyz/webrtc/isconsultant-client:latest 
-    - docker push hub.ruzik.xyz/webrtc/isconsultant:latest
-    - docker push hub.ruzik.xyz/webrtc/isconsultant-client:latest
+    - docker system prune -f
+
+
+client-build:
+  stage: build
+  tags: 
+    - build
+  only:
+    - master
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA"
+    - docker build -f Dockerfile.client -t $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA
+
+server-build:
+  stage: build
+  tags: 
+    - build
+  only:
+    - master
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA"
+    - docker build -f Dockerfile.server -t $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA
+
+server-deploy:
+  stage: deploy
+  only:
+    - master
+  tags: 
+    - deploy-prod
+  script: 
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker rm -f isc-server
+    - docker run -d --env-file="/home/falcon/production.env" -p 8080:8080 -p 8081:8081 --pull always --name isc-server --restart always "$CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA"
+
+client-deploy:
+  stage: deploy
+  only: 
+    - master
+  tags: 
+    - deploy-prod
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker rm -f isc-client
+    - docker run -d --env-file="/home/falcon/production.env" -p 8090:8080 --pull always --name isc-client --restart always "$CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA"
+
+
 
