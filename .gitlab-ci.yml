@@ -10,7 +10,13 @@ cleanup:
   variables:
     GIT_STRATEGY: none
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - common/**/*
+      - client/**/*
+      - tsconfig.json
+      - Dockerfile.client
   script:
     - docker system prune -f
 
@@ -27,6 +33,10 @@ client-build:
       - client/**/*
       - tsconfig.json
       - Dockerfile.client
+      - types/**/*
+      - server/**/*
+      - admin/**/*
+      - Dockerfile.server
 
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -78,7 +88,7 @@ client-deploy:
   needs: ["client-build"]
   stage: deploy
   only:
-    regs:
+    refs:
       - master
     changes:
       - common/**/*
