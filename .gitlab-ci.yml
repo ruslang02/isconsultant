@@ -10,7 +10,13 @@ cleanup:
   variables:
     GIT_STRATEGY: none
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - common/**/*
+      - client/**/*
+      - tsconfig.json
+      - Dockerfile.client
   script:
     - docker system prune -f
 
@@ -20,7 +26,18 @@ client-build:
   tags: 
     - build
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - common/**/*
+      - client/**/*
+      - tsconfig.json
+      - Dockerfile.client
+      - types/**/*
+      - server/**/*
+      - admin/**/*
+      - Dockerfile.server
+
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant-client:$CI_COMMIT_SHORT_SHA"
@@ -32,7 +49,15 @@ server-build:
   tags: 
     - build
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - types/**/*
+      - server/**/*
+      - common/**/*
+      - admin/**/*
+      - Dockerfile.server
+      - tsconfig.json
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "Building $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA"
@@ -40,9 +65,18 @@ server-build:
     - docker push $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA
 
 server-deploy:
+  needs: ["server-build"]
   stage: deploy
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - types/**/*
+      - server/**/*
+      - common/**/*
+      - admin/**/*
+      - Dockerfile.server
+      - tsconfig.json
   tags: 
     - deploy-prod
   script: 
@@ -51,9 +85,16 @@ server-deploy:
     - docker run -d --env-file="/home/falcon/production.env" -p 8080:8080 -p 8081:8081 --pull always --name isc-server --restart always "$CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA"
 
 client-deploy:
+  needs: ["client-build"]
   stage: deploy
-  only: 
-    - master
+  only:
+    refs:
+      - master
+    changes:
+      - common/**/*
+      - client/**/*
+      - tsconfig.json
+      - Dockerfile.client
   tags: 
     - deploy-prod
   script:

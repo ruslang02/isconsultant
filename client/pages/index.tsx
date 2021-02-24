@@ -132,7 +132,7 @@ function EventArrange() {
               ></textarea>
             </Form.Field>
             <div style={{ display: "flex", justifyContent: "center" }}>
-              <Button type="button">Cancel</Button>
+              <Button onClick={(e) => setOpen(false)} type="button">Cancel</Button>
               <Button primary type="submit">
                 Send
               </Button>
