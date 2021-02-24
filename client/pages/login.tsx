@@ -3,16 +3,16 @@ import { useRouter } from "next/router";
 import React, { useContext, useState } from "react";
 import { Button, Card, Checkbox, Form, Message } from "semantic-ui-react";
 import { api } from "utils/api";
-import { AuthContext } from "utils/AuthContext";
+import { useAuth } from "utils/useAuth";
 
 const Login: React.FC = () => {
   const redirect = globalThis.location
     ? new URL(location.href).searchParams.get("redirect")
-    : undefined;
+    : "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { auth, setAuth } = useContext(AuthContext);
+  const [ auth, setAuth ] = useAuth();
   const router = useRouter();
 
   const handleSubmit = async () => {
@@ -29,7 +29,7 @@ const Login: React.FC = () => {
 
       setError("");
       setAuth(data);
-      router.replace(redirect);
+      router.replace(redirect || "/");
     } catch (e) {
       setError(e.message);
       console.error(e);

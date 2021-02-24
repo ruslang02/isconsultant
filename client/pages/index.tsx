@@ -14,7 +14,6 @@ import {
 } from "semantic-ui-react";
 import { Header } from "../components/Header";
 import { useTranslation } from "react-i18next";
-import { AuthContext } from "utils/AuthContext";
 
 function Promo() {
   const { t } = useTranslation();
@@ -58,7 +57,6 @@ function Promo() {
 function EventArrange() {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
-  const { auth } = useContext(AuthContext);
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");

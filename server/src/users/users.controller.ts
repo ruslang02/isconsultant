@@ -58,6 +58,9 @@ export class UsersController {
     hydratedUser.type_localized = await i18n.t(
       `global.USER_TYPE_${user.type.toUpperCase()}` as LocalizedStringID
     );
+    if (!hydratedUser.avatar) {
+      hydratedUser.avatar = "https://react.semantic-ui.com/images/avatar/small/matt.jpg"
+    }
     return hydratedUser;
   }
 
