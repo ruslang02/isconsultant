@@ -26,13 +26,15 @@ function MyApp({
   if (typeof window !== "undefined") {
     localStorage.setItem("auth", JSON.stringify(auth));
 
-    switch (location.pathname) {
-      case "/":
-      case "/login":
-      case "/register":
-        break;
-      default:
-        router.replace("/login?redirect=" + location.pathname);
+    if (!auth) {
+      switch (location.pathname) {
+        case "/":
+        case "/login":
+        case "/register":
+          break;
+        default:
+          router.replace("/login?redirect=" + location.pathname);
+      }
     }
   }
 
