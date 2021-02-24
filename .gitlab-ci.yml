@@ -40,6 +40,7 @@ server-build:
     - docker push $CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA
 
 server-deploy:
+  needs: ["server-build"]
   stage: deploy
   only:
     - master
@@ -51,6 +52,7 @@ server-deploy:
     - docker run -d --env-file="/home/falcon/production.env" -p 8080:8080 -p 8081:8081 --pull always --name isc-server --restart always "$CI_REGISTRY/hse/webrtchse1/isconsultant:$CI_COMMIT_SHORT_SHA"
 
 client-deploy:
+  needs: ["client-build"]
   stage: deploy
   only: 
     - master
