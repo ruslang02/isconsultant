@@ -83,7 +83,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         this.logger.log(`Client id = ${client.room}`)
         this.logger.log(`Sender  id = ${client.room}`)
         if (client.room === socket.room) {
-          client.send(m);
+          client.send(JSON.stringify(m));
         }
       }
       
