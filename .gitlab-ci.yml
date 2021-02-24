@@ -40,7 +40,6 @@ server-build:
 
 server-deploy:
   needs: ["server-build"]
-  stage: deploy
   only:
     - master
   tags: 
@@ -52,7 +51,6 @@ server-deploy:
 
 client-deploy:
   needs: ["client-build"]
-  stage: deploy
   only: 
     - master
   tags: 
