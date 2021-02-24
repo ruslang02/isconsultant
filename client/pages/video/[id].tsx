@@ -11,7 +11,6 @@ import styles from "./[id].module.css";
 import "../../videoroom";
 
 import { JoinChatRoomDto } from "@common/dto/join-chat-room.dto";
-import { AuthContext } from "utils/AuthContext";
 import { GetUserInfoDto } from "@common/dto/get-user-info.dto";
 import { ReceiveChatMessageDto } from "@common/dto/receive-chat-message.dto";
 import { PostChatMessageDto } from "@common/dto/post-chat-message.dto";
@@ -21,6 +20,7 @@ import { GetEventDto } from "@common/dto/get-event.dto";
 import { useTranslation } from "react-i18next";
 import VideoContainer from "components/VideoContainer";
 import { api } from "utils/api";
+import { useAuth } from "utils/useAuth";
 
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
@@ -94,7 +94,7 @@ const File: React.FC<{ href: string; icon: string; name: string }> = ({
 const Files: React.FC = () => {
   const { files, setFiles } = useContext(FilesContext);
   const event = useContext(EventContext);
-  const { auth } = useContext(AuthContext);
+  const [auth] = useAuth();
   const { t } = useTranslation();
 
   return (
@@ -159,7 +159,7 @@ interface WSMessage<T> {
 const Chat: React.FC = () => {
   const { users, setUsers } = useContext(UserStoreContext);
   const { setFiles } = useContext(FilesContext);
-  const { auth } = useContext(AuthContext);
+  const [auth] = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [client, setClient] = useState<WebSocket | null>(null);
@@ -329,7 +329,7 @@ export default function Video() {
   const [users, setUsers] = useState<GetUserInfoDto[]>([]);
   const [files, setFiles] = useState<RemoteFile[]>([]);
   const [event, setEvent] = useState<GetEventDto | null>(null);
-  const { auth } = useContext(AuthContext);
+  const [auth] = useAuth();
 
   useEffect(() => {
     if (!id)

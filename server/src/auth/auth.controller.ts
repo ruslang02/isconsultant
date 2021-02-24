@@ -62,7 +62,7 @@ export class AuthController {
         first_name,
         middle_name,
         last_name,
-        avatar,
+        avatar: avatar || "https://react.semantic-ui.com/images/avatar/small/matt.jpg",
         type: await this.i18n.t(`global.USER_TYPE_${type.toUpperCase()}`, {
           lang: 'ru',
         }),
