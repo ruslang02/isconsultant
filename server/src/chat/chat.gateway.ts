@@ -80,12 +80,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       };
 
       for (const client of this.server.clients as Set<ChatSocket>) {
-        if (client.room === socket.room && client.user.id !== socket.user.id) {
+        if (client.room === socket.room) {
           client.send(JSON.stringify(m));
         }
       }
       
-      return m as Answer<ReceiveChatMessageDto>;
+      return;
     }
   }
 }
