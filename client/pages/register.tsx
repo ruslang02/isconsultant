@@ -1,6 +1,8 @@
+import { CreateUserDto } from "@common/dto/create-user.dto";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { Form, Button, Segment, Message, Icon } from "semantic-ui-react";
+import { api } from "utils/api";
 
 export default () => {
   const [firstName, setFirstName] = useState("");
@@ -8,9 +10,23 @@ export default () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSubmit = () => {};
+  const handleSubmit = async () => {
+    const { data, status } = await api.post<{ message: string}>("/auth/register", {
+      email,
+      first_name: firstName,
+      middle_name: middleName,
+      last_name: lastName,
+      password
+    } as CreateUserDto);
+    if (status < 300) {
+      router.push("/login?from=register");
+    } else {
+      setError(data.message);
+    }
+  };
 
   return (
     <div
@@ -84,6 +100,7 @@ export default () => {
             </div>
           </Form>
         </Segment>
+        { error && <Message attached="bottom" color="red" content={ error } />}
       </div>
     </div>
   );

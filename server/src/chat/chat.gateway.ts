@@ -22,7 +22,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   private logger = new Logger("Chat");
 
-  constructor(private jwt: JwtService, private users: UsersService) {}
+  constructor(private jwt: JwtService, private users: UsersService) { }
 
   async handleConnection(@ConnectedSocket() socket: ChatSocket, req: Request) {
     try {
@@ -84,8 +84,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           client.send(JSON.stringify(m));
         }
       }
+<<<<<<< HEAD
       
       return;
+=======
+
+      return m as Answer<ReceiveChatMessageDto>;
+>>>>>>> 132f47302c512c10d560aaad759bb2006999d132
     }
   }
 }
