@@ -199,7 +199,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
     }
 
     if (!running.current && auth?.access_token) {
-      var janus = new Janus.Client('wss://consultant.infostrategic.com/gateway2', {
+      var janus = new Janus.Client('wss://consultant.infostrategic.com/gateway2?access_token=' + auth.access_token, {
         token: '',
         apisecret: '',
         keepalive: 'true'
