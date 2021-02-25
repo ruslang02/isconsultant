@@ -27,7 +27,7 @@ export function useAuth() {
     if (typeof window === "undefined") {
       return;
     }
-    if (auth === undefined || auth.access_token === getAuth()?.access_token) {
+    if (auth === undefined || auth?.access_token === getAuth()?.access_token) {
       return;
     }
 

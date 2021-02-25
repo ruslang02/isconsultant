@@ -71,22 +71,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       socket.close(1001);
       return;
     } else {
+      const m = {
+        event: 'message',
+        data: {
+          message: payload.message,
+          userId: socket.user.id
+        }
+      };
+
       for (const client of this.server.clients as Set<ChatSocket>) {
-        console.log(client.room, socket.room);
-        if (client.room === socket.room) {
-          socket.send(
-            JSON.stringify(
-              {
-                event: 'message',
-                data: {
-                  message: payload.message,
-                  userId: socket.user.id
-                }
-              } as Answer<ReceiveChatMessageDto>
-            )
-          );
+        if (client.room === socket.room && client.user.id !== socket.user.id) {
+          client.send(JSON.stringify(m));
         }
       }
+
+      return m as Answer<ReceiveChatMessageDto>;
     }
   }
 }

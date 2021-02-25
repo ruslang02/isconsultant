@@ -22,7 +22,7 @@ function MyApp({
   const [allowed, setAllowed] = useState(typeof window === "undefined" || isPublic(router.pathname));
 
   useEffect(() => {
-    if (!auth.access_token && !isPublic(router.pathname)) {
+    if (!auth?.access_token && !isPublic(router.pathname)) {
       if (typeof window !== "undefined") location.replace("/login?redirect=" + location.pathname);
     } else {
       setAllowed(true);
