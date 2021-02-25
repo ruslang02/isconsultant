@@ -84,13 +84,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           client.send(JSON.stringify(m));
         }
       }
-<<<<<<< HEAD
       
       return;
-=======
-
-      return m as Answer<ReceiveChatMessageDto>;
->>>>>>> 132f47302c512c10d560aaad759bb2006999d132
     }
   }
 }
