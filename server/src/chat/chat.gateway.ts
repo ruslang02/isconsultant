@@ -22,7 +22,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   private logger = new Logger("Chat");
 
-  constructor(private jwt: JwtService, private users: UsersService) {}
+  constructor(private jwt: JwtService, private users: UsersService) { }
 
   async handleConnection(@ConnectedSocket() socket: ChatSocket, req: Request) {
     try {
@@ -72,14 +72,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       return;
     } else {
       for (const client of this.server.clients as Set<ChatSocket>) {
+        console.log(client.room, socket.room);
         if (client.room === socket.room) {
-          return {
-            event: 'message',
-            data: {
-              message: payload.message,
-              userId: socket.user.id
-            }
-          } as Answer<ReceiveChatMessageDto>;
+          socket.send(
+            JSON.stringify(
+              {
+                event: 'message',
+                data: {
+                  message: payload.message,
+                  userId: socket.user.id
+                }
+              } as Answer<ReceiveChatMessageDto>
+            )
+          );
         }
       }
     }
