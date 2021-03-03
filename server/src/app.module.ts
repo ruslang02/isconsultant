@@ -1,3 +1,4 @@
+import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ChatModule } from "chat/chat.module";
@@ -25,6 +26,12 @@ import { ApiModule } from './api.module';
     }),
     ApiModule,
     ChatModule,
+    MailerModule.forRoot({
+      transport: 'smtps://isconsultant1331@gmail.com:isconsultant@smtp.gmail.com',
+      defaults: {
+        from: '"nest-modules" <modules@nestjs.com>',
+      }
+    })
   ]
 })
-export class AppModule {}
+export class AppModule { }

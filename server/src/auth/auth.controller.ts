@@ -10,6 +10,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -22,6 +23,7 @@ import { I18nService } from 'nestjs-i18n';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { VerifyService } from './mail.service';
 
 @ApiTags('Авторизация и регистрация пользователей')
 @Controller('/api/auth')
@@ -29,7 +31,9 @@ export class AuthController {
   constructor(
     private auth: AuthService,
     private i18n: I18nService,
-    private users: UsersService
+    private users: UsersService,
+    private verifyMail: VerifyService,
+    private jwt: JwtService
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -87,6 +91,12 @@ export class AuthController {
   async register(@Body() u: CreateUserDto) {
     try {
       await this.users.insertOne({ ...u, type: UserType.CLIENT });
+      // Send email!
+      this.users.findOneByEmail(u.email).then((data: Pick<User, 'id' | 'password' | 'email' | 'verified'>) => {
+        this.auth.generateVerifyToken(data.id, data.password, data.verified).then((token: string) => {
+          this.verifyMail.send(data.email, token)
+        })
+      })
     } catch (e) {
       console.error(e);
       throw new BadRequestException(
@@ -94,4 +104,16 @@ export class AuthController {
       );
     }
   }
+
+  // async verify(@Body() data: {token: string}) {
+  //   try {
+  //     const { id, email } = this.jwt.verify<{ id: number, email: string }>(data.token, { secret:  });
+
+  //   } catch (e) {
+  //     console.error(e);
+  //     throw new BadRequestException(
+  //       'Token for verification is wrong!'
+  //     );
+  //   }
+  // }
 }

@@ -29,4 +29,9 @@ export class AuthService {
     const payload = { id: user.id, type: user.type };
     return this.jwt.sign(payload);
   }
+
+  async generateVerifyToken(id: number, password: string, verified: boolean){
+    const payload = { id: id };
+    return this.jwt.sign(payload, { secret: password + verified });
+  }
 }
