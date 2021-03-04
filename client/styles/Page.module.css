@@ -1,0 +1,9 @@
+.page_container {
+  display: flex !important;
+  margin-top: 1rem;
+}
+
+.page {
+  flex-grow: 1;
+  margin-right: 1rem;
+}

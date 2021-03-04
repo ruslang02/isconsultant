@@ -1,5 +1,11 @@
+import { Header } from "components/Header"
+
 const Empty = () => {
-  return <>under construction</>;
+  return (
+    <section>
+      <Header />
+    </section>
+  )
 };
 
 export default Empty;
