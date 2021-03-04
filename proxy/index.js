@@ -6,7 +6,7 @@ const proxy = redbird({ port: DEBUG ? 9090 : 80, xfwd: false });
 
 proxy.register('localhost', 'http://localhost:' + 3000);
 proxy.register('localhost/api', 'http://localhost:' + 8080 + '/api');
-proxy.register('localhost/admin', 'http://localhost:' + 8080 + '/admin');
+proxy.register('localhost/admin', 'http://localhost:' + 9000 + '/admin');
 proxy.register('localhost/docs', 'http://localhost:' + 8080 + '/docs');
 proxy.register('localhost/chat', 'http://localhost:' + 8081);
 
