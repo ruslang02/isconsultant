@@ -9,13 +9,21 @@ export const SideMenu: React.FC = () => {
     <Menu secondary vertical style={{ margin: 0 }}>
       <Menu.Item
         name='Profile'
-        active={router.pathname === '/profile/@me'}
-      // onClick={this.handleItemClick}
+        active={router.pathname.includes('/profile/@me')}
+        link
+        onClick={() => router.push('/profile/@me')}
       />
       <Menu.Item
         name='Calendar'
-        active={router.pathname === '/calendar'}
-      // onClick={this.handleItemClick}
+        active={router.pathname.includes('/calendar')}
+        link
+        onClick={() => router.push('/calendar')}
+      />
+      <Menu.Item
+        name='Lawyers Directory'
+        active={router.pathname.includes('/lawyers')}
+        link
+        onClick={() => router.push('/lawyers')}
       />
     </Menu>
   )

@@ -48,7 +48,7 @@ export function Header({ promo }: { promo?: boolean }) {
     <header className={styles.Header}>
       <Container>
         <div className={styles.Header_container}>
-          <Image src="/assets/logo.png" height="24" />
+          <a href="/"><Image src="/assets/logo.png" height="24" /></a>
           {promo ? <CallPanel /> : <div style={{ flexGrow: 1 }} />}
           <AccountMenu />
         </div>
