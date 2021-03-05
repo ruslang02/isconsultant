@@ -30,8 +30,8 @@ const {
       password: POSTGRES_PASSWORD,
       database: POSTGRES_DB,
       entities: [CalendarEvent, Comment, File, PendingEvent, Report, User],
-      synchronize: true,
-      dropSchema: true
+      // synchronize: true,
+      // dropSchema: true
     }),
     UsersModule,
     SchedulesModule,
