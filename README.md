@@ -8,9 +8,7 @@
 
 ```bash
 git clone https://git.infostrategic.com/hse/webrtchse1
-npm ci
-npm run build
-npm start
+docker-compose -f docker-compose.json up
 ```
 
 ## Структура проекта

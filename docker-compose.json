@@ -1,18 +1,31 @@
 {
   "version": "3.4",
   "networks": {
-    "db": {}
-  },
-  "volumes": {
+    "main": {},
     "db": {}
   },
   "services": {
+    "proxy": {
+      "image": "nginx",
+      "ports": [
+        "9000:80"
+      ],
+      "volumes": [
+        "./proxy/nginx.conf:/etc/nginx/nginx.conf"
+      ],
+      "networks": [
+        "db",
+        "main"
+      ]
+    },
     "db": {
       "env_file": "./development.env",
       "image": "postgres",
       "networks": {
         "db": {
-          "aliases": ["webrtc-db"]
+          "aliases": [
+            "webrtc-db"
+          ]
         }
       },
       "ports": [
@@ -27,7 +40,8 @@
       },
       "env_file": "./development.env",
       "networks": [
-        "db"
+        "db",
+        "main"
       ],
       "ports": [
         "8080:8080",
@@ -41,10 +55,27 @@
         "context": "."
       },
       "env_file": "./development.env",
+      "networks": [
+        "main"
+      ],
       "ports": [
         "8090:8080"
       ],
       "restart": "always"
+    },
+    "janus":{
+      "image":"canyan/janus-gateway:0.10.7",
+      "command": ["usr/local/bin/janus", "-F", "/usr/local/etc/janus"],
+      "ports":[
+        "8188:8188"
+      ],
+      "volumes":[
+        "./janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg"
+      ],
+      "networks":[
+        "main"
+      ],
+      "restart":"always"
     }
   }
 }
