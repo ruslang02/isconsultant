@@ -6,6 +6,7 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { File } from './file.entity';
 
@@ -25,7 +26,7 @@ export class User {
   })
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   @ApiProperty({
     description: 'Адрес электронной почты пользователя.',
   })

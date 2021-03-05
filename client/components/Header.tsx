@@ -13,18 +13,21 @@ function AccountMenu() {
   const { t } = useTranslation();
   const router = useRouter();
 
-  return auth?.user ? (
-    <div>
-    <Image src={auth.user.avatar} avatar />
-    <span>{auth.user.last_name} {auth.user.first_name[0]}.</span>
-    <Button secondary style={{marginLeft: "15px"}} onClick={() => setAuth(() => ({}))}>Sign out</Button>
+  return typeof window !== "undefined" && auth?.user ? (
+    <div className={styles.account}>
+      <Image src={auth.user.avatar} avatar />
+      <span>{auth.user.last_name} {auth.user.first_name[0]}.</span>
+      <Button icon onClick={() => router.push("/profile/@me")}>
+        <Icon name="user" />
+      </Button>
+      <Button secondary onClick={() => setAuth(() => ({}))}>Sign out</Button>
     </div>
   ) : (
-      <div>
-        <Button primary onClick={() => router.push("/register")}>{t('header.register')}</Button>
-        <Button secondary onClick={() => router.push("/login")}>{t('header.login')}</Button>
-      </div>
-    )
+    <span>
+      <Button onClick={() => router.push("/register")}>{t('header.register')}</Button>
+      <Button secondary onClick={() => router.push("/login")}>{t('header.login')}</Button>
+    </span>
+  )
 }
 
 function CallPanel() {
@@ -40,13 +43,13 @@ function CallPanel() {
   )
 }
 
-export function Header() {
+export function Header({ promo }: { promo?: boolean }) {
   return (
     <header className={styles.Header}>
       <Container>
         <div className={styles.Header_container}>
           <Image src="/assets/logo.png" height="24" />
-          <CallPanel />
+          {promo ? <CallPanel /> : <div style={{ flexGrow: 1 }} />}
           <AccountMenu />
         </div>
       </Container>

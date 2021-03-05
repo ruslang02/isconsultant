@@ -31,6 +31,7 @@ const {
       database: POSTGRES_DB,
       entities: [CalendarEvent, Comment, File, PendingEvent, Report, User],
       synchronize: true,
+      dropSchema: true
     }),
     UsersModule,
     SchedulesModule,
@@ -41,4 +42,4 @@ const {
   controllers: [],
   providers: [],
 })
-export class ApiModule {}
+export class ApiModule { }

@@ -12,12 +12,12 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [ auth, setAuth ] = useAuth();
+  const [auth, setAuth] = useAuth();
   const router = useRouter();
 
   const handleSubmit = async () => {
     try {
-      const { data } = await api.post<LoginUserSuccessDto>(
+      const { data } = await api.post<LoginUserSuccessDto | { message: string }>(
         "/auth/login",
         JSON.stringify({ email, password }),
         {
@@ -27,9 +27,13 @@ const Login: React.FC = () => {
         }
       );
 
-      setError("");
-      setAuth(data);
-      router.replace(redirect || "/");
+      if ("message" in data) {
+        setError(data.message);
+      } else {
+        setError("");
+        setAuth(data);
+        router.replace(redirect || "/profile/@me");
+      }
     } catch (e) {
       setError(e.message);
       console.error(e);
@@ -49,6 +53,7 @@ const Login: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          maxWidth: "400px"
         }}
       >
         <Message

@@ -4,13 +4,20 @@
   background-color: #eee;
   height: 84px;
   z-index: 100;
+
+  display: flex;
+  align-items: center;
 }
 
 .Header_container {
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 0 1rem 1rem;
   justify-content: space-between;
+}
+
+.account > * {
+  margin-left: .5rem !important;
 }
 
 .CallPanel {
