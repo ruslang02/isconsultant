@@ -1,11 +1,40 @@
-import { User } from '@common/models/user.entity';
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { User, UserType } from '@common/models/user.entity';
+import { BadRequestException, Injectable, OnApplicationBootstrap, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from '@common/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 
+const {
+  DEVELOPMENT
+} = process.env;
+
 @Injectable()
-export class AuthService {
+export class AuthService implements OnApplicationBootstrap {
   constructor(private users: UsersService, private jwt: JwtService) { }
+  onApplicationBootstrap() {
+    if (DEVELOPMENT == "true") {
+      let user = new CreateUserDto()
+      user.email = "test@test.com"
+      user.first_name = "test"
+      user.last_name = "test"
+      user.middle_name = "test"
+      user.password = "test"
+
+      console.log("Creating test user...")
+      this.users.findOneByEmail("test@test.com").then((u: User) => {
+        if(!u) {
+          this.users.insertOne({...user, type: UserType.ADMIN, verified: true}).then((insertRes: any) => {
+            console.log(insertRes)
+          })
+        }
+      }).catch((reason: any) => {
+        console.log(reason)
+        this.users.insertOne({...user, type: UserType.ADMIN, verified: true}).then((insertRes: any) => {
+          console.log(insertRes)
+        })
+      })
+    }
+  }
 
   async validateUser(
     email: string,
