@@ -7,7 +7,7 @@ import { Button } from "semantic-ui-react";
 import { useRouter } from "next/router";
 import { useAuth } from "utils/useAuth";
 
-const isPublic = (path: string) => path === "/" || path === "/login" || path === "/register";
+const isPublic = (path: string) => path === "/" || path === "/login" || path === "/register" || path.startsWith("/verify");
 
 function MyApp({
   Component,

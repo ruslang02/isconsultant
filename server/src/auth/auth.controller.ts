@@ -6,6 +6,8 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -92,8 +94,8 @@ export class AuthController {
     try {
       await this.users.insertOne({ ...u, type: UserType.CLIENT });
       // Send email!
-      this.users.findOneByEmail(u.email).then((data: Pick<User, 'id' | 'password' | 'email' | 'verified'>) => {
-        this.auth.generateVerifyToken(data.id, data.password, data.verified).then((token: string) => {
+      this.users.findOneByEmail(u.email).then((data: Pick<User, 'id' | 'email'>) => {
+        this.auth.generateVerifyToken(data).then((token: string) => {
           this.verifyMail.send(data.email, token)
         })
       })
@@ -105,15 +107,23 @@ export class AuthController {
     }
   }
 
-  // async verify(@Body() data: {token: string}) {
-  //   try {
-  //     const { id, email } = this.jwt.verify<{ id: number, email: string }>(data.token, { secret:  });
-
-  //   } catch (e) {
-  //     console.error(e);
-  //     throw new BadRequestException(
-  //       'Token for verification is wrong!'
-  //     );
-  //   }
-  // }
+  @Get('verify/:verifyToken')
+  async verify(@Param('verifyToken') token: string) {
+    try {
+      const { id, email } = this.jwt.verify<{ id: number, email: string }>(token);
+      const user = await this.users.findOne(id)
+      if(user.verified) {
+        throw new BadRequestException("User already verified!")
+      } else if(user.email != email) {
+        throw new BadRequestException("Emails don't match!")
+      } else {
+        await this.users.updateOne(id, { verified: true })
+      }
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException(
+        'Token for verification is wrong!'
+      );
+    }
+  }
 }

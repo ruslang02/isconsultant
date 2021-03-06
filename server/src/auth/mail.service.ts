@@ -12,7 +12,7 @@ export class VerifyService {
         to: userEmail, // list of receivers
         from: 'noreply@nestjs.com', // sender address
         subject: 'ISC Email Verification', // Subject line
-        text: `Verify your email by clicking this link: https://consultant.infostrategic.com/verify?token=${verifyToken}`, // plaintext body
+        text: `Verify your email by clicking this link: https://consultant.infostrategic.com/verify/${verifyToken}`, // plaintext body
       })
       .then(() => {
         console.log("success")

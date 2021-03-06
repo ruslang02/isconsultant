@@ -60,8 +60,8 @@ export class AuthService implements OnApplicationBootstrap {
     return this.jwt.sign(payload);
   }
 
-  async generateVerifyToken(id: number, password: string, verified: boolean) {
-    const payload = { id: id };
-    return this.jwt.sign(payload, { secret: password + verified });
+  async generateVerifyToken(user: Pick<User, 'id' | 'email'>) {
+    const payload = { id: user.id, email: user.email };
+    return this.jwt.sign(payload);
   }
 }
