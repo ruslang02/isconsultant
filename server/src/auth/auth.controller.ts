@@ -129,7 +129,7 @@ export class AuthController {
     }
   }
 
-  @UseGuards(JwtAuthGuard, UserGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('janus')
   async janus() {
   }
