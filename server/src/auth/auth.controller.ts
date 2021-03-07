@@ -21,6 +21,8 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'guards/jwt.guard';
+import { UserGuard } from 'guards/user.guard';
 import { I18nService } from 'nestjs-i18n';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { UsersService } from '../users/users.service';
@@ -125,5 +127,10 @@ export class AuthController {
         'Token for verification is wrong!'
       );
     }
+  }
+
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @Get('janus')
+  async janus() {
   }
 }
