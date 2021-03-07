@@ -132,6 +132,5 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('janus')
   async janus() {
-    return ApiOkResponse
   }
 }
