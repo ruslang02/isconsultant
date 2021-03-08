@@ -11,7 +11,10 @@ const Empty = () => {
     <Page>
       <Segment>
         <Image size="small" src={auth?.user?.avatar} avatar />
-
+        <h3>{auth?.user?.last_name} {auth?.user?.first_name} {auth?.user?.middle_name}</h3>
+        <p>{auth?.user?.type}</p>
+        <p><b>E-mail: </b><i>not set</i></p>
+        <p><b>Phone number: </b><i>not set</i></p>
       </Segment>
     </Page>
   );

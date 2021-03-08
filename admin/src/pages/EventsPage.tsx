@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle, Modal, Snackbar, TextField } from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle, Icon, Modal, Snackbar, TextField } from '@material-ui/core';
 import { ColDef, DataGrid } from '@material-ui/data-grid';
 import { GetEventDto } from '@common/dto/get-event.dto';
 import MomentUtils from '@date-io/moment';
@@ -6,6 +6,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import UserContext from '../utils/UserContext';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
+import { PlusOne } from '@material-ui/icons';
 
 type EventRows = GetEventDto[];
 
@@ -61,10 +62,13 @@ function EventsPage() {
 
   return (
     <div style={{ flexGrow: 1 }}>
+      <div style={{ padding: "1rem" }}>
+        <Button variant="contained" color="primary"/* startIcon={PlusOne}*/>Create a new meeting</Button>
+      </div>
       <DataGrid columns={columns} rows={events} onRowClick={(a) => setCurrentEvent(a.row as GetEventDto)} />
       <Snackbar open={!!error} message={error} onClose={() => setError(null)} autoHideDuration={6000} anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }} />
       <Dialog open={!!currentEvent} onClose={() => setCurrentEvent(undefined)}>
-        <DialogTitle>Information about this event</DialogTitle>
+        <DialogTitle>Information about this meeting</DialogTitle>
         <DialogContent>
           <MuiPickersUtilsProvider utils={MomentUtils} libInstance={moment} locale="en">
             <TextField
@@ -86,7 +90,7 @@ function EventsPage() {
               value={currentEvent?.description}
               fullWidth
             />
-            <DateTimePicker label="Start date" value={new Date(currentEvent?.timespan_start)} onChange={() => { }} />
+            <DateTimePicker label="Start date" value={new Date(currentEvent?.timespan_start)} onChange={() => { }} /><br />
             <DateTimePicker label="End date" value={new Date(currentEvent?.timespan_end)} onChange={() => { }} />
           </MuiPickersUtilsProvider>
         </DialogContent>
