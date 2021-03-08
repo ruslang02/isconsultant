@@ -7,4 +7,5 @@ export class GetUserInfoDto {
   avatar?: string;
   verified: boolean;
   rating: number;
+  created_timestamp: string;
 }

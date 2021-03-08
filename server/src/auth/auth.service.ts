@@ -22,7 +22,7 @@ export class AuthService implements OnApplicationBootstrap {
 
       this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
         console.log(insertRes)
-      })
+      }).catch(() => {});
 
       console.log("Creating test user...")
       try {
@@ -32,16 +32,8 @@ export class AuthService implements OnApplicationBootstrap {
               console.log(insertRes)
             })
           }
-        }).catch((reason: any) => {
-          console.log(reason)
-          this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
-            console.log(insertRes)
-          })
-        })
+        }).catch(() => {});
       } catch {
-        this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
-          console.log(insertRes)
-        })
       }
     }
   }

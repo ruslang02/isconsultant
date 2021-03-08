@@ -28,6 +28,10 @@ export class PendingEvent {
   @JoinColumn({ name: 'from_id' })
   from: User;
 
+  @OneToOne(() => User)
+  @JoinColumn({ name: 'lawyer_id' })
+  lawyer: User;
+
   @ManyToMany(() => User)
   @JoinTable({
     joinColumn: {

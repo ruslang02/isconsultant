@@ -31,6 +31,9 @@ const Login: React.FC = () => {
         setError(data.message);
       } else {
         setError("");
+        if (!data.user.avatar) {
+          data.user.avatar = "https://react.semantic-ui.com/images/avatar/large/matt.jpg";
+        }
         setAuth(data);
         router.replace(redirect || "/profile/@me");
       }

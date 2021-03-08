@@ -6,6 +6,13 @@
     "url": "https://git.infostrategic.com/hse/webrtchse1",
     "type": "git"
   },
+  "scripts": {
+    "start:server": "node dist/main",
+    "watch": "concurrently --kill-others \"npm run watch:server\" \"npm run watch:admin\" \"npm run watch:client\"",
+    "watch:server": "cd server/; npm run watch",
+    "watch:client": "cd client/; npm run dev -- -p 3002",
+    "watch:admin": "cd admin/; npm run start"
+  },
   "main": "dist/main.js",
   "keywords": [],
   "author": "",

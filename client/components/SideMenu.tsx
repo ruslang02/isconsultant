@@ -14,7 +14,7 @@ export const SideMenu: React.FC = () => {
         onClick={() => router.push('/profile/@me')}
       />
       <Menu.Item
-        name='Calendar'
+        name='Meetings'
         active={router.pathname.includes('/calendar')}
         link
         onClick={() => router.push('/calendar')}

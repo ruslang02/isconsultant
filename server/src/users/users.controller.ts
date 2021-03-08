@@ -59,7 +59,7 @@ export class UsersController {
       `global.USER_TYPE_${user.type.toUpperCase()}` as LocalizedStringID
     );
     if (!hydratedUser.avatar) {
-      hydratedUser.avatar = "https://react.semantic-ui.com/images/avatar/small/matt.jpg"
+      hydratedUser.avatar = "https://react.semantic-ui.com/images/avatar/large/matt.jpg"
     }
     return hydratedUser;
   }
@@ -87,25 +87,10 @@ export class UsersController {
   })
   async getUserInfo(@Param('uid') userId: string): Promise<GetUserInfoDto> {
     try {
-      const {
-        id,
-        first_name,
-        middle_name,
-        last_name,
-        type,
-        avatar,
-        verified,
-        rating,
-      } = await this.users.findOne(userId);
+      const { password, ...user } = await this.users.findOne(userId);
       return {
-        id,
-        first_name,
-        middle_name,
-        last_name,
-        type,
-        avatar,
-        verified,
-        rating,
+        ...user,
+        created_timestamp: user.created_timestamp?.toISOString()
       };
     } catch (e) {
       throw new NotFoundException('The user does not exist.');
@@ -148,8 +133,11 @@ export class UsersController {
 
     try {
       await this.users.updateOne(userId, data);
-
-      return this.users.findOne(userId);
+      const user = await this.users.findOne(userId);
+      return {
+        ...user,
+        created_timestamp: user.created_timestamp?.toISOString()
+      }
     } catch (e) {
       throw new NotFoundException('The user does not exist.');
     }

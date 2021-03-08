@@ -2,7 +2,7 @@
 
 Возможен запуск в виде Docker-образа.
 
-Бекенд-часть на базе Nest.js располагается в папке `/server`, панель администратора на базе [React.js](https://reactjs.org) - в `/admin`, клиентская часть на базе [Next.js](https://nextjs.org) - в `/views`. Используемая БД: PostgreSQL.
+Бекенд-часть на базе Nest.js располагается в папке `/server`, панель администратора на базе [React.js](https://reactjs.org) - в `/admin`, клиентская часть на базе [Next.js](https://nextjs.org) - в `/client`. Используемая БД: PostgreSQL.
 
 Быстрый запуск:
 

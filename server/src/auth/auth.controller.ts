@@ -61,20 +61,12 @@ export class AuthController {
   ): Promise<LoginUserSuccessDto> {
     const access_token = await this.auth.login(user);
 
-    const { id, type, first_name, middle_name, last_name, avatar } = user;
-
     return {
       access_token,
       user: {
-        id,
-        first_name,
-        middle_name,
-        last_name,
-        avatar: avatar || "https://react.semantic-ui.com/images/avatar/small/matt.jpg",
-        type: await this.i18n.t(`global.USER_TYPE_${type.toUpperCase()}`, {
-          lang: 'ru',
-        }),
-      },
+        ...user,
+        created_timestamp: user.created_timestamp?.toISOString()
+      }
     };
   }
 

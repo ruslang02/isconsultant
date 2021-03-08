@@ -3,4 +3,5 @@ export class ArrangeEventDto {
   timespan_end: string;
   description: string;
   additional_ids: string[];
+  lawyer_id?: string;
 }

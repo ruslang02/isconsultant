@@ -1,7 +1,7 @@
 import { Header } from "components/Header";
 import { Page } from "components/Page";
 import React from "react";
-import { Container, Image, Segment } from "semantic-ui-react";
+import { Container, Icon, Image, Segment } from "semantic-ui-react";
 import styles from "styles/Page.module.css";
 import { useAuth } from "utils/useAuth";
 
@@ -10,11 +10,41 @@ const Empty = () => {
   return (
     <Page>
       <Segment>
-        <Image size="small" src={auth?.user?.avatar} avatar />
-        <h3>{auth?.user?.last_name} {auth?.user?.first_name} {auth?.user?.middle_name}</h3>
-        <p>{auth?.user?.type}</p>
-        <p><b>E-mail: </b><i>not set</i></p>
-        <p><b>Phone number: </b><i>not set</i></p>
+        <div style={{ float: "left", margin: "0 2rem 0 0", textAlign: "center" }}>
+          <Image size="small" src={auth?.user?.avatar} avatar />
+          <br />
+          <br />
+          <div><a href="#"><Icon name="edit" /> Change avatar</a></div>
+        </div>
+        <div>
+          <h2>
+            {auth?.user?.last_name}
+            {" "}
+            {auth?.user?.first_name}
+            {" "}
+            {auth?.user?.middle_name}
+          </h2>
+          <p>{auth?.user?.type}</p>
+          <p>
+            <b>E-mail: </b>
+            {auth?.user?.email || <i>not set</i>}
+          </p>
+          <p>
+            <b>Phone number: </b>
+            {auth?.user?.phone || <i>not set</i>}
+          </p>
+          <p>
+            <b>Rating: </b>
+            {auth?.user?.rating || <i>not set</i>}
+          </p>
+          <p>
+            <b>Created at: </b>
+            {auth?.user?.created_timestamp ? new Date(auth.user.created_timestamp).toLocaleDateString() : <i>not set</i>}
+          </p>
+        </div>
+        <div style={{textAlign: "right", margin: "1rem"}}>
+        <a href="#" style={{color: "red"}}><Icon name="envelope" /> Send feedback</a>
+        </div>
       </Segment>
     </Page>
   );
