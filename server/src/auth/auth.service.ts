@@ -20,19 +20,29 @@ export class AuthService implements OnApplicationBootstrap {
       user.middle_name = "test"
       user.password = "test"
 
+      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+        console.log(insertRes)
+      })
+
       console.log("Creating test user...")
-      this.users.findOneByEmail("test@test.com").then((u: User) => {
-        if(!u) {
-          this.users.insertOne({...user, type: UserType.ADMIN, verified: true}).then((insertRes: any) => {
+      try {
+        this.users.findOneByEmail("test@test.com").then((u: User) => {
+          if (!u) {
+            this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+              console.log(insertRes)
+            })
+          }
+        }).catch((reason: any) => {
+          console.log(reason)
+          this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
             console.log(insertRes)
           })
-        }
-      }).catch((reason: any) => {
-        console.log(reason)
-        this.users.insertOne({...user, type: UserType.ADMIN, verified: true}).then((insertRes: any) => {
+        })
+      } catch {
+        this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
           console.log(insertRes)
         })
-      })
+      }
     }
   }
 
@@ -60,8 +70,8 @@ export class AuthService implements OnApplicationBootstrap {
     return this.jwt.sign(payload);
   }
 
-  async generateVerifyToken(id: number, password: string, verified: boolean) {
-    const payload = { id: id };
-    return this.jwt.sign(payload, { secret: password + verified });
+  async generateVerifyToken(user: Pick<User, 'id' | 'email'>) {
+    const payload = { id: user.id, email: user.email };
+    return this.jwt.sign(payload);
   }
 }

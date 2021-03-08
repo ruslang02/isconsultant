@@ -8,12 +8,14 @@ import {
   Grid,
   Header as SHeader,
   Image,
+  Message,
   Modal,
   Segment,
   TextArea,
 } from "semantic-ui-react";
 import { Header } from "../components/Header";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/router";
 
 function Promo() {
   const { t } = useTranslation();
@@ -64,7 +66,7 @@ function EventArrange() {
   const [password, setPassword] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => { };
 
   return (
     <>
@@ -225,6 +227,9 @@ function Lawyers() {
 }
 
 export default function Home() {
+  const router = useRouter()
+  const { verify } = router.query
+
   return (
     <section>
       <Header />
@@ -232,6 +237,21 @@ export default function Home() {
       <Promo />
       <PromoAdvantages />
       <Lawyers />
+      <div style={{
+        position:"fixed",
+        bottom: "5%",
+        left: "5%"
+
+      }}>
+        {!verify ?
+          <></>
+          :
+          (verify == "success" ?
+            <Message positive>Sucessfuly verified your email.</Message>
+            :
+            <Message negative>There was an error verifying your email.</Message>)
+        }
+      </div>
     </section>
   );
 }
