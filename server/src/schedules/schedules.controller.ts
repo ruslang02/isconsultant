@@ -37,7 +37,7 @@ import { ExtendedRequest } from "utils/ExtendedRequest";
 import { SchedulesService } from "./schedules.service";
 import { myStorage } from "./storage.multer";
 import { StorageService } from "./storage.service";
-import { CalendarEvent } from "/home/ruzik/Projects/isc/common/models/calendar-event.entity";
+import { CalendarEvent } from "@common/models/calendar-event.entity";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
