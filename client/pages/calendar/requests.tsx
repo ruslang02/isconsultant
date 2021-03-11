@@ -13,11 +13,7 @@ const RequestsPage = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get<GetPendingEventDto[]>("/events/requests", {
-        headers: {
-          Authorization: `Bearer ${auth?.access_token}`,
-        },
-      });
+      const { data } = await api.get<GetPendingEventDto[]>("/events/requests");
       setRequests(data);
     })();
   }, []);
@@ -27,59 +23,51 @@ const RequestsPage = () => {
       <h2>Pending advice requests</h2>
       {requests.length
         ? requests.map((r) => (
-            <Comment.Group>
-              <Comment>
-                <Comment.Avatar as="a" src={r.from.avatar} />
-                <Comment.Content>
-                  <Comment.Author as="a">
-                    {r.from.first_name} {r.from.last_name}
-                  </Comment.Author>
-                  <Comment.Metadata>
-                    <div>
-                      Starting at {new Date(r.timespan_start).toLocaleString()}{" "}
+          <Comment.Group>
+            <Comment>
+              <Comment.Avatar as="a" src={r.from.avatar} />
+              <Comment.Content>
+                <Comment.Author as="a">
+                  {r.from.first_name} {r.from.last_name}
+                </Comment.Author>
+                <Comment.Metadata>
+                  <div>
+                    Starting at {new Date(r.timespan_start).toLocaleString()}{" "}
                       until {new Date(r.timespan_end).toLocaleString()}
-                    </div>
-                  </Comment.Metadata>
-                  <Comment.Text>{r.description}</Comment.Text>
-                  <Form reply>
-                    <Button
-                      content="Accept"
-                      labelPosition="left"
-                      icon="checkmark"
-                      color="green"
-                      onClick={() => {
-                        api
-                          .post("/events/request/accept", { id: r.id }, {
-                            headers: {
-                              Authorization: `Bearer ${auth?.access_token}`,
-                            },
-                          })
-                          .then(() => {
-                            setRequests((v) => v.filter((_) => _.id != r.id));
-                          });
-                      }}
-                    />
-                    <Button
-                      secondary
-                      content="Decline"
-                      onClick={() => {
-                        api
-                          .post("/events/request/decline", { id: r.id }, {
-                            headers: {
-                              Authorization: `Bearer ${auth?.access_token}`,
-                            },
-                          })
-                          .then(() => {
-                            setRequests((v) => v.filter((_) => _.id != r.id));
-                          });
-                      }}
-                    />
-                  </Form>
-                </Comment.Content>
-              </Comment>
-            </Comment.Group>
-          ))
-        : <div style={{ color: "grey", textAlign: "center", margin: "1rem"}}>No items found.</div>}
+                  </div>
+                </Comment.Metadata>
+                <Comment.Text>{r.description}</Comment.Text>
+                <Form reply>
+                  <Button
+                    content="Accept"
+                    labelPosition="left"
+                    icon="checkmark"
+                    color="green"
+                    onClick={() => {
+                      api
+                        .post("/events/request/accept", { id: r.id })
+                        .then(() => {
+                          setRequests((v) => v.filter((_) => _.id != r.id));
+                        });
+                    }}
+                  />
+                  <Button
+                    secondary
+                    content="Decline"
+                    onClick={() => {
+                      api
+                        .post("/events/request/decline", { id: r.id })
+                        .then(() => {
+                          setRequests((v) => v.filter((_) => _.id != r.id));
+                        });
+                    }}
+                  />
+                </Form>
+              </Comment.Content>
+            </Comment>
+          </Comment.Group>
+        ))
+        : <div style={{ color: "grey", textAlign: "center", margin: "1rem" }}>No items found.</div>}
     </Page>
   );
 };

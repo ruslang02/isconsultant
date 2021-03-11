@@ -42,6 +42,7 @@ import { GetUserContactsDto } from '@common/dto/get-user-contacts.dto';
 import { PatchUserDto } from '@common/dto/patch-user.dto';
 import { GetUserDto } from '@common/dto/get-user.dto';
 import { PatchUserVerifiedDto } from '@common/dto/patch-user-verified.dto';
+import { UserAdapter } from './user.adapter';
 
 @ApiTags('Управление пользователями')
 @Controller('/api/users')
@@ -49,20 +50,9 @@ export class UsersController {
   constructor(
     private comments: CommentsService,
     private reports: ReportsService,
-    private users: UsersService
-  ) {}
-
-  async hydrateUser(user: User, i18n: I18nContext) {
-    const hydratedUser = { ...user };
-    delete hydratedUser.password;
-    hydratedUser.type_localized = await i18n.t(
-      `global.USER_TYPE_${user.type.toUpperCase()}` as LocalizedStringID
-    );
-    if (!hydratedUser.avatar) {
-      hydratedUser.avatar = "https://react.semantic-ui.com/images/avatar/large/matt.jpg"
-    }
-    return hydratedUser;
-  }
+    private users: UsersService,
+    private adapter: UserAdapter
+  ) { }
 
   @Types(UserType.ADMIN, UserType.MODERATOR)
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -70,9 +60,9 @@ export class UsersController {
   @ApiOperation({
     description: 'Получение всех зарегистрированных пользователей.',
   })
-  async listUsers(@I18n() i18n: I18nContext): Promise<User[]> {
+  async listUsers(@I18n() i18n: I18nContext): Promise<GetUserDto[]> {
     const users = await this.users.findMany();
-    const hydrated = users.map((user) => this.hydrateUser(user, i18n));
+    const hydrated = users.map((user) => this.adapter.transform(user, i18n));
     return Promise.all(hydrated);
   }
 
@@ -85,13 +75,10 @@ export class UsersController {
   @ApiOperation({
     description: 'Получение информации о пользователе.',
   })
-  async getUserInfo(@Param('uid') userId: string): Promise<GetUserInfoDto> {
+  async getUserInfo(@Param('uid') userId: string, @I18n() i18n: I18nContext): Promise<GetUserInfoDto> {
     try {
-      const { password, ...user } = await this.users.findOne(userId);
-      return {
-        ...user,
-        created_timestamp: user.created_timestamp?.toISOString()
-      };
+      const user = await this.users.findOne(userId);
+      return this.adapter.transform(user, i18n);
     } catch (e) {
       throw new NotFoundException('The user does not exist.');
     }
@@ -121,7 +108,8 @@ export class UsersController {
   })
   async updateUserInfo(
     @Param('uid') userId: string,
-    @Body() data: PatchUserDto
+    @Body() data: PatchUserDto,
+    @I18n() i18n: I18nContext
   ): Promise<GetUserDto> {
     /*
     if (data.password) {
@@ -134,10 +122,7 @@ export class UsersController {
     try {
       await this.users.updateOne(userId, data);
       const user = await this.users.findOne(userId);
-      return {
-        ...user,
-        created_timestamp: user.created_timestamp?.toISOString()
-      }
+      return this.adapter.transform(user, i18n);
     } catch (e) {
       throw new NotFoundException('The user does not exist.');
     }

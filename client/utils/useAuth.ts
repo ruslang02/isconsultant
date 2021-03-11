@@ -13,7 +13,7 @@ class AuthEventTarget extends EventEmitter {
 
 const target = new AuthEventTarget();
 
-const getAuth = () => {
+export const getAuth = () => {
   try {
     return JSON.parse(localStorage.getItem("auth") || "{}") as AuthInfo;
   } catch (e) {

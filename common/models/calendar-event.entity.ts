@@ -9,6 +9,7 @@ import {
   ManyToMany,
   JoinTable,
   CreateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { File } from './file.entity';
 import { User } from './user.entity';
@@ -54,14 +55,14 @@ export class CalendarEvent {
   })
   end_timestamp: Date;
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User, user => user.ownedEvents)
   @JoinColumn({ name: 'owner_id' })
   @ApiProperty({
     description: 'Пользователь, управляющий этим событием.',
   })
   owner: User;
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, user => user.events)
   @JoinTable({
     joinColumn: {
       name: 'event_id',
@@ -100,6 +101,11 @@ export class CalendarEvent {
     description: "Пароль для доступа к комнате в Janus (заполняется только если roomAccess = PASSWORD)."
   })
   roomPassword?: string;
+
+  @ApiProperty({
+    description: "Секретный код для доступа к комнате."
+  })
+  roomSecret?: string
 
   @ApiProperty({
     default: RoomAccess.NO_PASSWORD,

@@ -4,6 +4,7 @@ import { GetPendingEventDto } from "@common/dto/get-pending-event.dto";
 import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { UserType } from "@common/models/user.entity";
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -37,15 +38,22 @@ import { ExtendedRequest } from "utils/ExtendedRequest";
 import { SchedulesService } from "./schedules.service";
 import { myStorage } from "./storage.multer";
 import { StorageService } from "./storage.service";
-import { CalendarEvent } from "/home/ruzik/Projects/isc/common/models/calendar-event.entity";
+import { CalendarEvent } from "@common/models/calendar-event.entity";
+import { UsersService } from "users/users.service";
+import { EventAdapter } from "./event.adapter";
+import { I18n, I18nContext } from "nestjs-i18n";
+import { PendingEventAdapter } from "./pending-event.adapter";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
 export class SchedulesController {
   constructor(
     private schedules: SchedulesService,
-    private storage: StorageService
-  ) {}
+    private storage: StorageService,
+    private users: UsersService,
+    private adapter: EventAdapter,
+    private pAdapter: PendingEventAdapter
+  ) { }
 
   @Types(UserType.ADMIN, UserType.MODERATOR, UserType.LAWYER)
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -57,19 +65,10 @@ export class SchedulesController {
   })
   async getPendingEvents(
     @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
   ): Promise<GetPendingEventDto[]> {
     const events = await this.schedules.findPendingEvents(user.id.toString());
-    return events.map((e) => ({
-      id: e.id.toString(),
-      from: {
-        ...e.from,
-        created_timestamp: undefined
-      },
-      description: e.description,
-      participants: e.participants?.map(p => p.id.toString()),
-      timespan_start: e.start_timestamp.toISOString(),
-      timespan_end: e.start_timestamp.toISOString(),
-    }))
+    return Promise.all(events.map(this.pAdapter.transform(i18n)))
   }
 
   @Types(UserType.ADMIN, UserType.MODERATOR)
@@ -83,31 +82,18 @@ export class SchedulesController {
     description: "Получение событий (встреч).",
   })
   async getAllEvents(
-    @Request() { user }: ExtendedRequest
+    @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
   ) {
     try {
       const events = await this.schedules.findAllEvents();
-      return events?.map(this.eventModelToDto);
+      return Promise.all(events.map(this.adapter.transform(true, i18n)));
     } catch (e) {
       console.log(e);
       throw new NotFoundException();
     }
   }
 
-  private eventModelToDto(event: CalendarEvent): GetEventDto {
-    return {
-      id: event.id.toString(),
-      description: event.description,
-      owner: event.description,
-      participants: (event.participants ?? []).map((p) => p.id.toString()),
-      room_access: event.roomAccess,
-      room_id: event.roomId,
-      timespan_end: event.end_timestamp.toISOString(),
-      timespan_start: event.start_timestamp.toISOString(),
-      title: event.title,
-      room_password: event.roomPassword,
-    };
-  }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -122,15 +108,33 @@ export class SchedulesController {
     });
   }
 
+  @Types(UserType.ADMIN, UserType.MODERATOR, UserType.LAWYER)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("/")
   async getEvents(
-    @Request() { user }: ExtendedRequest
+    @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
   ) {
     try {
       const events = await this.schedules.findManyByLawyer(user.id.toString());
-      return events.map(this.eventModelToDto);
+      return Promise.all(events.map(this.adapter.transform(true, i18n)));
+    } catch (e) {
+      console.log(e);
+      throw new NotFoundException();
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Get("/@me")
+  async getMyEvents(
+    @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
+  ) {
+    try {
+      const events = await this.users.findEvents(user.id.toString());
+      return Promise.all(events.map(this.adapter.transform(false, i18n)));
     } catch (e) {
       console.log(e);
       throw new NotFoundException();
@@ -140,11 +144,15 @@ export class SchedulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("/:eid")
-  async getEvent(@Param("eid") eid: string): Promise<GetEventDto> {
+  async getEvent(
+    @Param("eid") eid: string,
+    @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
+  ): Promise<GetEventDto> {
     try {
       const event = await this.schedules.findEvent(eid);
       console.log(event);
-      return this.eventModelToDto(event);
+      return this.adapter.transform(user.type !== UserType.CLIENT, i18n)(event);
     } catch (e) {
       console.log(e);
       throw new NotFoundException();
@@ -232,14 +240,18 @@ export class SchedulesController {
     description:
       "Создание заявку на создание события в календаре текущего пользователя.",
   })
-  requestEvent(
+  async requestEvent(
     @Request() { user }: ExtendedRequest,
     @Body() data: ArrangeEventDto
   ) {
-    this.schedules.createPendingEvent({
-      ...data,
-      user_id: user.id.toString(),
-    });
+    try {
+      await this.schedules.createPendingEvent({
+        ...data,
+        user_id: user.id.toString(),
+      });
+    } catch (e) {
+      throw new BadRequestException("You have already sent a meeting request. Please wait for it to be either declined or accepted and try again later.");
+    }
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -253,7 +265,7 @@ export class SchedulesController {
     @Request() { user }: ExtendedRequest,
     @Body() data: { id: string }
   ) {
-    this.schedules.transferEvent(data.id);
+    this.schedules.transferEvent(data.id, user.id.toString());
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)

@@ -4,7 +4,10 @@ import { PendingEvent } from '@common/models/pending-event.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatModule } from 'chat/chat.module';
+import { UserAdapter } from 'users/user.adapter';
 import { UsersModule } from '../users/users.module';
+import { EventAdapter } from './event.adapter';
+import { PendingEventAdapter } from './pending-event.adapter';
 import { SchedulesController } from './schedules.controller';
 import { SchedulesService } from './schedules.service';
 import { SnowflakeService } from './snowflake.service';
@@ -16,7 +19,7 @@ import { StorageService } from './storage.service';
     UsersModule,
     ChatModule
   ],
-  providers: [SchedulesService, SnowflakeService, StorageService],
+  providers: [EventAdapter, PendingEventAdapter, SchedulesService, SnowflakeService, StorageService, UserAdapter],
   controllers: [SchedulesController],
 })
-export class SchedulesModule {}
+export class SchedulesModule { }

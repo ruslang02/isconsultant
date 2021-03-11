@@ -15,7 +15,10 @@ import {
 } from "semantic-ui-react";
 import { Header } from "../components/Header";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "next/router";
+import router, { useRouter } from "next/router";
+import { useAuth } from "utils/useAuth";
+import { api } from "utils/api";
+import { ArrangeEventDto } from "@common/dto/arrange-event.dto";
 
 function Promo() {
   const { t } = useTranslation();
@@ -65,6 +68,7 @@ function EventArrange() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [description, setDescription] = useState("");
+  const [auth] = useAuth();
 
   const handleSubmit = () => { };
 
@@ -76,7 +80,28 @@ function EventArrange() {
         value={description}
       ></TextArea>
       <div style={{ textAlign: "right", marginTop: "1rem" }}>
-        <Button primary onClick={() => setOpen(true)}>
+        <Button primary onClick={() => {
+          if (auth) {
+            const timespan_end = new Date();
+            timespan_end.setDate(timespan_end.getDate() + 1);
+            timespan_end.setHours(0, 0, 0);
+            (async () => {
+              try {
+                await api.post("/events/request", {
+                  description,
+                  additional_ids: [auth.user.id],
+                  timespan_start: new Date().toISOString(),
+                  timespan_end: timespan_end.toISOString(),
+                } as ArrangeEventDto);
+                router.push("/meetings");
+              } catch (e) {
+
+              }
+            })()
+            return;
+          }
+          setOpen(true);
+        }}>
           {t("pages.index.arrange_event")}
         </Button>
       </div>
@@ -238,7 +263,7 @@ export default function Home() {
       <PromoAdvantages />
       <Lawyers />
       <div style={{
-        position:"fixed",
+        position: "fixed",
         bottom: "5%",
         left: "5%"
 

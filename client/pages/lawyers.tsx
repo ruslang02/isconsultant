@@ -11,11 +11,7 @@ const LawyersPage = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get<GetUserInfoDto[]>("/users", {
-        headers: {
-          Authorization: "Bearer " + auth.access_token,
-        },
-      });
+      const { data } = await api.get<GetUserInfoDto[]>("/users");
 
       setLawyers(data);
     })();
@@ -31,21 +27,21 @@ const LawyersPage = () => {
         </small>
       </h2>
       <Item.Group>
-        { lawyers?.map(u => (
-        <Item>
-          <Item.Image
-            size="tiny"
-            src={u.avatar}
-          />
-          <Item.Content>
-            <Item.Header as="a">{u.first_name} {u.last_name}</Item.Header>
-            <Item.Description>
-              {u.middle_name}
-            </Item.Description>
-            <Item.Extra>More Details</Item.Extra>
-            <Button floated="right" content="Request a meeting" primary />
-          </Item.Content>
-        </Item>
+        {lawyers?.map(u => (
+          <Item>
+            <Item.Image
+              size="tiny"
+              src={u.avatar}
+            />
+            <Item.Content>
+              <Item.Header as="a">{u.first_name} {u.last_name}</Item.Header>
+              <Item.Description>
+                {u.middle_name}
+              </Item.Description>
+              <Item.Extra>More Details</Item.Extra>
+              <Button floated="right" content="Request a meeting" primary />
+            </Item.Content>
+          </Item>
         ))}
       </Item.Group>
       <Pagination

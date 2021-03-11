@@ -23,7 +23,9 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'guards/jwt.guard';
 import { UserGuard } from 'guards/user.guard';
-import { I18nService } from 'nestjs-i18n';
+import { I18n, I18nContext, I18nService } from 'nestjs-i18n';
+import { UserAdapter } from 'users/user.adapter';
+import { ExtendedRequest } from 'utils/ExtendedRequest';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -37,8 +39,9 @@ export class AuthController {
     private i18n: I18nService,
     private users: UsersService,
     private verifyMail: VerifyService,
-    private jwt: JwtService
-  ) {}
+    private jwt: JwtService,
+    private adapter: UserAdapter
+  ) { }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -57,16 +60,14 @@ export class AuthController {
     type: LoginUserDto,
   })
   async login(
-    @Request() { user }: { user: Omit<User, 'password'> }
+    @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
   ): Promise<LoginUserSuccessDto> {
     const access_token = await this.auth.login(user);
 
     return {
       access_token,
-      user: {
-        ...user,
-        created_timestamp: user.created_timestamp?.toISOString()
-      }
+      user: await this.adapter.transform(user, i18n)
     };
   }
 
@@ -106,9 +107,9 @@ export class AuthController {
     try {
       const { id, email } = this.jwt.verify<{ id: number, email: string }>(token);
       const user = await this.users.findOne(id)
-      if(user.verified) {
+      if (user.verified) {
         throw new BadRequestException("User already verified!")
-      } else if(user.email != email) {
+      } else if (user.email != email) {
         throw new BadRequestException("Emails don't match!")
       } else {
         await this.users.updateOne(id, { verified: true })

@@ -1,49 +1,22 @@
 import { GetEventDto } from "@common/dto/get-event.dto";
-import { Header } from "components/Header";
+import { EventModal } from "components/EventModal";
 import { Page } from "components/Page";
 import moment from "moment";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import {
-  Calendar,
-  CalendarProps,
-  Event,
-  momentLocalizer,
+  Calendar, Event,
+  momentLocalizer
 } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import {
-  Button,
-  Card,
-  Header as SHeader,
-  Icon,
-  Modal,
+  Button, Header as SHeader,
+  Icon
 } from "semantic-ui-react";
 import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
 
 const localizer = momentLocalizer(moment);
-
-function EventEditModal({ open, onClose, event, onSubmit }) {
-  const [temp, setTemp] = useState(event);
-  return (
-    <Modal onClose={() => onClose()} open={open}>
-      <Modal.Header>Update meeting info</Modal.Header>
-      <Modal.Content></Modal.Content>
-      <Modal.Actions>
-        <Button color="black" onClick={() => onClose()}>
-          Cancel
-        </Button>
-        <Button
-          content="Update"
-          labelPosition="right"
-          icon="edit"
-          onClick={() => onSubmit(temp)}
-          positive
-        />
-      </Modal.Actions>
-    </Modal>
-  );
-}
 
 const CalendarPage = () => {
   const [auth] = useAuth();
@@ -54,11 +27,7 @@ const CalendarPage = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get<GetEventDto[]>("/events", {
-        headers: {
-          Authorization: `Bearer ${auth?.access_token}`,
-        },
-      });
+      const { data } = await api.get<GetEventDto[]>("/events");
 
       setEvents(
         data.map((_) => ({
@@ -122,16 +91,12 @@ const CalendarPage = () => {
         }}
         style={{ height: 500 }}
       />
-      <EventEditModal
+      <EventModal
         onClose={() => setOpen(false)}
         open={open}
         event={event}
         onSubmit={async (e: GetEventDto) => {
-          await api.patch("/events/" + e.id, e, {
-            headers: {
-              Authorization: `Bearer ${auth?.access_token}`,
-            },
-          });
+          await api.patch("/events/" + e.id, e);
         }}
       />
     </Page>

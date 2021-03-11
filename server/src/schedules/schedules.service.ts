@@ -1,14 +1,12 @@
-import { PatchEventDto } from "@common/dto/patch-event.dto";
-import { User } from "@common/models/user.entity";
 import { ArrangeEventDto } from "@common/dto/arrange-event.dto";
 import { CreateEventDto } from "@common/dto/create-event.dto";
-import { GetEventDto } from "@common/dto/get-event.dto";
+import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { CalendarEvent, RoomAccess } from "@common/models/calendar-event.entity";
 import { PendingEvent } from "@common/models/pending-event.entity";
+import { User } from "@common/models/user.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
-import { UsersService } from "../users/users.service";
 
 const genChar = () => String.fromCharCode(Math.round(Math.random() * (122 - 48) + 48));
 
@@ -20,20 +18,14 @@ export class SchedulesService {
     @InjectRepository(CalendarEvent)
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
-    private pEvents: Repository<PendingEvent>,
-    private users: UsersService
-  ) {}
+    private pEvents: Repository<PendingEvent>
+  ) { }
 
-  async findManyByAuthor(uid: string) {
-    return this.events
-      .createQueryBuilder("event")
-      .where("event.author_id = :uid", { uid })
-      .getMany();
-  }
 
   async findManyByLawyer(uid: string) {
     return this.events
       .createQueryBuilder("event")
+      .leftJoinAndSelect("event.owner", "user")
       .where("event.owner_id = :uid", { uid })
       .getMany();
   }
@@ -51,22 +43,28 @@ export class SchedulesService {
       .createQueryBuilder("event")
       .leftJoinAndSelect("event.from", "user")
       .where("event.lawyer_id = :uid", { uid })
+      .orWhere("event.lawyer_id IS NULL")
       .getMany();
   }
 
-  async transferEvent(eid: string) {
-    const pending = await this.pEvents.findOne(eid, { relations: ["from"] });
+  async transferEvent(eid: string, lid: string) {
+    const pending = await this.pEvents.findOne(eid, { relations: ["from", "participants"] });
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
     event.id = +pending.id;
     event.title = `Meeting with ${pending.from.first_name} ${pending.from.last_name}`;
     event.description = pending.description;
     event.start_timestamp = pending.start_timestamp;
     event.end_timestamp = pending.end_timestamp;
-    event.owner = { id: pending.lawyer.id };
+    event.owner = { id: +lid };
     event.roomAccess = RoomAccess.ONLY_PARTICIPANTS;
     event.roomId = genRoomId();
     event.roomPassword = "";
-    for (let i = 0; i < 6; i++) event.roomPassword += genChar();
+    event.roomSecret = "";
+    for (let i = 0; i < 6; i++) {
+      event.roomPassword += genChar();
+      event.roomSecret += genChar();
+    }
+    event.participants = pending.participants;
 
     await this.events.save(event);
     return this.pEvents.delete(eid);
@@ -128,10 +126,7 @@ export class SchedulesService {
     event.end_timestamp = new Date(data.timespan_end);
     event.from = { id: Number(data.user_id) };
     event.lawyer = data.lawyer_id ? { id: Number(data.lawyer_id) } : undefined;
-
-    const promises = data.additional_ids.map((id) => this.users.findOne(id));
-
-    event.participants = await Promise.all(promises);
+    event.participants = data.additional_ids.map((id) => ({ id: +id }));
 
     return this.pEvents.save(event);
   }

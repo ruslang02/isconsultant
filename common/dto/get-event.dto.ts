@@ -1,3 +1,5 @@
+import { GetUserDto } from "./get-user.dto";
+
 export class GetEventDto {
   id: string;
   title: string;
@@ -5,8 +7,9 @@ export class GetEventDto {
   timespan_start: string;
   timespan_end: string;
   participants: string[];
-  owner: string;
+  owner: GetUserDto;
   room_id: number;
   room_access: number;
+  room_secret: string;
   room_password: string;
 }

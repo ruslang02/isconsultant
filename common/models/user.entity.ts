@@ -4,11 +4,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import { File } from './file.entity';
+import { CalendarEvent } from './calendar-event.entity';
 
 export enum UserType {
   ADMIN = 'admin',
@@ -110,4 +113,10 @@ export class User {
 
   @OneToMany(() => File, f => f.owner)
   files: File[];
+
+  @ManyToMany(() => CalendarEvent, event => event.participants)
+  events: CalendarEvent[]
+
+  @OneToMany(() => CalendarEvent, event => event.owner)
+  ownedEvents: CalendarEvent[]
 }
