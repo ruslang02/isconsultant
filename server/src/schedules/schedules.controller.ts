@@ -208,8 +208,8 @@ export class SchedulesController {
   @ApiOperation({
     description: "Получение файла, загруженного в рамках этого события.",
   })
-  async getFilesForEvent(@Param("fid") fileId: string) {
-    return (await this.schedules.findEvent(fileId)).files;
+  async getFilesForEvent(@Param("eid") eventId: string) {
+    return this.storage.list(eventId);
   }
 
   @Types(UserType.LAWYER, UserType.CLIENT)
