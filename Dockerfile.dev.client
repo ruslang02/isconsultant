@@ -1,12 +1,3 @@
 FROM node:alpine
-WORKDIR /app
-COPY common ./common
-WORKDIR /app/common
-RUN npm ci
-WORKDIR /app
-COPY client ./client
-COPY tsconfig.json ./
 WORKDIR /app/client
-RUN npm ci
-EXPOSE 8080
 CMD npm run dev -- -p 8080

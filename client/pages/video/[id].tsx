@@ -34,6 +34,7 @@ const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
   const [roomId, setRoomId] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     setRoomId(+location.pathname.split("/")[2]);
@@ -48,7 +49,7 @@ const TopBar: React.FC = function () {
       </div>
       <div className={styles.TopYar_actions}>
         <Button primary>{t('pages.video.room_settings')}</Button>
-        <Button color="red">{t('pages.video.leave_call')}</Button>
+        <Button color="red" onClick={(e:any) => router.replace("/profile/@me")}>{t('pages.video.leave_call')}</Button>
       </div>
     </header>
   );
@@ -321,8 +322,6 @@ const Sidebar: React.FC = () => (
 export default function Video() {
   const router = useRouter();
   const { id } = router.query;
-  const pin = router.query["pin"]
-  const secret = router.query["secret"]
 
   const [users, setUsers] = useState<GetUserInfoDto[]>([]);
   const [files, setFiles] = useState<RemoteFile[]>([]);
@@ -330,45 +329,50 @@ export default function Video() {
   const [auth] = useAuth();
 
   useEffect(() => {
-    if (!id)
+    if (!id) {
       return
+    }
 
     (async () => {
       try {
         const { data } = await api.get<GetEventDto>(`/events/${id}`);
         setEvent(data);
-      } catch (e) { }
-    });
+      } catch (e) {
+        alert("This event is not available to you or it doesn't exist")
+      }
+    })();
   }, [id]);
 
   return (
     <UserStoreContext.Provider value={{ users, setUsers }}>
       <FilesContext.Provider value={{ files, setFiles }}>
         <EventContext.Provider value={event}>
-          <main
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              overflow: "hidden",
-              flexGrow: 1,
-            }}
-          >
-            <TopBar />
-            <section
+          {!(event) ? <></> :
+            <main
               style={{
                 display: "flex",
-                background: "white",
-                borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
+                flexDirection: "column",
+                height: "100%",
+                overflow: "hidden",
                 flexGrow: 1,
               }}
             >
-              {!("id" in router.query) ? <></> :
-                <VideoContainer roomNumber={id} roomPin={pin} roomSecret={secret} />
-              }
-              <Sidebar />
-            </section>
-          </main>
+              <TopBar />
+              <section
+                style={{
+                  display: "flex",
+                  background: "white",
+                  borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
+                  flexGrow: 1,
+                }}
+              >
+                
+                  <VideoContainer roomNumber={event.room_id} roomPin={event.room_password} roomSecret={event.room_secret} />
+                
+                <Sidebar />
+              </section>
+            </main>
+          }
         </EventContext.Provider>
       </FilesContext.Provider>
     </UserStoreContext.Provider>

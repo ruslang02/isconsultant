@@ -50,9 +50,9 @@
       "restart": "always"
     },
     "client": {
-      "build": {
-        "dockerfile": "./Dockerfile.dev.client",
-        "context": "."
+      "build":{
+        "dockerfile":"./Dockerfile.dev.client",
+        "context":"."
       },
       "env_file": "./development.env",
       "networks": [
@@ -60,6 +60,9 @@
       ],
       "ports": [
         "8090:8080"
+      ],
+      "volumes":[
+        "./:/app"
       ],
       "restart": "always"
     },

@@ -57,15 +57,5 @@ export const Actions: React.FC<{
                 name={!audio ? "microphone slash" : "microphone"}
                 size="large"></Icon>
         </Button>
-        <Button
-            icon
-            color="red"
-            circular
-            style={{ width: "64px", height: "64px" }}>
-            <Icon
-                style={{ width: "26px" }}
-                name="phone volume"
-                size="large"></Icon>
-        </Button>
     </div>)
 };
