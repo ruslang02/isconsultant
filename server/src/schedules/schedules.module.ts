@@ -5,6 +5,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatModule } from 'chat/chat.module';
 import { UsersModule } from '../users/users.module';
+import { JanusService } from './janus.service';
 import { SchedulesController } from './schedules.controller';
 import { SchedulesService } from './schedules.service';
 import { SnowflakeService } from './snowflake.service';
@@ -16,7 +17,7 @@ import { StorageService } from './storage.service';
     UsersModule,
     ChatModule
   ],
-  providers: [SchedulesService, SnowflakeService, StorageService],
+  providers: [SchedulesService, SnowflakeService, StorageService, JanusService],
   controllers: [SchedulesController],
 })
 export class SchedulesModule {}

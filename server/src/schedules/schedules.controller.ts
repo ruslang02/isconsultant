@@ -38,13 +38,15 @@ import { SchedulesService } from "./schedules.service";
 import { myStorage } from "./storage.multer";
 import { StorageService } from "./storage.service";
 import { CalendarEvent } from "@common/models/calendar-event.entity";
+import { JanusService } from "./janus.service";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
 export class SchedulesController {
   constructor(
     private schedules: SchedulesService,
-    private storage: StorageService
+    private storage: StorageService,
+    private janus: JanusService
   ) {}
 
   @Types(UserType.ADMIN, UserType.MODERATOR, UserType.LAWYER)

@@ -39,6 +39,7 @@
     "@nestjs/websockets": "^7.6.7",
     "cache-manager": "^3.4.0",
     "express": "^4.17.1",
+    "janus-gateway-js": "^2.0.2",
     "module-alias": "^2.2.2",
     "nestjs-i18n": "^8.0.10",
     "node-machine-id": "^1.1.12",
