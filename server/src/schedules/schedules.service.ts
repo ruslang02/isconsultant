@@ -4,7 +4,7 @@ import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { CalendarEvent, RoomAccess } from "@common/models/calendar-event.entity";
 import { PendingEvent } from "@common/models/pending-event.entity";
 import { User } from "@common/models/user.entity";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
 import { JanusService } from "./janus.service";
@@ -20,6 +20,7 @@ export class SchedulesService {
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
     private pEvents: Repository<PendingEvent>,
+    @Inject(JanusService)
     private janus: JanusService
   ) {}
 

@@ -25,8 +25,6 @@ export class JanusService implements OnModuleInit {
     }
   }
   
-
-
   async createRoom(id: number, pin: string, secret: string) {
     await this.pluginHandle.sendWithTransaction({ body: { request: "create", room: id, pin: pin, secret: secret } })
   }
