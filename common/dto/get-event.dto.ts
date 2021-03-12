@@ -1,12 +1,6 @@
-export class GetEventDto {
+import { GetUserDto } from "./get-user.dto";
+import { PatchEventDto } from "./patch-event.dto";
+
+export class GetEventDto extends PatchEventDto {
   id: string;
-  title: string;
-  description: string;
-  timespan_start: string;
-  timespan_end: string;
-  participants: string[];
-  owner: string;
-  room_id: number;
-  room_access: number;
-  room_password: string;
 }

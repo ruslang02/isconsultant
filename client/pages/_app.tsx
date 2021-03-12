@@ -39,7 +39,7 @@ function MyApp({
       >
         {i18n.language === "en" ? "RU" : "EN"}
       </Button>
-      {allowed && <Component {...pageProps} />}
+      <Component {...pageProps} />
     </>
   );
 }

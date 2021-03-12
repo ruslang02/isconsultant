@@ -114,7 +114,6 @@ const Files: React.FC = () => {
               formData,
               {
                 headers: {
-                  Authorization: `Bearer ${auth?.access_token}`,
                   "Content-Type": "multipart/form-data",
                 },
               }
@@ -167,12 +166,11 @@ const Chat: React.FC = () => {
   useEffect(() => {
     console.log("Loading chat...");
     const client = new WebSocket(
-      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${
-        location.port ? ":" + location.port : ""
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${location.port ? ":" + location.port : ""
       }/chat/${auth?.access_token}`
     );
 
-    client.addEventListener("error", (ev: Event) =>{
+    client.addEventListener("error", (ev: Event) => {
       console.log("WS-Error: " + ev)
     })
 
@@ -192,7 +190,7 @@ const Chat: React.FC = () => {
       >;
       switch (event) {
         case "message":
-          const uid = +data.userId;
+          const uid = data.userId.toString();
           let user = users.find((v) => v.id === uid) as GetUserInfoDto;
 
           if (!user) {
@@ -337,11 +335,7 @@ export default function Video() {
 
     (async () => {
       try {
-        const { data } = await api.get<GetEventDto>(`/events/${id}`, {
-          headers: {
-            Authorization: `Bearer ${auth?.access_token}`,
-          },
-        });
+        const { data } = await api.get<GetEventDto>(`/events/${id}`);
         setEvent(data);
       } catch (e) { }
     });

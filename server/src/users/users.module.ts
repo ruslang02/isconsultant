@@ -7,11 +7,12 @@ import { CommentsService } from './comments.service';
 import { ReportsService } from '../reports/reports.service';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { UserAdapter } from './user.adapter';
 
 @Module({
   controllers: [UsersController],
-  exports: [UsersService],
+  exports: [UsersService, UserAdapter],
   imports: [TypeOrmModule.forFeature([Comment, Report, User])],
-  providers: [CommentsService, ReportsService, UsersService],
+  providers: [CommentsService, ReportsService, UsersService, UserAdapter],
 })
-export class UsersModule {}
+export class UsersModule { }

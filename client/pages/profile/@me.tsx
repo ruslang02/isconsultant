@@ -1,7 +1,7 @@
 import { Header } from "components/Header";
 import { Page } from "components/Page";
 import React from "react";
-import { Container, Icon, Image, Segment } from "semantic-ui-react";
+import { Button, Container, Icon, Image, Segment } from "semantic-ui-react";
 import styles from "styles/Page.module.css";
 import { useAuth } from "utils/useAuth";
 
@@ -42,8 +42,10 @@ const Empty = () => {
             {auth?.user?.created_timestamp ? new Date(auth.user.created_timestamp).toLocaleDateString() : <i>not set</i>}
           </p>
         </div>
-        <div style={{textAlign: "right", margin: "1rem"}}>
-        <a href="#" style={{color: "red"}}><Icon name="envelope" /> Send feedback</a>
+        <div style={{ textAlign: "right", margin: "1rem" }}>
+          <Button color="blue" icon="edit"
+            content="Edit"
+            labelPosition="left" />
         </div>
       </Segment>
     </Page>

@@ -8,7 +8,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private users: Repository<User>
-  ) {}
+  ) { }
 
   async findMany(options?: FindManyOptions<any>): Promise<User[]> {
     return this.users.find(options);
@@ -16,6 +16,13 @@ export class UsersService {
 
   findOne(uid: string | number): Promise<User> {
     return this.users.findOne(uid.toString());
+  }
+
+  async findEvents(uid: string) {
+    const user = (await this.users.findOneOrFail({ where: { id: uid }, relations: ['events', 'events.owner'] }));
+    console.log(user);
+
+    return user.events;
   }
 
   findOneByEmail(

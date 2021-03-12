@@ -29,6 +29,10 @@ export class StorageService {
     };
   }
 
+  public async list(eid: string) {
+    return (await this.events.findOne({ where: { id: eid }, relations: ["files"] })).files
+  }
+
   public async create(fileName: string, fileId: string, ownerId: string, eventId: string) {
     const file = this.files.create();
     file.id = fileId;

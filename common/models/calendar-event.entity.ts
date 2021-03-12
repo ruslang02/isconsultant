@@ -9,14 +9,14 @@ import {
   ManyToMany,
   JoinTable,
   CreateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { File } from './file.entity';
 import { User } from './user.entity';
 
 export enum RoomAccess {
-  NO_PASSWORD = 0,
-  PASSWORD = 1,
-  ONLY_PARTICIPANTS = 2
+  PASSWORD = 0,
+  ONLY_PARTICIPANTS = 1
 }
 
 @Entity()
@@ -54,14 +54,14 @@ export class CalendarEvent {
   })
   end_timestamp: Date;
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User, user => user.ownedEvents)
   @JoinColumn({ name: 'owner_id' })
   @ApiProperty({
     description: 'Пользователь, управляющий этим событием.',
   })
   owner: User;
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, user => user.events)
   @JoinTable({
     joinColumn: {
       name: 'event_id',
@@ -91,18 +91,27 @@ export class CalendarEvent {
   })
   files: File[];
 
+  @Column({ type: 'int', name: "room_id" })
   @ApiProperty({
     description: "Идентификатор комнаты в Janus."
   })
   roomId: number;
 
+  @Column({ type: 'text', name: "room_password" })
   @ApiProperty({
     description: "Пароль для доступа к комнате в Janus (заполняется только если roomAccess = PASSWORD)."
   })
   roomPassword?: string;
 
+  @Column({ type: 'text', name: "room_secret" })
   @ApiProperty({
-    default: RoomAccess.NO_PASSWORD,
+    description: "Секретный код для доступа к комнате."
+  })
+  roomSecret?: string
+
+  @Column({ type: 'enum', enum: RoomAccess, name: "room_access" })
+  @ApiProperty({
+    default: RoomAccess.ONLY_PARTICIPANTS,
     description: "Уровень доступа к комнате Janus.",
     enum: RoomAccess,
   })
