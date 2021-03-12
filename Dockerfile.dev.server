@@ -1,0 +1,22 @@
+FROM node:alpine AS builder
+WORKDIR /app
+COPY . .
+WORKDIR /app/common
+RUN npm ci
+WORKDIR /app/server
+RUN npm ci && npm run build
+#WORKDIR /app/admin
+#RUN npm ci && npm run build:prod
+
+FROM node:alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/common/locales ./common/locales
+COPY --from=builder /app/dist ./dist
+#COPY --from=builder /app/admin/www ./admin/www
+COPY --from=builder /app/server/package*.json ./
+RUN npm ci
+USER node
+EXPOSE 8080 8081
+WORKDIR /app/dist
+ENV NODE_PATH=./
+CMD node main

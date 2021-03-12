@@ -7,6 +7,7 @@ import { User } from "@common/models/user.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
+import { JanusService } from "./janus.service";
 
 const genChar = () => String.fromCharCode(Math.round(Math.random() * (122 - 48) + 48));
 
@@ -18,8 +19,9 @@ export class SchedulesService {
     @InjectRepository(CalendarEvent)
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
-    private pEvents: Repository<PendingEvent>
-  ) { }
+    private pEvents: Repository<PendingEvent>,
+    private janus: JanusService
+  ) {}
 
 
   async findManyByLawyer(uid: string) {
@@ -70,6 +72,7 @@ export class SchedulesService {
     }
     event.participants = pending.participants;
 
+    await this.janus.createRoom(event.roomId, event.roomPassword, event.roomSecret)
     await this.events.save(event);
     return this.pEvents.delete(eid);
   }

@@ -41,7 +41,6 @@ import { ExtendedRequest } from "utils/ExtendedRequest";
 import { SchedulesService } from "./schedules.service";
 import { myStorage } from "./storage.multer";
 import { StorageService } from "./storage.service";
-import { CalendarEvent } from "@common/models/calendar-event.entity";
 import { UsersService } from "users/users.service";
 import { EventAdapter } from "./event.adapter";
 import { I18n, I18nContext } from "nestjs-i18n";
