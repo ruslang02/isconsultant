@@ -4,26 +4,52 @@ import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { CalendarEvent, RoomAccess } from "@common/models/calendar-event.entity";
 import { PendingEvent } from "@common/models/pending-event.entity";
 import { User } from "@common/models/user.entity";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
-import { JanusService } from "./janus.service";
-
+const Janus = require("janus-gateway-js")
 const genChar = () => String.fromCharCode(Math.round(Math.random() * (122 - 48) + 48));
 
 const genRoomId = () => Math.round(Math.random() * 10_000_000);
 
+const {
+  JANUS
+} = process.env
+
 @Injectable()
-export class SchedulesService {
+export class SchedulesService implements OnModuleInit {
   constructor(
     @InjectRepository(CalendarEvent)
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
     private pEvents: Repository<PendingEvent>,
-    @Inject(JanusService)
-    private janus: JanusService
   ) {}
 
+  private pluginHandle: any
+
+  async onModuleInit() {
+    try {
+      var client = new Janus.Client(JANUS, {
+        token: '',
+        apisecret: '',
+        keepalive: 'true'
+      });
+
+      var connection = await client.createConnection()
+      var session = await connection.createSession()
+      this.pluginHandle = await session.attachPlugin("janus.plugin.videoroom")
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
+  async createRoom(id: number, pin: string, secret: string) {
+    await this.pluginHandle.sendWithTransaction({ body: { request: "create", room: id, pin: pin, secret: secret } })
+  }
+
+  async destroyRoom(id: number, secret: string) {
+    await this.pluginHandle.sendWithTransaction({ body: { request: "destroy", room: id, secret: secret } })
+  }
 
   async findManyByLawyer(uid: string) {
     return this.events
@@ -73,7 +99,7 @@ export class SchedulesService {
     }
     event.participants = pending.participants;
 
-    await this.janus.createRoom(event.roomId, event.roomPassword, event.roomSecret)
+    await this.createRoom(event.roomId, event.roomPassword, event.roomSecret)
     await this.events.save(event);
     return this.pEvents.delete(eid);
   }

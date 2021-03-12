@@ -7,7 +7,6 @@ import { ChatModule } from 'chat/chat.module';
 import { UserAdapter } from 'users/user.adapter';
 import { UsersModule } from '../users/users.module';
 import { EventAdapter } from './event.adapter';
-import { JanusService } from './janus.service';
 import { PendingEventAdapter } from './pending-event.adapter';
 import { SchedulesController } from './schedules.controller';
 import { SchedulesService } from './schedules.service';
@@ -20,7 +19,7 @@ import { StorageService } from './storage.service';
     UsersModule,
     forwardRef(() => ChatModule)
   ],
-  providers: [EventAdapter, PendingEventAdapter, SchedulesService, SnowflakeService, StorageService, UserAdapter, JanusService],
+  providers: [EventAdapter, PendingEventAdapter, SchedulesService, SnowflakeService, StorageService, UserAdapter],
   controllers: [SchedulesController],
 })
 export class SchedulesModule { }
