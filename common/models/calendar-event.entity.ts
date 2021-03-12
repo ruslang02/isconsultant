@@ -1,16 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-  ManyToMany,
-  JoinTable,
-  CreateDateColumn,
-  ManyToOne,
+  Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn
 } from 'typeorm';
+import { ChatMessage } from './chat-message.entity';
 import { File } from './file.entity';
 import { User } from './user.entity';
 
@@ -116,4 +108,7 @@ export class CalendarEvent {
     enum: RoomAccess,
   })
   roomAccess: RoomAccess;
+
+  @OneToMany(() => ChatMessage, message => message.event)
+  messages: ChatMessage[]
 }

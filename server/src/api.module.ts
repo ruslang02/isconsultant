@@ -11,6 +11,8 @@ import { SchedulesModule } from './schedules/schedules.module';
 import { UsersModule } from './users/users.module';
 import { AdminModule } from './admin/admin.module';
 import { File } from '@common/models/file.entity';
+import { ChatMessage } from '@common/models/chat-message.entity';
+import { ChatModule } from 'chat/chat.module';
 
 const {
   POSTGRES_HOST,
@@ -29,13 +31,14 @@ const {
       username: POSTGRES_USER,
       password: POSTGRES_PASSWORD,
       database: POSTGRES_DB,
-      entities: [CalendarEvent, Comment, File, PendingEvent, Report, User],
+      entities: [CalendarEvent, ChatMessage, Comment, File, PendingEvent, Report, User],
       synchronize: true,
       // dropSchema: true
     }),
     UsersModule,
     SchedulesModule,
     AuthModule,
+    ChatModule,
     ReportsModule,
     AdminModule,
   ],

@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { File } from './file.entity';
 import { CalendarEvent } from './calendar-event.entity';
+import { ChatMessage } from './chat-message.entity';
 
 export enum UserType {
   ADMIN = 'admin',
@@ -119,4 +120,7 @@ export class User {
 
   @OneToMany(() => CalendarEvent, event => event.owner)
   ownedEvents: CalendarEvent[]
+
+  @OneToMany(() => ChatMessage, message => message.from)
+  messages: ChatMessage[]
 }

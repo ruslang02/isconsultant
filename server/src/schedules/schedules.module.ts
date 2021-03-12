@@ -1,7 +1,7 @@
 import { CalendarEvent } from '@common/models/calendar-event.entity';
 import { File } from '@common/models/file.entity';
 import { PendingEvent } from '@common/models/pending-event.entity';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatModule } from 'chat/chat.module';
 import { UserAdapter } from 'users/user.adapter';
@@ -17,7 +17,7 @@ import { StorageService } from './storage.service';
   imports: [
     TypeOrmModule.forFeature([CalendarEvent, File, PendingEvent]),
     UsersModule,
-    ChatModule
+    forwardRef(() => ChatModule)
   ],
   providers: [EventAdapter, PendingEventAdapter, SchedulesService, SnowflakeService, StorageService, UserAdapter],
   controllers: [SchedulesController],

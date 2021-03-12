@@ -10,6 +10,7 @@ import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect,
 import { Request } from "express";
 import { UsersService } from "users/users.service";
 import Socket, { Server } from "ws";
+import { ChatService } from "./chat.service";
 
 type ChatSocket = Socket & { room?: string, user: User };
 
@@ -22,7 +23,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   private logger = new Logger("Chat");
 
-  constructor(private jwt: JwtService, private users: UsersService) { }
+  constructor(
+    private jwt: JwtService,
+    private users: UsersService,
+    private chat: ChatService
+  ) { }
 
   async handleConnection(@ConnectedSocket() socket: ChatSocket, req: Request) {
     try {
@@ -79,12 +84,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         }
       };
 
+      this.chat.createChatMessage(socket.user.id.toString(), socket.room, payload.message);
+
       for (const client of this.server.clients as Set<ChatSocket>) {
         if (client.room === socket.room) {
           client.send(JSON.stringify(m));
         }
       }
-      
+
       return;
     }
   }

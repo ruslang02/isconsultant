@@ -87,13 +87,18 @@ export class AuthController {
   })
   async register(@Body() u: CreateUserDto) {
     try {
+      if (u.password.length < 6) {
+        throw new BadRequestException(
+          'The password is too short.'
+        );
+      }
       await this.users.insertOne({ ...u, type: UserType.CLIENT });
       // Send email!
-      this.users.findOneByEmail(u.email).then((data: Pick<User, 'id' | 'email'>) => {
-        this.auth.generateVerifyToken(data).then((token: string) => {
-          this.verifyMail.send(data.email, token)
-        })
-      })
+      const data: Pick<User, 'id' | 'email' | 'type'> = await this.users.findOneByEmail(u.email);
+      const token = await this.auth.generateVerifyToken(data);
+      this.verifyMail.send(data.email, token)
+
+      return { access_token: this.jwt.sign({ id: data.id, verified: false, type: data.type }) };
     } catch (e) {
       console.error(e);
       throw new BadRequestException(
