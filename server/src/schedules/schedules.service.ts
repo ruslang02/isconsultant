@@ -33,7 +33,11 @@ export class SchedulesService {
   }
 
   async findEvent(eid: string) {
-    return this.events.findOne(eid, { relations: ["files"] });
+    return this.events.findOneOrFail(eid, { relations: ["files", "owner"] });
+  }
+
+  async findEventByRoom(rid: string) {
+    return this.events.findOneOrFail({ where: { roomId: rid } });
   }
 
   async findAllEvents() {
@@ -86,15 +90,21 @@ export class SchedulesService {
     event.start_timestamp = new Date(data.timespan_start);
     event.end_timestamp = new Date(data.timespan_end);
     event.owner = { id: Number(data.user_id) };
-    event.roomAccess = event.roomAccess;
-    event.roomId = Math.floor(Math.random() * 900_000_000) + 100_000_000;
-    event.participants = data.participants.map((id) => ({ id: Number(id) }));
+    event.roomAccess = data.room_access ?? 0;
+    event.roomId = genRoomId();
+    event.roomPassword = "";
+    event.roomSecret = "";
+    for (let i = 0; i < 6; i++) {
+      event.roomPassword += genChar();
+      event.roomSecret += genChar();
+    }
+    event.participants = (data.participants ?? []).map((id) => ({ id: Number(id) }));
 
     return this.events.save(event);
   }
 
   async updateEvent(eventId: string, data: PatchEventDto) {
-    const model = {} as Partial<CalendarEvent>;
+    const model = await this.events.findOne(eventId) as Partial<CalendarEvent>;
     if (data.timespan_start) {
       model.start_timestamp = new Date(data.timespan_start);
     }
@@ -112,8 +122,11 @@ export class SchedulesService {
         id,
       })) as unknown) as User[];
     }
+    if (data.room_access) {
+      model.roomAccess = data.room_access;
+    }
 
-    await this.events.update(eventId, model);
+    await this.events.save(model);
   }
 
   async deleteEvent(eventId: string) {

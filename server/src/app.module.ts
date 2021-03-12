@@ -25,7 +25,6 @@ import { ApiModule } from './api.module';
       serveRoot: '/admin',
     }),
     ApiModule,
-    ChatModule,
     MailerModule.forRoot({
       transport: 'smtps://isconsultant1331@gmail.com:isconsultant@smtp.gmail.com',
       defaults: {

@@ -3,7 +3,7 @@ import { EventModal } from "components/EventModal";
 import { Page } from "components/Page";
 import moment from "moment";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Calendar, Event,
   momentLocalizer
@@ -14,6 +14,7 @@ import {
   Icon
 } from "semantic-ui-react";
 import { api } from "utils/api";
+import { MessageContext } from "utils/MessageContext";
 import { useAuth } from "utils/useAuth";
 
 const localizer = momentLocalizer(moment);
@@ -24,20 +25,22 @@ const CalendarPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
   const [event, setEvent] = useState<GetEventDto | undefined>();
+  const { setValue: setMessage } = useContext(MessageContext);
 
+  const loadEvents = async () => {
+    const { data } = await api.get<GetEventDto[]>("/events");
+
+    setEvents(
+      data.map((_) => ({
+        title: _.title,
+        start: new Date(_.timespan_start),
+        end: new Date(_.timespan_end),
+        resource: _,
+      }))
+    );
+  };
   useEffect(() => {
-    (async () => {
-      const { data } = await api.get<GetEventDto[]>("/events");
-
-      setEvents(
-        data.map((_) => ({
-          title: _.title,
-          start: new Date(_.timespan_start),
-          end: new Date(_.timespan_end),
-          resource: _,
-        }))
-      );
-    })();
+    loadEvents();
   }, []);
 
   return (
@@ -92,11 +95,14 @@ const CalendarPage = () => {
         style={{ height: 500 }}
       />
       <EventModal
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          setOpen(false);
+          loadEvents();
+        }}
         open={open}
         event={event}
-        onSubmit={async (e: GetEventDto) => {
-          await api.patch("/events/" + e.id, e);
+        onSubmit={async (temp: GetEventDto) => {
+          setOpen(false);
         }}
       />
     </Page>

@@ -1,5 +1,5 @@
 import { PromoHeader } from "components/PromoHeader";
-import React, { useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -19,6 +19,10 @@ import router, { useRouter } from "next/router";
 import { useAuth } from "utils/useAuth";
 import { api } from "utils/api";
 import { ArrangeEventDto } from "@common/dto/arrange-event.dto";
+import { CreateUserDto } from "@common/dto/create-user.dto";
+import { AxiosError } from "@common/node_modules/axios";
+import { MessageContext } from "utils/MessageContext";
+import { ErrorDto } from "@common/dto/error.dto";
 
 function Promo() {
   const { t } = useTranslation();
@@ -69,8 +73,66 @@ function EventArrange() {
   const [password, setPassword] = useState("");
   const [description, setDescription] = useState("");
   const [auth] = useAuth();
+  const { setValue: setMessage } = useContext(MessageContext);
 
-  const handleSubmit = () => { };
+  const handleSubmit = async () => {
+    if (!auth?.access_token) {
+      try {
+        const {
+          data: { access_token },
+        } = await api.post<{ access_token: string }>("/auth/register", {
+          email,
+          first_name: firstName,
+          middle_name: middleName,
+          last_name: lastName,
+          password,
+        } as CreateUserDto);
+
+        const timespan_end = new Date();
+        timespan_end.setDate(timespan_end.getDate() + 1);
+        timespan_end.setHours(0, 0, 0);
+        await api.post(
+          "/events/request",
+          {
+            description,
+            additional_ids: [auth.user.id],
+            timespan_start: new Date().toISOString(),
+            timespan_end: timespan_end.toISOString(),
+          } as ArrangeEventDto,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          }
+        );
+        setMessage(
+          "Your meeting request was created. In order for it to be accepted, you need to <b>verify your email address</b> using the link we sent you."
+        );
+        setOpen(false);
+      } catch (e) {
+        console.log(e);
+        setMessage("Error: " + (e as ErrorDto).message);
+      }
+    }
+  };
+  const createRequest = async () => {
+    // TODO: choose time?
+    const timespan_end = new Date();
+    timespan_end.setDate(timespan_end.getDate() + 1);
+    timespan_end.setHours(0, 0, 0);
+    try {
+      await api.post("/events/request", {
+        description,
+        additional_ids: [auth.user.id],
+        timespan_start: new Date().toISOString(),
+        timespan_end: timespan_end.toISOString(),
+      } as ArrangeEventDto);
+      setMessage(
+        "Your meeting request was created. You are now being redirect to the meetings page."
+      );
+      router.push("/meetings");
+    } catch (e) {}
+  };
 
   return (
     <>
@@ -80,28 +142,13 @@ function EventArrange() {
         value={description}
       ></TextArea>
       <div style={{ textAlign: "right", marginTop: "1rem" }}>
-        <Button primary onClick={() => {
-          if (auth) {
-            const timespan_end = new Date();
-            timespan_end.setDate(timespan_end.getDate() + 1);
-            timespan_end.setHours(0, 0, 0);
-            (async () => {
-              try {
-                await api.post("/events/request", {
-                  description,
-                  additional_ids: [auth.user.id],
-                  timespan_start: new Date().toISOString(),
-                  timespan_end: timespan_end.toISOString(),
-                } as ArrangeEventDto);
-                router.push("/meetings");
-              } catch (e) {
-
-              }
-            })()
-            return;
-          }
-          setOpen(true);
-        }}>
+        <Button
+          primary
+          onClick={() => {
+            if (auth?.access_token) createRequest();
+            else setOpen(true);
+          }}
+        >
           {t("pages.index.arrange_event")}
         </Button>
       </div>
@@ -159,7 +206,9 @@ function EventArrange() {
               ></textarea>
             </Form.Field>
             <div style={{ display: "flex", justifyContent: "center" }}>
-              <Button onClick={(e) => setOpen(false)} type="button">Cancel</Button>
+              <Button onClick={(e) => setOpen(false)} type="button">
+                Cancel
+              </Button>
               <Button primary type="submit">
                 Send
               </Button>
@@ -252,8 +301,17 @@ function Lawyers() {
 }
 
 export default function Home() {
-  const router = useRouter()
-  const { verify } = router.query
+  const router = useRouter();
+  const { verify } = router.query;
+  const { setValue: setMessage } = useContext(MessageContext);
+
+  useEffect(() => {
+    if (verify == "success") {
+      setMessage("Your account was verified.");
+    } else if (verify) {
+      setMessage("There was an error verifying your account.");
+    }
+  }, [verify]);
 
   return (
     <section>
@@ -262,21 +320,6 @@ export default function Home() {
       <Promo />
       <PromoAdvantages />
       <Lawyers />
-      <div style={{
-        position: "fixed",
-        bottom: "5%",
-        left: "5%"
-
-      }}>
-        {!verify ?
-          <></>
-          :
-          (verify == "success" ?
-            <Message positive>Sucessfuly verified your email.</Message>
-            :
-            <Message negative>There was an error verifying your email.</Message>)
-        }
-      </div>
     </section>
   );
 }

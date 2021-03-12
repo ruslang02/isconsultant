@@ -8,7 +8,10 @@ import {
   Body,
   Controller,
   Delete,
+  forwardRef,
   Get,
+  Header,
+  Inject,
   NotFoundException,
   Param,
   Patch,
@@ -42,6 +45,8 @@ import { UsersService } from "users/users.service";
 import { EventAdapter } from "./event.adapter";
 import { I18n, I18nContext } from "nestjs-i18n";
 import { PendingEventAdapter } from "./pending-event.adapter";
+import { ChatGateway } from "chat/chat.gateway";
+import { ChatService } from "chat/chat.service";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
@@ -52,6 +57,8 @@ export class SchedulesController {
     private users: UsersService,
     private adapter: EventAdapter,
     private pAdapter: PendingEventAdapter,
+    @Inject(forwardRef(() => ChatService))
+    private chat: ChatService
   ) { }
 
   @Types(UserType.ADMIN, UserType.MODERATOR, UserType.LAWYER)
@@ -158,7 +165,7 @@ export class SchedulesController {
     }
   }
 
-  @Types(UserType.LAWYER)
+  @Types(UserType.LAWYER, UserType.ADMIN, UserType.MODERATOR)
   @UseGuards(JwtAuthGuard, UserGuard)
   @Patch("/:eid")
   @ApiBearerAuth()
@@ -200,7 +207,31 @@ export class SchedulesController {
     }
   }
 
-  @Types(UserType.LAWYER, UserType.CLIENT)
+  @Get("/:eid/log/json")
+  async getChatLogJSON(@Param("eid") eventId: string) {
+    try {
+      return this.chat.getForEvent(eventId);
+    } catch (e) {
+      throw new BadRequestException("The event does not exist or the chat log is empty.");
+    }
+  }
+
+  @Get(["/:eid/log/text", "/:eid/log/text/:fname"])
+  @Header('Content-Type', 'application/octet-stream')
+  async getChatLogText(@Param("eid") eventId: string) {
+    try {
+      const event = await this.schedules.findEvent(eventId);
+      const messages = await this.chat.getForEvent(eventId, true);
+      return `Log from meeting "${event.title}", meeting moderator: ${event.owner.first_name} ${event.owner.last_name}:
+
+` + messages.map(_ => (`${_.from.first_name} ${_.from.last_name} (${_.from.type}) sent in ${_.created_timestamp.toString()}:
+${_.content}
+`)).join("\n") + "\nEnd of log"
+    } catch (e) {
+      throw new BadRequestException("The event does not exist or the chat log is empty.");
+    }
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get("/:eid/files")
   @ApiBearerAuth()
@@ -211,7 +242,6 @@ export class SchedulesController {
     return this.storage.list(eventId);
   }
 
-  @Types(UserType.LAWYER, UserType.CLIENT)
   @UseGuards(JwtAuthGuard)
   @Post("/:eid/files/")
   @UseInterceptors(

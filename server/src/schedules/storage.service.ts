@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { createWriteStream } from 'fs';
 import { File } from '@common/models/file.entity';
 import { join } from 'path';
@@ -19,6 +19,7 @@ export class StorageService {
     @InjectRepository(File)
     private files: Repository<File>,
     private schedules: SchedulesService,
+    @Inject(forwardRef(() => ChatGateway))
     private chat: ChatGateway
   ) { }
 
