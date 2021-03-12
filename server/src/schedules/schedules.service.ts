@@ -68,8 +68,7 @@ export class SchedulesService {
     }
     event.participants = pending.participants;
 
-    await this.janus.createRoom(event.roomId, event.roomPassword, "")
-
+    await this.janus.createRoom(event.roomId, event.roomPassword, event.roomSecret)
     await this.events.save(event);
     return this.pEvents.delete(eid);
   }
