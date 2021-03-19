@@ -96,10 +96,7 @@ export function EventModal({
         event.owner.last_name
       } invites you to a meeting on ISConsultant.
 Topic: ${temp.title}
-Time: ${new Date(temp.timespan_start).toLocaleString("en-GB", {
-        dateStyle: "full",
-        timeStyle: "short",
-      })}
+Time: ${new Date(temp.timespan_start).toLocaleString("en-GB")}
 
 Join the meeting room: https://consultant.infostrategic.com/video/${
         event.id
