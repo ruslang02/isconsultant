@@ -7,6 +7,8 @@ import { api } from "utils/api";
 import { File } from "@common/models/file.entity";
 import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { MessageContext } from "utils/MessageContext";
+import { Status } from "pages/video/[id]";
+import { useRouter } from "next/router";
 
 interface EventModalProps {
   editable?: boolean;
@@ -26,6 +28,7 @@ export function EventModal({
   const [temp, setTemp] = useState<PatchEventDto | undefined>(event);
   const [files, setFiles] = useState<File[]>([]);
   const { setValue: setMessage } = useContext(MessageContext);
+  const router = useRouter();
 
   useEffect(() => {
     if (event === undefined && temp === undefined) {
@@ -119,12 +122,12 @@ export function EventModal({
                 value={
                   temp !== undefined
                     ? new Date(
-                        temp.timespan_start
-                      ).toLocaleTimeString(undefined, {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      })
+                      temp.timespan_start
+                    ).toLocaleTimeString(undefined, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })
                     : undefined
                 }
               />
@@ -154,9 +157,9 @@ export function EventModal({
                 value={
                   temp !== undefined
                     ? new Date(temp.timespan_end).toLocaleTimeString(
-                        undefined,
-                        { hour: "2-digit", minute: "2-digit", hour12: false }
-                      )
+                      undefined,
+                      { hour: "2-digit", minute: "2-digit", hour12: false }
+                    )
                     : undefined
                 }
               />
@@ -245,10 +248,34 @@ export function EventModal({
               window.open(`/api/events/${event.id}/log/text/meeting_log_${event.id}.txt`);
             }}
           />
+          <h4>Room Control</h4>
+          {event?.room_status == Status.NEW ?
+            <Button
+              primary
+              content="Start meeting"
+              onClick={async () => {
+                const response = await api.post(`/events/${event.id}/start`);
+                if(response.status == 201) {
+                  router.replace(`/video/${event.id}`)
+                }
+              }}
+            />
+            : event?.room_status == Status.STARTED ?
+              <Button
+                primary
+                content="Finish meeting"
+                onClick={async () => {
+                  const response = await api.post(`/events/${event.id}/stop`);
+                  if(response.status == 201) {
+                    router.reload()
+                  }
+                }}
+              />
+              : <></>}
         </section>
       </Modal.Content>
       <Modal.Actions>
-        { event !== undefined && <Button color="red" style={{float: "left"}} onClick={async () => {
+        {event !== undefined && <Button color="red" style={{ float: "left" }} onClick={async () => {
           try {
             await api.delete(`/events/${event.id}`);
             setMessage('Meeting was deleted.');
@@ -265,8 +292,8 @@ export function EventModal({
           url.pathname = `/video/${event.room_id}`;
           navigator.clipboard.writeText(url.href);
           setMessage("Link copied!");
-        }} style={{float: "left"}} />
-        
+        }} style={{ float: "left" }} />
+
         <Button color="black" onClick={() => onClose()}>
           Cancel
         </Button>

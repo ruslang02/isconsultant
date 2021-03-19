@@ -1,7 +1,7 @@
 import { ArrangeEventDto } from "@common/dto/arrange-event.dto";
 import { CreateEventDto } from "@common/dto/create-event.dto";
 import { PatchEventDto } from "@common/dto/patch-event.dto";
-import { CalendarEvent, RoomAccess } from "@common/models/calendar-event.entity";
+import { CalendarEvent, RoomAccess, Status } from "@common/models/calendar-event.entity";
 import { PendingEvent } from "@common/models/pending-event.entity";
 import { User } from "@common/models/user.entity";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
@@ -98,14 +98,21 @@ export class SchedulesService implements OnModuleInit {
       event.roomSecret += genChar();
     }
     event.participants = pending.participants;
+    event.roomStatus = Status.NEW;
 
-    await this.createRoom(event.roomId, event.roomPassword, event.roomSecret)
+    //await this.createRoom(event.roomId, event.roomPassword, event.roomSecret)
     await this.events.save(event);
     return this.pEvents.delete(eid);
   }
 
   async deleteRequestEvent(eid: string) {
     return this.pEvents.delete(eid);
+  }
+
+  async updateStatus(eid: string, status: Status) {
+    const event = await this.events.findOne(eid);
+    event.roomStatus = status;
+    return this.events.save(event);
   }
 
   async createEvent(
@@ -126,6 +133,7 @@ export class SchedulesService implements OnModuleInit {
       event.roomSecret += genChar();
     }
     event.participants = (data.participants ?? []).map((id) => ({ id: Number(id) }));
+    event.roomStatus = Status.NEW;
 
     return this.events.save(event);
   }
@@ -170,6 +178,7 @@ export class SchedulesService implements OnModuleInit {
     event.from = { id: Number(data.user_id) };
     event.lawyer = data.lawyer_id ? { id: Number(data.lawyer_id) } : undefined;
     event.participants = data.additional_ids.map((id) => ({ id: +id }));
+
 
     return this.pEvents.save(event);
   }

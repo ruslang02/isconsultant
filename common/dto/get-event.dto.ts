@@ -1,3 +1,4 @@
+import { Status } from "../models/calendar-event.entity";
 import { GetUserDto } from "./get-user.dto";
 import { PatchEventDto } from "./patch-event.dto";
 
@@ -13,4 +14,5 @@ export class GetEventDto {
   room_access: number;
   room_secret: string;
   room_password: string;
+  room_status: Status;
 }

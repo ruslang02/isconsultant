@@ -15,6 +15,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
   const userStream = useRef<MediaStream>(null)
   const [video, setVideo] = useState<boolean>(false)
   const [audio, setAudio] = useState<boolean>(false)
+  const [screen, setScreen] = useState<boolean>(false)
   const [menuState, changeMenuState] = useState<Menu>({ xPos: 0, yPos: 0, show: false, user: null, changeUser: null })
   const [audioAvailable, changeAudioAvailable] = useState<boolean>(false)
   const [videoAvailable, changeVideoAvailable] = useState<boolean>(false)
@@ -30,6 +31,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
   const roomSession = useRef<any>(null)
   const publisherHandle = useRef<any>(null)
   const isPublishing = useRef<boolean>(false)
+  const screenHandle = useRef<any>(null)
 
   const { t } = useTranslation();
 
@@ -199,9 +201,8 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
     }
 
     if (!running.current && auth?.access_token) {
-      var janus = new Janus.Client(`${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${
-        location.port ? ":" + location.port : ""
-      }/gateway2?access_token=` + auth.access_token, {
+      var janus = new Janus.Client(`${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${location.port ? ":" + location.port : ""
+        }/gateway2?access_token=` + auth.access_token, {
         token: '',
         apisecret: '',
         keepalive: 'true'
@@ -227,6 +228,51 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
     dataChannel.current.send(JSON.stringify({ muted: !audio, streaming: enabled }))
 
     setVideo(enabled)
+  }
+
+  function clickScreen(enabled: boolean) {
+    function onScreenJoin() {
+      screenHandle.current.getUserMedia({ video: "screen", audio: false })
+        .then(function (stream: any) {
+          var pc = publisherHandle.current.createPeerConnection();
+          userStream.current = stream
+          stream.getTracks().forEach(function (track: any) {
+            publisherHandle.current.addTrack(track, stream);
+          });
+        })
+        .then(function () {
+          return publisherHandle.current.createOffer();
+        })
+        .then(function (jsep: any) {
+          return publisherHandle.current.sendWithTransaction({ body: { video: true, request: "publish" }, jsep: jsep });
+        })
+        .then(function (response: any) {
+          var jsep = response.get("jsep");
+          if (jsep) {
+            publisherHandle.current.setRemoteSDP(jsep);
+            return jsep;
+          }
+        });
+    }
+
+    if (enabled) {
+      roomSession.current.attachPlugin("janus.plugin.videoroom").then(function (plugin: any) {
+        screenHandle.current = plugin
+
+        if (roomPin)
+          plugin.sendWithTransaction({ body: { "request": "join", "room": parseInt(roomNumber), "ptype": "publisher", "pin": roomPin.toString() } }).then(onScreenJoin);
+        else
+          plugin.sendWithTransaction({ body: { "request": "join", "room": parseInt(roomNumber), "ptype": "publisher" } }).then(onScreenJoin);
+
+        //plugin.detach();
+      });
+    } else {
+      screenHandle.current.detach();
+      screenHandle.current = null
+    }
+
+
+    setScreen(enabled)
   }
 
   function onContainerClick(e: React.MouseEvent<HTMLElement, MouseEvent>) {
@@ -259,7 +305,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
         )}
       </div>
       <div style={{ flexGrow: 1 }}></div>
-      <Actions audioAvailable={audioAvailable} videoAvailable={videoAvailable} audio={audio} video={video} changeAudio={clickAudio} changeVideo={clickVideo} />
+      <Actions audioAvailable={audioAvailable} videoAvailable={videoAvailable} audio={audio} video={video} changeAudio={clickAudio} changeVideo={clickVideo} changeScreen={clickScreen} screen={screen} />
     </section>);
 };
 

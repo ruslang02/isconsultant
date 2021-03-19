@@ -21,6 +21,7 @@ export class EventAdapter {
       timespan_start: event.start_timestamp.toISOString(),
       title: event.title,
       room_password: event.roomPassword,
+      room_status: event.roomStatus
     });
   }
 }

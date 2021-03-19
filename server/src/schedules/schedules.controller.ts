@@ -2,12 +2,13 @@ import { CreateEventDto } from "@common/dto/create-event.dto";
 import { GetEventDto } from "@common/dto/get-event.dto";
 import { GetPendingEventDto } from "@common/dto/get-pending-event.dto";
 import { PatchEventDto } from "@common/dto/patch-event.dto";
-import { UserType } from "@common/models/user.entity";
+import { User, UserType } from "@common/models/user.entity";
 import {
   BadRequestException,
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   forwardRef,
   Get,
   Header,
@@ -20,6 +21,7 @@ import {
   Query,
   Request,
   Response,
+  UnauthorizedException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -47,6 +49,7 @@ import { I18n, I18nContext } from "nestjs-i18n";
 import { PendingEventAdapter } from "./pending-event.adapter";
 import { ChatGateway } from "chat/chat.gateway";
 import { ChatService } from "chat/chat.service";
+import { Status } from "@common/models/calendar-event.entity";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
@@ -158,6 +161,13 @@ export class SchedulesController {
     try {
       const event = await this.schedules.findEvent(eid);
       console.log(event);
+
+      if (user.type === UserType.CLIENT || user.type === UserType.LAWYER) {
+        if (!event.participants.includes(user)) {
+          throw new ForbiddenException();
+        }
+      }
+
       return this.adapter.transform(user.type !== UserType.CLIENT, i18n)(event);
     } catch (e) {
       console.log(e);
@@ -253,13 +263,13 @@ ${_.content}
   @ApiOperation({
     description: "Получение файла, загруженного в рамках этого события.",
   })
-  uploadFile(
+  async uploadFile(
     @Param("eid") eventId: string,
     @Query("name") fileName: string,
     @Request() { user }: ExtendedRequest,
     @UploadedFile() file?: Express.Multer.File
   ) {
-    this.storage.create(fileName, file?.filename, user.id.toString(), eventId);
+    await this.storage.create(fileName, file?.filename, user.id.toString(), eventId);
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -290,24 +300,51 @@ ${_.content}
     description:
       "Создание заявку на создание события в календаре текущего пользователя.",
   })
-  acceptRequestEvent(
+  async acceptRequestEvent(
     @Request() { user }: ExtendedRequest,
     @Body() data: { id: string }
   ) {
-    this.schedules.transferEvent(data.id, user.id.toString());
+    await this.schedules.transferEvent(data.id, user.id.toString());
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
-  @Post("request/decline")
+  @Post("/:eid/start")
   @ApiBearerAuth()
   @ApiOperation({
     description:
-      "Создание заявку на создание события в календаре текущего пользователя.",
+      "Создание комнаты для видеозвонка.",
   })
-  declineRequestEvent(
+  async startRoom(
     @Request() { user }: ExtendedRequest,
-    @Body() data: { id: string }
+    @Param("eid") id: string,
   ) {
-    this.schedules.deleteRequestEvent(data.id);
+    const event = await this.schedules.findEvent(id);
+    if (user.type == UserType.CLIENT || (user.type == UserType.LAWYER && user == event.owner)) {
+      throw new ForbiddenException();
+    }
+
+    console.log(event)
+    await this.schedules.createRoom(event.roomId, event.roomPassword, event.roomSecret);
+    return this.schedules.updateStatus(id, Status.STARTED)
+  }
+
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @Post("/:eid/stop")
+  @ApiBearerAuth()
+  @ApiOperation({
+    description:
+      "Удаление комнаты для видеозвонка.",
+  })
+  async stopRoom(
+    @Request() { user }: ExtendedRequest,
+    @Param("eid") id: string,
+  ) {
+    const event = await this.schedules.findEvent(id);
+    if (user.type == UserType.CLIENT || (user.type == UserType.LAWYER && user == event.owner)) {
+      throw new ForbiddenException();
+    }
+
+    await this.schedules.destroyRoom(event.roomId, event.roomSecret);
+    return this.schedules.updateStatus(id, Status.NEW)
   }
 }

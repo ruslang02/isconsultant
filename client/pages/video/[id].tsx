@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Button, Comment, Icon, Input } from "semantic-ui-react";
+import { Button, Comment, Icon, Input, Message } from "semantic-ui-react";
 import styles from "./[id].module.css";
 import "../../videoroom";
 
@@ -21,6 +21,12 @@ import { useTranslation } from "react-i18next";
 import VideoContainer from "components/VideoContainer";
 import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
+
+export enum Status {
+  NEW = 0,
+  STARTED = 1,
+  FINISHED = 2
+}
 
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
@@ -49,7 +55,7 @@ const TopBar: React.FC = function () {
       </div>
       <div className={styles.TopYar_actions}>
         <Button primary>{t('pages.video.room_settings')}</Button>
-        <Button color="red" onClick={(e:any) => router.replace("/profile/@me")}>{t('pages.video.leave_call')}</Button>
+        <Button color="red" onClick={(e: any) => router.replace("/profile/@me")}>{t('pages.video.leave_call')}</Button>
       </div>
     </header>
   );
@@ -149,6 +155,7 @@ interface Message {
   content: string;
   user: GetUserInfoDto;
   created_at: Date;
+  count: number;
 }
 
 interface WSMessage<T> {
@@ -162,14 +169,26 @@ const Chat: React.FC = () => {
   const [auth] = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [client, setClient] = useState<WebSocket | null>(null);
+  const [client, setClient] = useState<boolean>(false);
+  const messageCount = useRef<number>(0);
+  const ws = useRef<WebSocket>(null);
 
   useEffect(() => {
     console.log("Loading chat...");
+    // const client = new WebSocket(
+    //   `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${location.port ? ":" + location.port : ""
+    //   }/chat/${auth?.access_token}`
+    // );
+
     const client = new WebSocket(
-      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${location.port ? ":" + location.port : ""
-      }/chat/${auth?.access_token}`
+      `ws://localhost:8081/chat/${auth?.access_token}`
     );
+
+    ws.current = client;
+
+    client.addEventListener("close", (ev: CloseEvent) => {
+      console.log(ev);
+    })
 
     client.addEventListener("error", (ev: Event) => {
       console.log("WS-Error: " + ev)
@@ -182,7 +201,8 @@ const Chat: React.FC = () => {
           data: { id: +location.pathname.split("/")[2] },
         } as WSMessage<JoinChatRoomDto>)
       );
-      setClient(client);
+
+      setClient(true);
     });
 
     client.addEventListener("message", async (ev: MessageEvent<string>) => {
@@ -195,18 +215,29 @@ const Chat: React.FC = () => {
           let user = users.find((v) => v.id === uid) as GetUserInfoDto;
 
           if (!user) {
-            const { data } = await api.get<GetUserInfoDto>(`/users/${uid}`);
-            user = data;
+            user = { first_name: "", last_name: "" } as GetUserInfoDto
+
+            // try {
+            //   const { data } = await api.get<GetUserInfoDto>(`/users/${uid}`);
+            //   user = data;
+            // } catch(error) {
+            //   user = { first_name: "", last_name: "" } as GetUserInfoDto
+            // }
           }
 
-          setMessages((msgs) => [
-            ...msgs,
-            {
-              content: data.message,
-              user,
-              created_at: new Date(),
-            },
-          ]);
+          setMessages((msgs) => {
+            const newArray = [
+              ...msgs,
+              {
+                content: data.message,
+                user,
+                created_at: new Date(),
+                count: messageCount.current
+              },
+            ]
+            messageCount.current++;
+            return newArray;
+          });
           break;
         case "new_file":
           const { file } = data;
@@ -216,8 +247,6 @@ const Chat: React.FC = () => {
           console.error(data);
       }
     });
-
-    setClient(client);
 
     return () => {
       client.close();
@@ -250,7 +279,7 @@ const Chat: React.FC = () => {
       >
         <Comment.Group>
           {messages.map((message) => (
-            <Comment key={message.user.id}>
+            <Comment key={message.count}>
               <Comment.Avatar
                 src={
                   message.user.avatar ??
@@ -281,9 +310,9 @@ const Chat: React.FC = () => {
         <Button
           icon
           primary
-          disabled={!!client && client.readyState !== WebSocket.OPEN}
+          disabled={!client}
           onClick={() => {
-            client?.send(
+            ws.current.send(
               JSON.stringify({
                 event: "post_message",
                 data: {
@@ -319,6 +348,43 @@ const Sidebar: React.FC = () => (
   </section>
 );
 
+const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: boolean }> = ({ event, status, loaded }) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        height: "100vh",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          maxWidth: "400px"
+        }}
+      >
+        {!loaded ?
+          <Message
+            header="Loading meeting..."
+          /> :
+          status == Status.NEW ?
+          <Message
+            header="Meeting not started"
+            content="Wait for organizer to start it"
+          />
+          : 
+          <Message
+            header="Meeting already finished"
+            content="Organizer has already finished this meeting"
+          />
+        }
+      </div>
+    </div>
+  )
+}
+
 export default function Video() {
   const router = useRouter();
   const { id } = router.query;
@@ -327,6 +393,8 @@ export default function Video() {
   const [files, setFiles] = useState<RemoteFile[]>([]);
   const [event, setEvent] = useState<GetEventDto | null>(null);
   const [auth] = useAuth();
+  const [status, setStatus] = useState<Status>(null);
+  const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     if (!id) {
@@ -337,8 +405,11 @@ export default function Video() {
       try {
         const { data } = await api.get<GetEventDto>(`/events/${id}`);
         setEvent(data);
+        setStatus(data.room_status)
+        setLoaded(true);
       } catch (e) {
         alert("This event is not available to you or it doesn't exist")
+        router.replace("/")
       }
     })();
   }, [id]);
@@ -347,7 +418,9 @@ export default function Video() {
     <UserStoreContext.Provider value={{ users, setUsers }}>
       <FilesContext.Provider value={{ files, setFiles }}>
         <EventContext.Provider value={event}>
-          {!(event) ? <></> :
+
+          {(status != Status.STARTED) ?
+            <WaitingScreen event={event} status={status} loaded={loaded} /> :
             <main
               style={{
                 display: "flex",
@@ -366,9 +439,9 @@ export default function Video() {
                   flexGrow: 1,
                 }}
               >
-                
-                  <VideoContainer roomNumber={event.room_id} roomPin={event.room_password} roomSecret={event.room_secret} />
-                
+
+                <VideoContainer roomNumber={event.room_id} roomPin={event.room_password} roomSecret={event.room_secret} />
+
                 <Sidebar />
               </section>
             </main>

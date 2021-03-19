@@ -14,27 +14,45 @@ export class AuthService implements OnApplicationBootstrap {
   onApplicationBootstrap() {
     if (DEVELOPMENT == "true") {
       let user = new CreateUserDto()
-      user.email = "test@test.com"
-      user.first_name = "test"
-      user.last_name = "test"
-      user.middle_name = "test"
-      user.password = "test"
+      user.email = "user@user.com"
+      user.first_name = "user"
+      user.last_name = "user"
+      user.middle_name = "user"
+      user.password = "user"
 
       this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
         console.log(insertRes)
       }).catch(() => {});
 
-      console.log("Creating test user...")
-      try {
-        this.users.findOneByEmail("test@test.com").then((u: User) => {
-          if (!u) {
-            this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
-              console.log(insertRes)
-            })
-          }
-        }).catch(() => {});
-      } catch {
-      }
+      user.email = "lawyer@lawyer.com"
+      user.first_name = "lawyer"
+      user.last_name = "lawyer"
+      user.middle_name = "lawyer"
+      user.password = "lawyer"
+
+      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+        console.log(insertRes)
+      }).catch(() => {});
+
+      user.email = "moderator@moderator.com"
+      user.first_name = "moderator"
+      user.last_name = "moderator"
+      user.middle_name = "moderator"
+      user.password = "moderator"
+
+      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+        console.log(insertRes)
+      }).catch(() => {});
+
+      user.email = "admin@admin.com"
+      user.first_name = "admin"
+      user.last_name = "admin"
+      user.middle_name = "admin"
+      user.password = "admin"
+
+      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+        console.log(insertRes)
+      }).catch(() => {});
     }
   }
 

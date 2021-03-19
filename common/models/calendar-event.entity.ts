@@ -11,6 +11,12 @@ export enum RoomAccess {
   ONLY_PARTICIPANTS = 1
 }
 
+export enum Status {
+  NEW = 0,
+  STARTED = 1,
+  FINISHED = 2
+}
+
 @Entity()
 export class CalendarEvent {
   @PrimaryGeneratedColumn()
@@ -111,4 +117,12 @@ export class CalendarEvent {
 
   @OneToMany(() => ChatMessage, message => message.event)
   messages: ChatMessage[]
+
+  @Column({type: 'enum', enum: Status, name: "room_status"})
+  @ApiProperty({
+    default: Status.NEW,
+    description: "Статус события, отражающий состояние комнаты.",
+    enum: Status
+  })
+  roomStatus: Status
 }

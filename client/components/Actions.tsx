@@ -5,8 +5,8 @@ import video from "pages/video";
 
 export const Actions: React.FC<{
     audioAvailable: boolean, videoAvailable: boolean, audio: boolean, video: boolean,
-    changeAudio: Function, changeVideo: Function
-}> = function ({ audioAvailable, videoAvailable, audio, video, changeAudio, changeVideo }) {
+    changeAudio: Function, changeVideo: Function, changeScreen: Function, screen: boolean
+}> = function ({ audioAvailable, videoAvailable, audio, video, changeAudio, changeVideo, changeScreen, screen }) {
     function onVideoClick(e: any) {
         changeVideo(!video)
     }
@@ -15,9 +15,14 @@ export const Actions: React.FC<{
         changeAudio(!audio)
     }
 
+    function onScreenClick(e: any) {
+        changeScreen(!screen)
+    }
+
 
     return (<div className={styles.Actions}>
         <Button
+            onClick={onScreenClick}
             icon
             secondary
             circular

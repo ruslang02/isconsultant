@@ -91,8 +91,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
           client.send(JSON.stringify(m));
         }
       }
-
-      return;
     }
   }
 }
