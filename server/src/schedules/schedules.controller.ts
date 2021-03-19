@@ -186,7 +186,7 @@ export class SchedulesController {
     return this.schedules.updateEvent(eventId, data);
   }
 
-  @Types(UserType.LAWYER)
+  @Types(UserType.LAWYER, UserType.ADMIN, UserType.MODERATOR)
   @UseGuards(JwtAuthGuard, UserGuard)
   @Delete("/:eid")
   @ApiBearerAuth()
@@ -220,7 +220,7 @@ export class SchedulesController {
   @Get("/:eid/log/json")
   async getChatLogJSON(@Param("eid") eventId: string) {
     try {
-      return this.chat.getForEvent(eventId);
+      return this.chat.getForEvent(eventId, true);
     } catch (e) {
       throw new BadRequestException("The event does not exist or the chat log is empty.");
     }

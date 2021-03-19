@@ -20,13 +20,6 @@ api.interceptors.request.use(function (config) {
 
 (api.interceptors.response as AxiosInterceptorManager<AxiosResponse<ErrorDto>>).use(function (response) {
   if (response.status > 300) {
-    const error = document.createElement("div");
-    error.className = "ui error message";
-    const content = document.createElement("p");
-    content.innerText = response.data.message;
-    error.appendChild(content);
-    document.body.appendChild(error);
-    setTimeout(() => error.remove(), 3000);
     throw response.data;
   }
 

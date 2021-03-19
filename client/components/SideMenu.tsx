@@ -8,20 +8,20 @@ export const SideMenu: React.FC = () => {
   const [auth] = useAuth();
 
   return (
-    <Menu secondary vertical style={{ margin: 0 }}>
+    <Menu secondary vertical style={{ margin: 0, marginLeft: "1rem" }}>
       <Menu.Item
         name='Profile'
         active={router.pathname.includes('/profile/@me')}
         link
         onClick={() => router.push('/profile/@me')}
       />
-      { auth?.user.type !== "client" && <Menu.Item
+      { auth?.user?.type !== "client" && <Menu.Item
         name='Meetings'
         active={router.pathname.includes('/calendar')}
         link
         onClick={() => router.push('/calendar')}
       />}
-      { auth?.user.type === "client" && <Menu.Item
+      { auth?.user?.type === "client" && <Menu.Item
         name='Meetings'
         active={router.pathname.includes('/meetings')}
         link

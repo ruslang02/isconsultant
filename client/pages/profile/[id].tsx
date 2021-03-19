@@ -21,13 +21,10 @@ const Empty = () => {
     })()
   }, [id]);
   return (
-    <Page>
+    <Page hasMenu={false}>
       <Segment>
-        <div style={{ float: "left", margin: "0 2rem 0 0", textAlign: "center" }}>
+        <div style={{ float: "left", margin: "0 2rem 0 0", textAlign: "center", height: "500px" }}>
           <Image size="small" src={user?.avatar} avatar />
-          <br />
-          <br />
-          <div><a href="#"><Icon name="edit" /> Change avatar</a></div>
         </div>
         <div>
           <h2>

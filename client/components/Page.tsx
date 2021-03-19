@@ -4,7 +4,7 @@ import { Header } from "./Header";
 import styles from "styles/Page.module.css";
 import { SideMenu } from "./SideMenu";
 
-export const Page: React.FC<{ children?: ReactNode }> = ({ children }) => {
+export const Page: React.FC<{ children?: ReactNode, hasMenu?: boolean }> = ({ children, hasMenu }) => {
   return (
     <section>
       <Header />
@@ -12,7 +12,7 @@ export const Page: React.FC<{ children?: ReactNode }> = ({ children }) => {
         <div className={styles.page}>
           {children}
         </div>
-        <SideMenu />
+        { hasMenu !== false && <SideMenu /> }
       </Container>
     </section>
   )

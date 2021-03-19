@@ -23,7 +23,7 @@ export class SchedulesService implements OnModuleInit {
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
     private pEvents: Repository<PendingEvent>,
-  ) {}
+  ) { }
 
   private pluginHandle: any
 
@@ -42,19 +42,20 @@ export class SchedulesService implements OnModuleInit {
       console.log(error);
     }
   }
-  
+
   async createRoom(id: number, pin: string, secret: string) {
-    await this.pluginHandle.sendWithTransaction({ body: { request: "create", room: id, pin: pin, secret: secret } })
+    await this.pluginHandle?.sendWithTransaction({ body: { request: "create", room: id, pin: pin, secret: secret } })
   }
 
   async destroyRoom(id: number, secret: string) {
-    await this.pluginHandle.sendWithTransaction({ body: { request: "destroy", room: id, secret: secret } })
+    await this.pluginHandle?.sendWithTransaction({ body: { request: "destroy", room: id, secret: secret } })
   }
 
   async findManyByLawyer(uid: string) {
     return this.events
       .createQueryBuilder("event")
       .leftJoinAndSelect("event.owner", "user")
+      .leftJoinAndSelect("event.participants", "participant")
       .where("event.owner_id = :uid", { uid })
       .getMany();
   }
@@ -140,26 +141,28 @@ export class SchedulesService implements OnModuleInit {
 
   async updateEvent(eventId: string, data: PatchEventDto) {
     const model = await this.events.findOne(eventId) as Partial<CalendarEvent>;
-    if (data.timespan_start) {
+    if ("timespan_start" in data) {
       model.start_timestamp = new Date(data.timespan_start);
     }
-    if (data.timespan_end) {
+    if ("timespan_end" in data) {
       model.end_timestamp = new Date(data.timespan_end);
     }
-    if (data.title) {
+    if ("title" in data) {
       model.title = data.title;
     }
-    if (data.description) {
+    if ("description" in data) {
       model.description = data.description;
     }
-    if (data.participants) {
+    if ("participants" in data) {
       model.participants = (data.participants.map((id) => ({
         id,
       })) as unknown) as User[];
     }
-    if (data.room_access) {
+    if ("room_access" in data) {
       model.roomAccess = data.room_access;
     }
+
+    console.log(model);
 
     await this.events.save(model);
   }

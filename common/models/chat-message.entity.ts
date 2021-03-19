@@ -15,7 +15,7 @@ export class ChatMessage {
   @JoinColumn({ name: 'from_id' })
   from: User;
 
-  @ManyToOne(() => CalendarEvent, event => event.messages)
+  @ManyToOne(() => CalendarEvent, event => event.messages, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'event_id' })
   event: CalendarEvent;
 
