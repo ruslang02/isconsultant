@@ -232,24 +232,24 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
   function clickScreen(enabled: boolean) {
     function onScreenJoin() {
-      screenHandle.current.getUserMedia({ video: "screen", audio: false })
+      navigator.mediaDevices.getDisplayMedia()
         .then(function (stream: any) {
-          var pc = publisherHandle.current.createPeerConnection();
+          var pc = screenHandle.current.createPeerConnection();
           userStream.current = stream
           stream.getTracks().forEach(function (track: any) {
-            publisherHandle.current.addTrack(track, stream);
+            screenHandle.current.addTrack(track, stream);
           });
         })
         .then(function () {
-          return publisherHandle.current.createOffer();
+          return screenHandle.current.createOffer();
         })
         .then(function (jsep: any) {
-          return publisherHandle.current.sendWithTransaction({ body: { video: true, request: "publish" }, jsep: jsep });
+          return screenHandle.current.sendWithTransaction({ body: { video: true, request: "publish" }, jsep: jsep });
         })
         .then(function (response: any) {
           var jsep = response.get("jsep");
           if (jsep) {
-            publisherHandle.current.setRemoteSDP(jsep);
+            screenHandle.current.setRemoteSDP(jsep);
             return jsep;
           }
         });
