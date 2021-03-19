@@ -232,6 +232,7 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
   function clickScreen(enabled: boolean) {
     function onScreenJoin() {
+      // @ts-ignore
       navigator.mediaDevices.getDisplayMedia()
         .then(function (stream: any) {
           var pc = screenHandle.current.createPeerConnection();
