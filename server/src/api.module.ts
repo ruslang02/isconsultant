@@ -33,7 +33,7 @@ const {
       database: POSTGRES_DB,
       entities: [CalendarEvent, ChatMessage, Comment, File, PendingEvent, Report, User],
       synchronize: true,
-      // dropSchema: true
+      dropSchema: true
     }),
     UsersModule,
     SchedulesModule,
