@@ -12,6 +12,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Response,
   UseGuards,
@@ -54,8 +55,18 @@ export class UsersController {
     private adapter: UserAdapter
   ) { }
 
-  @Types(UserType.ADMIN, UserType.MODERATOR)
-  @UseGuards(JwtAuthGuard, UserGuard)
+  @Get("search")
+  @ApiOperation({
+    description: 'Поиск пользователей.',
+  })
+  async searchUsers(
+    @Query("query") query: string,
+    @I18n() i18n: I18nContext
+  ) {
+    return Promise.all((await this.users.search(query)).map(u => this.adapter.transform(u, i18n)));
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('')
   @ApiOperation({
     description: 'Получение всех зарегистрированных пользователей.',

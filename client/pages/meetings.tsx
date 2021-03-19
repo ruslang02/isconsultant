@@ -66,7 +66,10 @@ const MeetingsList = () => {
           </Card>
         )) : <div style={{ textAlign: "center", color: "grey", width: "100%" }}>No meetings found.</div>}
       </Card.Group>
-      <EventModal open={open} onClose={() => setOpen(false)} onSubmit={() => { }} event={event} />
+      <EventModal open={open} onClose={() => {
+        setOpen(false);
+        setEvent(undefined);
+      }} onSubmit={() => { }} event={event} />
     </Page>
   );
 };

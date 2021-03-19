@@ -210,7 +210,7 @@ export class SchedulesController {
   @Get("/:eid/log/json")
   async getChatLogJSON(@Param("eid") eventId: string) {
     try {
-      return this.chat.getForEvent(eventId);
+      return this.chat.getForEvent(eventId, true);
     } catch (e) {
       throw new BadRequestException("The event does not exist or the chat log is empty.");
     }

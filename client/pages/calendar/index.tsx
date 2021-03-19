@@ -40,8 +40,8 @@ const CalendarPage = () => {
     );
   };
   useEffect(() => {
-    loadEvents();
-  }, []);
+    if (!event) loadEvents();
+  }, [event]);
 
   return (
     <Page>
@@ -61,7 +61,7 @@ const CalendarPage = () => {
             </SHeader.Content>
           </SHeader>
         </Button>
-        <Button.Or style={{ height: "auto" }} />
+        <Button.Or style={{ height: "auto", width: "auto" }} />
         <Button
           size="huge"
           primary
@@ -94,7 +94,7 @@ const CalendarPage = () => {
         }}
         style={{ height: 500 }}
       />
-      <EventModal
+      <EventModal editable
         onClose={() => {
           setOpen(false);
           loadEvents();
@@ -102,7 +102,16 @@ const CalendarPage = () => {
         open={open}
         event={event}
         onSubmit={async (temp: GetEventDto) => {
+          if (event === undefined) {
+            await api.put("/events", temp);
+            setMessage("Your meeting was successfully created.");
+          } else {
+            await api.patch(`/events/${event.id}`, temp);
+            setMessage("Your meeting was successfully edited.");
+          }
+
           setOpen(false);
+          setEvent(undefined);
         }}
       />
     </Page>

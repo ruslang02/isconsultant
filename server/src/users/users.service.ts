@@ -49,4 +49,15 @@ export class UsersService {
   deleteOne(uid: string | number) {
     return this.users.delete(uid.toString());
   }
+
+  search(queryStr: string) {
+    const query = queryStr.toLowerCase().trim();
+    const builder = this.users.createQueryBuilder()
+      .where("LOWER(first_name) LIKE :query", { query: `%${query}%` })
+      .orWhere("LOWER(middle_name) LIKE :query", { query: `%${query}%` })
+      .orWhere("LOWER(last_name) LIKE :query", { query: `%${query}%` });
+
+    console.log(builder.getSql())
+    return builder.getMany();
+  }
 }

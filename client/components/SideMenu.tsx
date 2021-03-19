@@ -15,13 +15,13 @@ export const SideMenu: React.FC = () => {
         link
         onClick={() => router.push('/profile/@me')}
       />
-      { auth?.user.type !== "client" && <Menu.Item
+      { auth?.user?.type !== "client" && <Menu.Item
         name='Meetings'
         active={router.pathname.includes('/calendar')}
         link
         onClick={() => router.push('/calendar')}
       />}
-      { auth?.user.type === "client" && <Menu.Item
+      { auth?.user?.type === "client" && <Menu.Item
         name='Meetings'
         active={router.pathname.includes('/meetings')}
         link

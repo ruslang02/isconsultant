@@ -23,9 +23,13 @@ import { CreateUserDto } from "@common/dto/create-user.dto";
 import { AxiosError } from "@common/node_modules/axios";
 import { MessageContext } from "utils/MessageContext";
 import { ErrorDto } from "@common/dto/error.dto";
+import { EventArrange } from "components/EventArrange";
 
 function Promo() {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [description, setDescription] = useState("");
+
   return (
     <Form
       style={{
@@ -55,168 +59,25 @@ function Promo() {
           >
             <h2>{t("pages.index.title")}</h2>
             <p style={{ fontSize: "13pt" }}>{t("pages.index.subtitle")}</p>
-            <EventArrange />
+            <TextArea
+              style={{ resize: "none" }}
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
+            ></TextArea>
+            <div style={{ textAlign: "right", marginTop: "1rem" }}>
+              <Button primary onClick={() => setOpen(true)}>
+                {t("pages.index.arrange_event")}
+              </Button>
+            </div>
+            <EventArrange
+              open={open}
+              onClose={() => setOpen(false)}
+              description={description}
+            />
           </section>
         </div>
       </Container>
     </Form>
-  );
-}
-
-function EventArrange() {
-  const [open, setOpen] = useState(false);
-  const { t } = useTranslation();
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [description, setDescription] = useState("");
-  const [auth] = useAuth();
-  const { setValue: setMessage } = useContext(MessageContext);
-
-  const handleSubmit = async () => {
-    if (!auth?.access_token) {
-      try {
-        const {
-          data: { access_token },
-        } = await api.post<{ access_token: string }>("/auth/register", {
-          email,
-          first_name: firstName,
-          middle_name: middleName,
-          last_name: lastName,
-          password,
-        } as CreateUserDto);
-
-        const timespan_end = new Date();
-        timespan_end.setDate(timespan_end.getDate() + 1);
-        timespan_end.setHours(0, 0, 0);
-        await api.post(
-          "/events/request",
-          {
-            description,
-            additional_ids: [auth.user.id],
-            timespan_start: new Date().toISOString(),
-            timespan_end: timespan_end.toISOString(),
-          } as ArrangeEventDto,
-          {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
-            },
-          }
-        );
-        setMessage(
-          "Your meeting request was created. In order for it to be accepted, you need to <b>verify your email address</b> using the link we sent you."
-        );
-        setOpen(false);
-      } catch (e) {
-        console.log(e);
-        setMessage("Error: " + (e as ErrorDto).message);
-      }
-    }
-  };
-  const createRequest = async () => {
-    // TODO: choose time?
-    const timespan_end = new Date();
-    timespan_end.setDate(timespan_end.getDate() + 1);
-    timespan_end.setHours(0, 0, 0);
-    try {
-      await api.post("/events/request", {
-        description,
-        additional_ids: [auth.user.id],
-        timespan_start: new Date().toISOString(),
-        timespan_end: timespan_end.toISOString(),
-      } as ArrangeEventDto);
-      setMessage(
-        "Your meeting request was created. You are now being redirect to the meetings page."
-      );
-      router.push("/meetings");
-    } catch (e) {}
-  };
-
-  return (
-    <>
-      <TextArea
-        style={{ resize: "none" }}
-        onChange={(e) => setDescription(e.target.value)}
-        value={description}
-      ></TextArea>
-      <div style={{ textAlign: "right", marginTop: "1rem" }}>
-        <Button
-          primary
-          onClick={() => {
-            if (auth?.access_token) createRequest();
-            else setOpen(true);
-          }}
-        >
-          {t("pages.index.arrange_event")}
-        </Button>
-      </div>
-      <Modal size={"small"} open={open} onClose={() => setOpen(false)}>
-        <Modal.Header>Arrange a meeting</Modal.Header>
-        <Modal.Content>
-          <Form onSubmit={handleSubmit}>
-            <Form.Field>
-              <label>First name:</label>
-              <input
-                placeholder="John"
-                onChange={(e) => setFirstName(e.target.value)}
-                type="text"
-                value={firstName}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>Middle name:</label>
-              <input
-                onChange={(e) => setMiddleName(e.target.value)}
-                value={middleName}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>Last name:</label>
-              <input
-                placeholder="Smith"
-                onChange={(e) => setLastName(e.target.value)}
-                value={lastName}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>E-mail:</label>
-              <input
-                placeholder="example@example.org"
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                value={email}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>Password:</label>
-              <input
-                placeholder=""
-                type="password"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>Description:</label>
-              <textarea
-                onChange={(e) => setDescription(e.target.value)}
-                value={description}
-              ></textarea>
-            </Form.Field>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <Button onClick={(e) => setOpen(false)} type="button">
-                Cancel
-              </Button>
-              <Button primary type="submit">
-                Send
-              </Button>
-            </div>
-          </Form>
-        </Modal.Content>
-      </Modal>
-    </>
   );
 }
 
