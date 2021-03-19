@@ -258,8 +258,8 @@ const Chat: React.FC = () => {
                 }
               />
               <Comment.Content>
-                <Comment.Author as="a">
-                  {message.user.last_name} {message.user.first_name}
+                <Comment.Author>
+                  <a href={`/profile/${message.user.id}`}>{message.user.last_name} {message.user.first_name}</a>
                 </Comment.Author>
                 <Comment.Metadata>
                   <div>{message.created_at.toLocaleTimeString()}</div>

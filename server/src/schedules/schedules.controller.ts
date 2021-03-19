@@ -176,7 +176,7 @@ export class SchedulesController {
     return this.schedules.updateEvent(eventId, data);
   }
 
-  @Types(UserType.LAWYER)
+  @Types(UserType.LAWYER, UserType.ADMIN, UserType.MODERATOR)
   @UseGuards(JwtAuthGuard, UserGuard)
   @Delete("/:eid")
   @ApiBearerAuth()

@@ -7,6 +7,8 @@ import { Button, Message } from "semantic-ui-react";
 import { useRouter } from "next/router";
 import { useAuth } from "utils/useAuth";
 import { MessageContext } from "utils/MessageContext";
+import { UserCacheContext } from "utils/UserCacheContext";
+import { GetUserDto } from "@common/dto/get-user.dto";
 
 const isPublic = (path: string) => path === "/" || path === "/login" || path === "/register" || path.startsWith("/verify");
 
@@ -21,6 +23,7 @@ function MyApp({
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [auth, setAuth] = useAuth();
+  const [users, setUsers] = useState<GetUserDto[]>([]);
   const [allowed, setAllowed] = useState(typeof window === "undefined" || isPublic(router.pathname));
   /*
     useEffect(() => {
@@ -41,7 +44,9 @@ function MyApp({
       >
         {i18n.language === "en" ? "RU" : "EN"}
       </Button>
-      <Component {...pageProps} />
+      <UserCacheContext.Provider value={[users, setUsers]}>
+        <Component {...pageProps} />
+      </UserCacheContext.Provider>
       <div
         style={{
           position: "fixed",

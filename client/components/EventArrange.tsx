@@ -3,14 +3,13 @@ import { CreateUserDto } from "@common/dto/create-user.dto";
 import { ErrorDto } from "@common/dto/error.dto";
 import { GetUserDto } from "@common/dto/get-user.dto";
 import router from "next/router";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Form, Button, TextArea, Image, Dropdown } from "semantic-ui-react";
 import { api } from "utils/api";
 import { MessageContext } from "utils/MessageContext";
 import { useAuth } from "utils/useAuth";
-
-const userCache = new Map<string, GetUserDto>();
+import { UserCacheContext } from "utils/UserCacheContext";
 
 export function EventArrange({ open, onClose, description: descr, lawyerId }: { open: boolean; onClose: () => void; description?: string; lawyerId?: string}) {
   const { t } = useTranslation();
@@ -21,8 +20,13 @@ export function EventArrange({ open, onClose, description: descr, lawyerId }: { 
   const [password, setPassword] = useState("");
   const [description, setDescription] = useState(descr);
   const [auth] = useAuth();
+  const [users, setUsers] = useContext(UserCacheContext);
   const [lawyer, setLawyer] = useState<string | undefined>(lawyerId);
   const { setValue: setMessage } = useContext(MessageContext);
+
+  useEffect(() => {
+    if (open) setLawyer(lawyerId);
+  }, [open])
 
   const handleSubmit = async () => {
     let access_token = auth?.access_token;
@@ -139,7 +143,15 @@ export function EventArrange({ open, onClose, description: descr, lawyerId }: { 
                 fluid
                 search
                 selection
-                options={[...userCache.values()].map((user) => ({
+                onChange={(_e, d) => {
+                  setLawyer(d.value.toString());
+                }}
+                onSearchChange={(_e, d) => {
+                  api.get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`).then(({ data }) => {
+                    setUsers([...(users.filter(u => !data.some(v => v.id === u.id))), ...data]);
+                  });
+                }}
+                options={users.map((user) => ({
                   key: user.id,
                   text: `${user.first_name} ${user.last_name}`,
                   value: user.id,

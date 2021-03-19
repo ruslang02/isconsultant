@@ -44,6 +44,7 @@ import { PatchUserDto } from '@common/dto/patch-user.dto';
 import { GetUserDto } from '@common/dto/get-user.dto';
 import { PatchUserVerifiedDto } from '@common/dto/patch-user-verified.dto';
 import { UserAdapter } from './user.adapter';
+import { In } from 'typeorm';
 
 @ApiTags('Управление пользователями')
 @Controller('/api/users')
@@ -61,9 +62,11 @@ export class UsersController {
   })
   async searchUsers(
     @Query("query") query: string,
+    @Query("ids") ids: string,
     @I18n() i18n: I18nContext
   ) {
-    return Promise.all((await this.users.search(query)).map(u => this.adapter.transform(u, i18n)));
+    const users = query ? await this.users.search(query) : ids ? await this.users.findMany({ where: { id: In(ids.split(',')) } }) : [];
+    return Promise.all(users.map(u => this.adapter.transform(u, i18n)));
   }
 
   @UseGuards(JwtAuthGuard)

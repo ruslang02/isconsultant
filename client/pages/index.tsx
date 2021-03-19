@@ -39,22 +39,14 @@ function Promo() {
         backgroundSize: "cover",
       }}
     >
-      <Container style={{ display: "flex", height: "100%" }}>
-        <div style={{ width: "50%", flexShrink: 0 }}></div>
-        <div
-          style={{
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
+      <Container style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "flex-end" }}>
           <section
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.7)",
               backdropFilter: "blur(15px)",
               borderRadius: "10px",
               padding: "2rem",
+              maxWidth: "500px"
             }}
           >
             <h2>{t("pages.index.title")}</h2>
@@ -75,7 +67,6 @@ function Promo() {
               description={description}
             />
           </section>
-        </div>
       </Container>
     </Form>
   );

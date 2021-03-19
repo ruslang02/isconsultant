@@ -1,4 +1,5 @@
 import { GetUserInfoDto } from "@common/dto/get-user-info.dto";
+import { EventArrange } from "components/EventArrange";
 import { Page } from "components/Page";
 import React, { useEffect, useState } from "react";
 import { Button, Item } from "semantic-ui-react";
@@ -8,6 +9,8 @@ import { useAuth } from "utils/useAuth";
 const LawyersPage = () => {
   const [lawyers, setLawyers] = useState<GetUserInfoDto[]>([]);
   const [auth] = useAuth();
+  const [open, setOpen] = useState(false);
+  const [lawyerId, setLawyerId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
@@ -38,11 +41,22 @@ const LawyersPage = () => {
               <Item.Header as="a">{u.first_name} {u.last_name}</Item.Header>
               <Item.Description>Rating: {u.rating}<br />Joined at: {new Date(u.created_timestamp).toLocaleDateString()}
               </Item.Description>
-              <Button floated="right" content="Request a meeting" primary />
+              <Button floated="right" content="Request a meeting" primary onClick={() => {
+                setLawyerId(u.id);
+                setOpen(true);
+              }} />
             </Item.Content>
           </Item>
         ))}
       </Item.Group>
+            <EventArrange
+              open={open}
+              onClose={() => {
+                setOpen(false);
+                setLawyerId(undefined);
+              }}
+              lawyerId={lawyerId}
+            />
     </Page>
   );
 };

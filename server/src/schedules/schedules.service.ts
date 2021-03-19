@@ -44,17 +44,18 @@ export class SchedulesService implements OnModuleInit {
   }
 
   async createRoom(id: number, pin: string, secret: string) {
-    await this.pluginHandle.sendWithTransaction({ body: { request: "create", room: id, pin: pin, secret: secret } })
+    await this.pluginHandle?.sendWithTransaction({ body: { request: "create", room: id, pin: pin, secret: secret } })
   }
 
   async destroyRoom(id: number, secret: string) {
-    await this.pluginHandle.sendWithTransaction({ body: { request: "destroy", room: id, secret: secret } })
+    await this.pluginHandle?.sendWithTransaction({ body: { request: "destroy", room: id, secret: secret } })
   }
 
   async findManyByLawyer(uid: string) {
     return this.events
       .createQueryBuilder("event")
       .leftJoinAndSelect("event.owner", "user")
+      .leftJoinAndSelect("event.participants", "participant")
       .where("event.owner_id = :uid", { uid })
       .getMany();
   }

@@ -51,7 +51,11 @@ export class UsersService {
   }
 
   search(queryStr: string) {
-    const query = queryStr.toLowerCase().trim();
+    const query = queryStr?.toLowerCase().trim();
+    if (!query) {
+      return [];
+    }
+
     const builder = this.users.createQueryBuilder()
       .where("LOWER(first_name) LIKE :query", { query: `%${query}%` })
       .orWhere("LOWER(middle_name) LIKE :query", { query: `%${query}%` })

@@ -97,7 +97,6 @@ const CalendarPage = () => {
       <EventModal editable
         onClose={() => {
           setOpen(false);
-          loadEvents();
         }}
         open={open}
         event={event}
@@ -112,6 +111,7 @@ const CalendarPage = () => {
 
           setOpen(false);
           setEvent(undefined);
+          loadEvents();
         }}
       />
     </Page>

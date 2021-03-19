@@ -21,6 +21,7 @@ import { MessageContext } from "utils/MessageContext";
 import { GetUserDto } from "@common/dto/get-user.dto";
 import { ChatMessage } from "@common/models/chat-message.entity";
 import router from "next/router";
+import { UserCacheContext } from "utils/UserCacheContext";
 
 interface EventModalProps {
   editable?: boolean;
@@ -29,8 +30,6 @@ interface EventModalProps {
   onSubmit: (e: PatchEventDto) => void;
   event: GetEventDto;
 }
-
-const userCache = new Map<string, GetUserDto>();
 
 export function EventModal({
   editable,
@@ -42,7 +41,9 @@ export function EventModal({
   const [temp, setTemp] = useState<PatchEventDto | undefined>(event);
   const [files, setFiles] = useState<File[]>([]);
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
+  const [users, setUsers] = useContext(UserCacheContext);
   const { setValue: setMessage } = useContext(MessageContext);
+  const [, update] = useState();
 
   useEffect(() => {
     if (event === undefined && temp === undefined) {
@@ -63,6 +64,14 @@ export function EventModal({
         );
         setChatLog(data);
       })();
+      if (event.participants?.length) {
+      (async () => {
+        const { data } = await api.get<GetUserDto[]>(
+          `/users/search?ids=${event.participants.join(",")}`
+        );
+        setUsers([...(users.filter(u => !data.some(v => v.id === u.id))), ...data]);
+      })();
+      }
       setTemp({ ...event });
     }
   }, [event]);
@@ -110,7 +119,7 @@ ${
     "padding": "1rem 1.5rem",
     "align-items": "center"}}>
         {editable ? event === undefined ? "Create new meeting" : "Update meeting info" : "View meeting info"}
-            <Button
+        {event !== undefined && <Button
               primary
               icon="arrow right"
               labelPosition="right"
@@ -119,7 +128,7 @@ ${
                 window.open(`/video/${event.room_id}`);
               }}
               style={{ marginLeft: "auto" }}
-            />
+            />}
       </Modal.Header>
       <Modal.Content style={{ display: "flex" }}>
         <section style={{ width: "100%" }}>
@@ -217,14 +226,23 @@ ${
                 multiple
                 search
                 selection
-                options={[...userCache.values()].map((user) => ({
+                onChange={(_e, d) => {
+                  const nTemp = {...temp, participants: d.value.toString().split(",").filter(x => x)};
+                  setTemp(nTemp);
+                }}
+                onSearchChange={(_e, d) => {
+                  api.get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`).then(({ data }) => {
+                    setUsers([...(users.filter(u => !data.some(v => v.id === u.id))), ...data]);
+                  });
+                }}
+                options={users.map((user) => ({
                   key: user.id,
                   text: `${user.first_name} ${user.last_name}`,
                   value: user.id,
                 }))}
                 value={temp?.participants?.map((v) => {
-                  const user = userCache.get(v) as GetUserDto;
-                  return user.id;
+                  const user = users.find(u => u.id === v) as GetUserDto;
+                  return user?.id;
                 })}
               />
             </Form.Field>
