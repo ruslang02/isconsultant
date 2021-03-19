@@ -14,7 +14,7 @@ export class ChatService {
   ) { }
 
   async createChatMessage(uid: string, eid: string, content: string) {
-    const { id } = await this.schedules.findEventByRoom(eid);
+    const { id } = await this.schedules.findEvent(eid);
     const message = new ChatMessage() as DeepPartial<ChatMessage>;
     message.from = { id: +uid };
     message.event = { id };
