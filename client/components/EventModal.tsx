@@ -102,10 +102,10 @@ Time: ${new Date(temp.timespan_start).toLocaleString("en-GB", {
       })}
 
 Join the meeting room: https://consultant.infostrategic.com/video/${
-        event.room_id
+        event.id
       }
 
-Room ID: ${event.room_id}
+Room ID: ${event.id}
 ${
   temp.room_access == 0
     ? "You will also be required to log in to your account."
@@ -125,7 +125,7 @@ ${
               labelPosition="right"
               content="Join meeting"
               onClick={() => {
-                window.open(`/video/${event.room_id}`);
+                window.open(`/video/${event.id}`);
               }}
               style={{ marginLeft: "auto" }}
             />}
@@ -252,7 +252,7 @@ ${
                 label="Room ID"
                 placeholder="(will be generated later)"
                 readOnly
-                value={temp?.room_id}
+                value={event?.id}
               />
             </Form.Field>
             
