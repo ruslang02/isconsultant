@@ -175,14 +175,14 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     console.log("Loading chat...");
-    // const client = new WebSocket(
-    //   `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${location.port ? ":" + location.port : ""
-    //   }/chat/${auth?.access_token}`
-    // );
-
     const client = new WebSocket(
-      `ws://localhost:8081/chat/${auth?.access_token}`
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${location.port ? ":" + location.port : ""
+      }/chat/${auth?.access_token}`
     );
+
+    // const client = new WebSocket(
+    //   `ws://localhost:8081/chat/${auth?.access_token}`
+    // );
 
     ws.current = client;
 
