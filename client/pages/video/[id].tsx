@@ -215,14 +215,12 @@ const Chat: React.FC = () => {
           let user = users.find((v) => v.id === uid) as GetUserInfoDto;
 
           if (!user) {
-            user = { first_name: "", last_name: "" } as GetUserInfoDto
-
-            // try {
-            //   const { data } = await api.get<GetUserInfoDto>(`/users/${uid}`);
-            //   user = data;
-            // } catch(error) {
-            //   user = { first_name: "", last_name: "" } as GetUserInfoDto
-            // }
+            try {
+              const { data } = await api.get<GetUserInfoDto>(`/users/${uid}`);
+              user = data;
+            } catch(error) {
+              user = { first_name: "", last_name: "" } as GetUserInfoDto
+            }
           }
 
           setMessages((msgs) => {
@@ -287,8 +285,8 @@ const Chat: React.FC = () => {
                 }
               />
               <Comment.Content>
-                <Comment.Author>
-                  <a href={`/profile/${message.user.id}`}>{message.user.last_name} {message.user.first_name}</a>
+                <Comment.Author as="a">
+                  {message.user.last_name} {message.user.first_name}
                 </Comment.Author>
                 <Comment.Metadata>
                   <div>{message.created_at.toLocaleTimeString()}</div>
@@ -349,6 +347,7 @@ const Sidebar: React.FC = () => (
 );
 
 const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: boolean }> = ({ event, status, loaded }) => {
+  const router = useRouter();
   return (
     <div
       style={{
@@ -370,16 +369,20 @@ const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: bool
             header="Loading meeting..."
           /> :
           status == Status.NEW ?
-          <Message
-            header="Meeting not started"
-            content="Wait for organizer to start it"
-          />
-          : 
-          <Message
-            header="Meeting already finished"
-            content="Organizer has already finished this meeting"
-          />
+            <Message
+              header="Meeting not started"
+              content="Wait for organizer to start it"
+            />
+            :
+            <Message
+              header="Meeting already finished"
+              content="Organizer has already finished this meeting"
+            />
         }
+        {loaded && status == Status.NEW && event.room_secret ?
+          <Button onClick={e => {
+            api.post(`events/${event.id}/start`).then(a => router.reload());
+          }}/> : <></>}
       </div>
     </div>
   )
@@ -404,6 +407,7 @@ export default function Video() {
     (async () => {
       try {
         const { data } = await api.get<GetEventDto>(`/events/${id}`);
+        //console.log(data.room_secret)
         setEvent(data);
         setStatus(data.room_status)
         setLoaded(true);

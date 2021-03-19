@@ -20,7 +20,7 @@ export class AuthService implements OnApplicationBootstrap {
       user.middle_name = "user"
       user.password = "user"
 
-      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+      this.users.insertOne({ ...user, type: UserType.CLIENT, verified: true }).then((insertRes: any) => {
         console.log(insertRes)
       }).catch(() => {});
 
@@ -30,7 +30,7 @@ export class AuthService implements OnApplicationBootstrap {
       user.middle_name = "lawyer"
       user.password = "lawyer"
 
-      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+      this.users.insertOne({ ...user, type: UserType.LAWYER, verified: true }).then((insertRes: any) => {
         console.log(insertRes)
       }).catch(() => {});
 
@@ -40,7 +40,7 @@ export class AuthService implements OnApplicationBootstrap {
       user.middle_name = "moderator"
       user.password = "moderator"
 
-      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
+      this.users.insertOne({ ...user, type: UserType.MODERATOR, verified: true }).then((insertRes: any) => {
         console.log(insertRes)
       }).catch(() => {});
 

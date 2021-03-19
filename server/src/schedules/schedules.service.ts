@@ -61,7 +61,7 @@ export class SchedulesService implements OnModuleInit {
   }
 
   async findEvent(eid: string) {
-    return this.events.findOneOrFail(eid, { relations: ["files", "owner"] });
+    return this.events.findOneOrFail(eid, { relations: ["files", "owner", "participants"] });
   }
 
   async findEventByRoom(rid: string) {

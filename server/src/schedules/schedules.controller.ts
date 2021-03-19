@@ -161,14 +161,20 @@ export class SchedulesController {
     try {
       const event = await this.schedules.findEvent(eid);
       console.log(event);
+      console.log(user);
+      const participantsId = event.participants.map(user => user.id);
 
       if (user.type === UserType.CLIENT || user.type === UserType.LAWYER) {
-        if (!event.participants.includes(user)) {
+        if (!(participantsId.includes(user.id) || event.owner.id == user.id)) {
           throw new ForbiddenException();
         }
       }
 
-      return this.adapter.transform(user.type !== UserType.CLIENT, i18n)(event);
+      if(user.type === UserType.CLIENT || (user.type === UserType.LAWYER && event.owner != user)) {
+        return this.adapter.transform(user.type !== UserType.CLIENT, i18n)({...event, roomSecret: null});
+      }
+
+      return this.adapter.transform(true, i18n)(event);
     } catch (e) {
       console.log(e);
       throw new NotFoundException();
