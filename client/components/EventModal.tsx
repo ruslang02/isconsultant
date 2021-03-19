@@ -18,15 +18,11 @@ import { api } from "utils/api";
 import { File } from "@common/models/file.entity";
 import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { MessageContext } from "utils/MessageContext";
-<<<<<<< HEAD
 import { Status } from "pages/video/[id]";
 import { useRouter } from "next/router";
-=======
 import { GetUserDto } from "@common/dto/get-user.dto";
 import { ChatMessage } from "@common/models/chat-message.entity";
-import router from "next/router";
 import { UserCacheContext } from "utils/UserCacheContext";
->>>>>>> 4b1b445713b5bcf3450b391aa4237ce83e0954b0
 
 interface EventModalProps {
   editable?: boolean;
@@ -48,11 +44,8 @@ export function EventModal({
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
   const [users, setUsers] = useContext(UserCacheContext);
   const { setValue: setMessage } = useContext(MessageContext);
-<<<<<<< HEAD
   const router = useRouter();
-=======
   const [, update] = useState();
->>>>>>> 4b1b445713b5bcf3450b391aa4237ce83e0954b0
 
   useEffect(() => {
     if (event === undefined && temp === undefined) {
@@ -181,15 +174,6 @@ ${
                 type="time"
                 value={
                   temp !== undefined
-<<<<<<< HEAD
-                    ? new Date(
-                      temp.timespan_start
-                    ).toLocaleTimeString(undefined, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })
-=======
                     ? new Date(temp.timespan_start).toLocaleTimeString(
                         undefined,
                         {
@@ -198,7 +182,6 @@ ${
                           hour12: false,
                         }
                       )
->>>>>>> 4b1b445713b5bcf3450b391aa4237ce83e0954b0
                     : undefined
                 }
               />
@@ -318,82 +301,6 @@ ${
             flexDirection: "column",
           }}
         >
-<<<<<<< HEAD
-          <h4>Shared files</h4>
-          <List divided relaxed>
-            {files && files.length ? (
-              files.map((f) => (
-                <List.Item>
-                  <List.Icon name="file" size="large" verticalAlign="middle" />
-                  <List.Content>
-                    <List.Header as="a">{f.name}</List.Header>
-                    <List.Description as="a">
-                      Uploaded by {f.owner.first_name} {f.owner.last_name}
-                    </List.Description>
-                  </List.Content>
-                </List.Item>
-              ))
-            ) : (
-              <div style={{ textAlign: "center", color: "grey" }}>
-                Nothing uploaded yet.
-              </div>
-            )}
-          </List>
-          <h4>Chat log</h4>
-          <Button
-            primary
-            content="Download"
-            onClick={() => {
-              window.open(`/api/events/${event.id}/log/text/meeting_log_${event.id}.txt`);
-            }}
-          />
-          <h4>Room Control</h4>
-          {event?.room_status == Status.NEW ?
-            <Button
-              primary
-              content="Start meeting"
-              onClick={async () => {
-                const response = await api.post(`/events/${event.id}/start`);
-                if(response.status == 201) {
-                  router.replace(`/video/${event.id}`)
-                }
-              }}
-            />
-            : event?.room_status == Status.STARTED ?
-              <Button
-                primary
-                content="Finish meeting"
-                onClick={async () => {
-                  const response = await api.post(`/events/${event.id}/stop`);
-                  if(response.status == 201) {
-                    router.reload()
-                  }
-                }}
-              />
-              : <></>}
-        </section>
-      </Modal.Content>
-      <Modal.Actions>
-        {event !== undefined && <Button color="red" style={{ float: "left" }} onClick={async () => {
-          try {
-            await api.delete(`/events/${event.id}`);
-            setMessage('Meeting was deleted.');
-            onClose();
-          } catch (e) {
-            setMessage(`Error: ${e}`);
-          }
-        }}>
-          Delete
-        </Button>}
-
-        <Button primary icon="linkify" labelPosition="left" content="Copy link" onClick={() => {
-          const url = new URL(location.href);
-          url.pathname = `/video/${event.room_id}`;
-          navigator.clipboard.writeText(url.href);
-          setMessage("Link copied!");
-        }} style={{ float: "left" }} />
-
-=======
           <div>
             <h4>Shared files</h4>
             <List divided relaxed>
@@ -496,7 +403,6 @@ ${
           </Button>
         )}
 
->>>>>>> 4b1b445713b5bcf3450b391aa4237ce83e0954b0
         <Button color="black" onClick={() => onClose()}>
         { editable ? "Cancel" : "Close" }
         </Button>
