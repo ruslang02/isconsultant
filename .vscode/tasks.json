@@ -3,20 +3,6 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "watch",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
-      "options": {
-        "cwd": "admin"
-      },
-      "path": "admin",
-      "group": "build",
-      "label": "Watch admin",
-      "isBackground": true
-    },
-    {
-      "type": "npm",
       "script": "dev",
       "problemMatcher": [
         "$tsc-watch"

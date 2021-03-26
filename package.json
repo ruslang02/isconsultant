@@ -10,10 +10,9 @@
     "proxy": "sudo nginx -p $PWD/proxy -c nginx.conf",
     "proxy:dev": "sudo nginx -p $PWD/proxy -c nginx.dev.conf",
     "start:server": "node dist/main",
-    "watch": "concurrently --kill-others \"npm run watch:server\" \"npm run watch:admin\" \"npm run watch:client\"",
+    "watch": "concurrently --kill-others \"npm run watch:server\" \"npm run watch:client\"",
     "watch:server": "cd server/; npm run watch",
-    "watch:client": "cd client/; npm run dev -- -p 3002",
-    "watch:admin": "cd admin/; npm run start"
+    "watch:client": "cd client/; npm run dev -- -p 3002"
   },
   "main": "dist/main.js",
   "keywords": [],

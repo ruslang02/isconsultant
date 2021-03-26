@@ -1,9 +1,11 @@
-import { Comment } from '@common/models/comment.entity';
+import { GetUserContactsDto } from '@common/dto/get-user-contacts.dto';
+import { GetUserInfoDto } from '@common/dto/get-user-info.dto';
+import { GetUserDto } from '@common/dto/get-user.dto';
+import { PatchUserVerifiedDto } from '@common/dto/patch-user-verified.dto';
+import { PatchUserDto } from '@common/dto/patch-user.dto';
 import { Report } from '@common/models/report.entity';
 import { User, UserType } from '@common/models/user.entity';
-import { Locale, LocalizedStringID } from '@common/utils/Locale';
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -14,8 +16,8 @@ import {
   Post,
   Query,
   Request,
-  Response,
-  UseGuards,
+
+  UseGuards
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -26,31 +28,22 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags,
-  OmitType,
-  PickType,
+  ApiTags
 } from '@nestjs/swagger';
-import { I18n, I18nContext, I18nLang, I18nService } from 'nestjs-i18n';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { In } from 'typeorm';
+import { JwtAuthGuard } from '../guards/jwt.guard';
 import { Types } from '../guards/type.decorator';
 import { UserGuard } from '../guards/user.guard';
-import { JwtAuthGuard } from '../guards/jwt.guard';
 import { ReportsService } from '../reports/reports.service';
 import { ExtendedRequest } from '../utils/ExtendedRequest';
-import { CommentsService } from './comments.service';
-import { UsersService } from './users.service';
-import { GetUserInfoDto } from '@common/dto/get-user-info.dto';
-import { GetUserContactsDto } from '@common/dto/get-user-contacts.dto';
-import { PatchUserDto } from '@common/dto/patch-user.dto';
-import { GetUserDto } from '@common/dto/get-user.dto';
-import { PatchUserVerifiedDto } from '@common/dto/patch-user-verified.dto';
 import { UserAdapter } from './user.adapter';
-import { In } from 'typeorm';
+import { UsersService } from './users.service';
 
 @ApiTags('Управление пользователями')
 @Controller('/api/users')
 export class UsersController {
   constructor(
-    private comments: CommentsService,
     private reports: ReportsService,
     private users: UsersService,
     private adapter: UserAdapter
@@ -74,6 +67,7 @@ export class UsersController {
   @ApiOperation({
     description: 'Получение всех зарегистрированных пользователей.',
   })
+  @ApiBearerAuth()
   async listUsers(@I18n() i18n: I18nContext): Promise<GetUserDto[]> {
     const users = await this.users.findMany();
     const hydrated = users.map((user) => this.adapter.transform(user, i18n));
@@ -192,24 +186,6 @@ export class UsersController {
     };
 
     this.reports.createOne(report);
-  }
-
-  @Get(':uid/comments')
-  @ApiOkResponse({
-    description: 'Приведен список комментариев для пользователя.',
-    isArray: true,
-    type: Comment,
-  })
-  @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
-  @ApiOperation({
-    description: 'Получение комментарии пользователя.',
-  })
-  getUserComments(@Param('uid') userId: string) {
-    try {
-      return this.comments.listAll(userId);
-    } catch (e) {
-      throw new NotFoundException('The user does not exist.');
-    }
   }
 
   @Types(UserType.MODERATOR, UserType.ADMIN)

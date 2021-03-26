@@ -1,8 +1,9 @@
 import { User, UserType } from '@common/models/user.entity';
-import { BadRequestException, Injectable, OnApplicationBootstrap, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, LoggerService, OnApplicationBootstrap, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '@common/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
+import e from 'express';
 
 const {
   DEVELOPMENT
@@ -10,7 +11,12 @@ const {
 
 @Injectable()
 export class AuthService implements OnApplicationBootstrap {
-  constructor(private users: UsersService, private jwt: JwtService) { }
+  constructor(
+    @Inject('Logger')
+    private logger: LoggerService,
+    private users: UsersService,
+    private jwt: JwtService
+  ) { }
   onApplicationBootstrap() {
     if (DEVELOPMENT == "true") {
       let user = new CreateUserDto()
@@ -21,8 +27,8 @@ export class AuthService implements OnApplicationBootstrap {
       user.password = "user"
 
       this.users.insertOne({ ...user, type: UserType.CLIENT, verified: true }).then((insertRes: any) => {
-        console.log(insertRes)
-      }).catch(() => {});
+        this.logger.log(`AuthService:`, 'Client test account created.');
+      }).catch(() => { });
 
       user.email = "lawyer@lawyer.com"
       user.first_name = "lawyer"
@@ -31,8 +37,8 @@ export class AuthService implements OnApplicationBootstrap {
       user.password = "lawyer"
 
       this.users.insertOne({ ...user, type: UserType.LAWYER, verified: true }).then((insertRes: any) => {
-        console.log(insertRes)
-      }).catch(() => {});
+        this.logger.log(`AuthService:`, 'Lawyer test account created.');
+      }).catch(() => { });
 
       user.email = "moderator@moderator.com"
       user.first_name = "moderator"
@@ -41,8 +47,8 @@ export class AuthService implements OnApplicationBootstrap {
       user.password = "moderator"
 
       this.users.insertOne({ ...user, type: UserType.MODERATOR, verified: true }).then((insertRes: any) => {
-        console.log(insertRes)
-      }).catch(() => {});
+        this.logger.log(`AuthService:`, 'Moderator test account created.');
+      }).catch(() => { });
 
       user.email = "admin@admin.com"
       user.first_name = "admin"
@@ -51,8 +57,8 @@ export class AuthService implements OnApplicationBootstrap {
       user.password = "admin"
 
       this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
-        console.log(insertRes)
-      }).catch(() => {});
+        this.logger.log(`AuthService:`, 'Admin test account created.');
+      }).catch(() => { });
     }
   }
 
@@ -61,15 +67,12 @@ export class AuthService implements OnApplicationBootstrap {
     pass: string
   ): Promise<Omit<User, 'password'> | null> {
     const user = await this.users.findOneByEmail(email, { withPassword: true });
-    console.log(user);
-    if (user) {
-      if (user.password === pass) {
-        const { password, ...safeUser } = user;
-        if (!user.verified) {
-          throw new BadRequestException('Your account was not verified yet.');
-        }
-        return safeUser;
+    if (user && user.password === pass) {
+      const { password, ...safeUser } = user;
+      if (!user.verified) {
+        throw new BadRequestException('Your account was not verified yet.');
       }
+      return safeUser;
     }
 
     throw new UnauthorizedException('Email or password were incorrect.');

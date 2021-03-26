@@ -20,6 +20,16 @@
             "database": "webrtc",
             "username": "wrtcu",
             "password": "wrtcp"
+        },
+        {
+            "previewLimit": 50,
+            "server": "167.86.72.50",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "webrtc-prod",
+            "database": "projecthse2",
+            "username": "projecthse2",
+            "password": "w$D+N.T?uZ9z*sS7"
         }
     ]
 }

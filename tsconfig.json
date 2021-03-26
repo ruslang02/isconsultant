@@ -16,7 +16,6 @@
     "target": "es2020",
     "sourceMap": false,
     "rootDirs": [
-      "admin/src/",
       "client/src",
       "common",
       "server/src"

@@ -4,7 +4,7 @@ import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { CalendarEvent, RoomAccess, Status } from "@common/models/calendar-event.entity";
 import { PendingEvent } from "@common/models/pending-event.entity";
 import { User } from "@common/models/user.entity";
-import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable, LoggerService, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
 const Janus = require("janus-gateway-js")
@@ -19,6 +19,8 @@ const {
 @Injectable()
 export class SchedulesService implements OnModuleInit {
   constructor(
+    @Inject('Logger')
+    private logger: LoggerService,
     @InjectRepository(CalendarEvent)
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
@@ -39,7 +41,7 @@ export class SchedulesService implements OnModuleInit {
       var session = await connection.createSession()
       this.pluginHandle = await session.attachPlugin("janus.plugin.videoroom")
     } catch (error) {
-      console.log(error);
+      this.logger.log('JanusInit:', error);
     }
   }
 
@@ -161,8 +163,6 @@ export class SchedulesService implements OnModuleInit {
     if ("room_access" in data) {
       model.roomAccess = data.room_access;
     }
-
-    console.log(model);
 
     await this.events.save(model);
   }

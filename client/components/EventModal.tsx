@@ -43,7 +43,7 @@ export function EventModal({
   const [files, setFiles] = useState<File[]>([]);
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
   const [users, setUsers] = useContext(UserCacheContext);
-  const { setValue: setMessage } = useContext(MessageContext);
+  const  [, setMessage] = useContext(MessageContext);
   const router = useRouter();
   const [, update] = useState();
 

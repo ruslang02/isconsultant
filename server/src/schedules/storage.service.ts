@@ -41,11 +41,9 @@ export class StorageService {
     file.owner = { id: +ownerId } as User;
     await this.files.save(file);
 
-    console.log("updating event");
 
     const event = await this.schedules.findEvent(eventId);
     const updEvent = { ...event, files: [...(event.files ?? []), file] };
-    console.log(event, updEvent);
     await this.events.save(updEvent);
 
     this.chat.notifyNewFile(file, eventId);

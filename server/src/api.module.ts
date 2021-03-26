@@ -1,18 +1,17 @@
 import { CalendarEvent } from '@common/models/calendar-event.entity';
-import { Comment } from '@common/models/comment.entity';
+import { ChatMessage } from '@common/models/chat-message.entity';
+import { File } from '@common/models/file.entity';
 import { PendingEvent } from '@common/models/pending-event.entity';
 import { Report } from '@common/models/report.entity';
 import { User } from '@common/models/user.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ChatModule } from 'chat/chat.module';
+import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { ReportsModule } from './reports/reports.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { UsersModule } from './users/users.module';
-import { AdminModule } from './admin/admin.module';
-import { File } from '@common/models/file.entity';
-import { ChatMessage } from '@common/models/chat-message.entity';
-import { ChatModule } from 'chat/chat.module';
 
 const {
   POSTGRES_HOST,
@@ -31,9 +30,8 @@ const {
       username: POSTGRES_USER,
       password: POSTGRES_PASSWORD,
       database: POSTGRES_DB,
-      entities: [CalendarEvent, ChatMessage, Comment, File, PendingEvent, Report, User],
-      synchronize: true,
-      dropSchema: true
+      entities: [CalendarEvent, ChatMessage, File, PendingEvent, Report, User],
+      synchronize: true
     }),
     UsersModule,
     SchedulesModule,

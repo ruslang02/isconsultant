@@ -1,7 +1,6 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { ChatModule } from "chat/chat.module";
+import { LoggerModule } from 'logger/logger.module';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import { join } from 'path';
 import { ApiModule } from './api.module';
@@ -20,11 +19,8 @@ import { ApiModule } from './api.module';
         watch: true,
       },
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../admin/www'),
-      serveRoot: '/admin',
-    }),
     ApiModule,
+    LoggerModule,
     MailerModule.forRoot({
       transport: 'smtps://isconsultant1331@gmail.com:isconsultant@smtp.gmail.com',
       defaults: {

@@ -22,7 +22,7 @@ export function EventArrange({ open, onClose, description: descr, lawyerId }: { 
   const [auth] = useAuth();
   const [users, setUsers] = useContext(UserCacheContext);
   const [lawyer, setLawyer] = useState<string | undefined>(lawyerId);
-  const { setValue: setMessage } = useContext(MessageContext);
+  const [, setMessage] = useContext(MessageContext);
 
   useEffect(() => {
     if (open) setLawyer(lawyerId);

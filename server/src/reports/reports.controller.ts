@@ -1,34 +1,43 @@
+import { CreateReportDto } from '@common/dto/create-report.dto';
+import { GetReportDto } from '@common/dto/get-report.dto';
+import { PatchReportDto } from '@common/dto/patch-report.dto';
 import { Report } from '@common/models/report.entity';
+import { UserType } from '@common/models/user.entity';
 import { LocalizedStringID } from '@common/utils/Locale';
 import {
+  Body,
   Controller,
+  Delete,
   Get,
-  NotImplementedException,
-  ParseBoolPipe,
+  Param,
   Patch,
+  Put,
   Query,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Types } from 'guards/type.decorator';
+import { UserGuard } from 'guards/user.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { JwtAuthGuard } from '../guards/jwt.guard';
+import { ReportAdapter } from './report.adapter';
 import { ReportsService } from './reports.service';
 
 @ApiTags('Обработка жалоб')
 @Controller('/api/reports')
 export class ReportsController {
-  constructor(private reports: ReportsService) {}
+  constructor(
+    private adapter: ReportAdapter,
+    private reports: ReportsService
+  ) { }
 
-  async hydrateReport(report: Report, i18n: I18nContext) {
-    const hydratedReport = { ...report };
-    hydratedReport.status_localized = await i18n.t(
-      `global.REPORT_STATUS_${report.status.toUpperCase()}` as LocalizedStringID
-    );
-    return hydratedReport;
-  }
-
-  @UseGuards(JwtAuthGuard)
+  @Types(UserType.ADMIN, UserType.MODERATOR)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Get('/')
+  @ApiOperation({
+    description: "Получение всех жалоб в системе."
+  })
+  @ApiBearerAuth()
   async getReports(
     @Query('resolve_users') resolve_users: string,
     @I18n() i18n: I18nContext
@@ -36,13 +45,63 @@ export class ReportsController {
     const reports = await this.reports.find({
       resolveUsers: resolve_users === 'true',
     });
-    const hydrated = reports.map((report) => this.hydrateReport(report, i18n));
-    return Promise.all(hydrated);
+
+    return Promise.all(reports.map(this.adapter.transform(i18n)));
+  }
+
+  @Types(UserType.ADMIN, UserType.MODERATOR)
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @ApiOperation({
+    description: "Изменение статуса жалобы в системе."
+  })
+  @ApiBearerAuth()
+  @Patch('/:rid')
+  patchReport(
+    @Param("rid") reportId: string,
+    @Body() report: PatchReportDto
+  ) {
+    return this.reports.patchOne(reportId, report);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':uid')
-  updateReportStatus() {
-    throw new NotImplementedException();
+  @ApiBearerAuth()
+  @Put('/')
+  @ApiOperation({
+    description: "Создание жалобы."
+  })
+  @ApiBearerAuth()
+  createReport(
+    @Body() report: CreateReportDto
+  ) {
+    return this.reports.createOne(report);
+  }
+
+  @Types(UserType.ADMIN, UserType.MODERATOR)
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @ApiBearerAuth()
+  @Delete('/:rid')
+  @ApiOperation({
+    description: "Удаление жалобы."
+  })
+  @ApiBearerAuth()
+  deleteReport(
+    @Param("rid") reportId: string
+  ) {
+    this.reports.deleteOne(reportId);
+  }
+
+
+  @Types(UserType.ADMIN, UserType.MODERATOR)
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @Get('/:rid')
+  @ApiOperation({
+    description: "Получение информации о жалобе."
+  })
+  @ApiBearerAuth()
+  async getReportStatus(
+    @I18n() i18n: I18nContext,
+    @Param("rid") reportId: string
+  ): Promise<GetReportDto> {
+    return this.adapter.transform(i18n)(await this.reports.findOne(reportId));
   }
 }

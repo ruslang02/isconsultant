@@ -20,7 +20,6 @@ export class UsersService {
 
   async findEvents(uid: string) {
     const user = (await this.users.findOneOrFail({ where: { id: uid }, relations: ['events', 'events.owner'] }));
-    console.log(user);
 
     return user.events;
   }
@@ -61,7 +60,6 @@ export class UsersService {
       .orWhere("LOWER(middle_name) LIKE :query", { query: `%${query}%` })
       .orWhere("LOWER(last_name) LIKE :query", { query: `%${query}%` });
 
-    console.log(builder.getSql())
     return builder.getMany();
   }
 }

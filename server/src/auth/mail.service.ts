@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Inject, Injectable, LoggerService } from '@nestjs/common';
 
 @Injectable()
 export class VerifyService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    @Inject('Logger')
+    private logger: LoggerService,
+    private readonly mailerService: MailerService
+  ) { }
 
   public send(userEmail: string, verifyToken: string): void {
     this
@@ -15,10 +19,10 @@ export class VerifyService {
         text: `Verify your email by clicking this link: https://consultant.infostrategic.com/verify/${verifyToken}`, // plaintext body
       })
       .then(() => {
-        console.log("success")
+        this.logger.log(`VerifyService:`, `Sent an email for user ${userEmail}.`);
       })
-      .catch(() => {
-        console.log("error")
+      .catch((e) => {
+        this.logger.error(`VerifyService:`, `Failed to send email for user ${userEmail}.`, e);
       });
   }
 }

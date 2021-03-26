@@ -35,7 +35,7 @@ function MyApp({
     }, [auth]);
   */
   return (
-    <MessageContext.Provider value={{value: message, setValue: setMessage}}>
+    <MessageContext.Provider value={[message, setMessage]}>
       <Button
         style={{ position: "fixed", bottom: 0, left: 0, zIndex: 100 }}
         onClick={() =>

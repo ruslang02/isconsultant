@@ -33,6 +33,12 @@ export const SideMenu: React.FC = () => {
         link
         onClick={() => router.push('/lawyers')}
       />
+      { ["admin", "moderator"].includes(auth?.user?.type) && <Menu.Item
+        name='Admin Panel'
+        active={router.pathname.includes('/admin')}
+        link
+        onClick={() => router.push('/admin')}
+      /> }
     </Menu>
   )
 }

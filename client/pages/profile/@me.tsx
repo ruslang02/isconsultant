@@ -14,7 +14,7 @@ const Empty = () => {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const formRef = useRef<HTMLFormElement>(undefined);
-  const {setValue: setMessage} = useContext(MessageContext);
+  const  [, setMessage] = useContext(MessageContext);
   const [avatar, setAvatar] = useState(auth?.user?.avatar ?? "");
 
   useEffect(() => {

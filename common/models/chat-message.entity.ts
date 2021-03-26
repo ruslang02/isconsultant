@@ -11,11 +11,17 @@ export class ChatMessage {
   })
   id: number;
 
-  @ManyToOne(() => User, user => user.messages)
+  @ManyToOne(() => User, user => user.messages, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'from_id' })
   from: User;
 
-  @ManyToOne(() => CalendarEvent, event => event.messages, { onDelete: 'CASCADE' })
+  @ManyToOne(() => CalendarEvent, event => event.messages, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'event_id' })
   event: CalendarEvent;
 

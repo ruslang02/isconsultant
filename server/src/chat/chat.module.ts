@@ -9,12 +9,14 @@ import { SchedulesModule } from 'schedules/schedules.module';
 import { SchedulesService } from 'schedules/schedules.service';
 import { CalendarEvent } from '@common/models/calendar-event.entity';
 import { PendingEvent } from '@common/models/pending-event.entity';
+import { LoggerModule } from 'logger/logger.module';
 
 @Module({
   imports: [
     AuthModule,
     forwardRef(() => SchedulesModule),
     UsersModule,
+    LoggerModule,
     TypeOrmModule.forFeature([CalendarEvent, ChatMessage, PendingEvent])
   ],
   providers: [ChatGateway, ChatService, SchedulesService],

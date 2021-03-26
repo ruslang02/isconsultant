@@ -52,14 +52,20 @@ export class CalendarEvent {
   })
   end_timestamp: Date;
 
-  @ManyToOne(() => User, user => user.ownedEvents)
+  @ManyToOne(() => User, user => user.ownedEvents, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'owner_id' })
   @ApiProperty({
     description: 'Пользователь, управляющий этим событием.',
   })
   owner: User;
 
-  @ManyToMany(() => User, user => user.events)
+  @ManyToMany(() => User, user => user.events, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinTable({
     joinColumn: {
       name: 'event_id',
@@ -74,7 +80,8 @@ export class CalendarEvent {
   participants: User[];
 
   @ManyToMany(() => File, {
-    cascade: true,
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
   })
   @JoinTable({
     joinColumn: {
@@ -115,10 +122,10 @@ export class CalendarEvent {
   })
   roomAccess: RoomAccess;
 
-  @OneToMany(() => ChatMessage, message => message.event)
+  @OneToMany(() => ChatMessage, message => message.event, { onDelete: 'CASCADE' })
   messages: ChatMessage[]
 
-  @Column({type: 'enum', enum: Status, name: "room_status"})
+  @Column({ type: 'enum', enum: Status, name: "room_status" })
   @ApiProperty({
     default: Status.NEW,
     description: "Статус события, отражающий состояние комнаты.",

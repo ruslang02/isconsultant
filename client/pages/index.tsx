@@ -155,7 +155,7 @@ function Lawyers() {
 export default function Home() {
   const router = useRouter();
   const { verify } = router.query;
-  const { setValue: setMessage } = useContext(MessageContext);
+  const  [, setMessage] = useContext(MessageContext);
 
   useEffect(() => {
     if (verify == "success") {

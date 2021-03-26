@@ -33,7 +33,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     try {
       const params = req.url.split("/");
       const token = params[params.length - 1];
-      console.log(token);
       const { id } = this.jwt.verify<{ id: number }>(token);
       const user = await this.users.findOne(id);
       socket.user = user;

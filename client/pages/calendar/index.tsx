@@ -1,18 +1,13 @@
 import { GetEventDto } from "@common/dto/get-event.dto";
+import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { EventModal } from "components/EventModal";
 import { Page } from "components/Page";
 import moment from "moment";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
-import {
-  Calendar, Event,
-  momentLocalizer
-} from "react-big-calendar";
+import { Calendar, Event, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import {
-  Button, Header as SHeader,
-  Icon
-} from "semantic-ui-react";
+import { Button, Header as SHeader, Icon } from "semantic-ui-react";
 import { api } from "utils/api";
 import { MessageContext } from "utils/MessageContext";
 import { useAuth } from "utils/useAuth";
@@ -25,7 +20,7 @@ const CalendarPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
   const [event, setEvent] = useState<GetEventDto | undefined>();
-  const { setValue: setMessage } = useContext(MessageContext);
+  const [, setMessage] = useContext(MessageContext);
 
   const loadEvents = async () => {
     const { data } = await api.get<GetEventDto[]>("/events");
@@ -45,7 +40,8 @@ const CalendarPage = () => {
 
   return (
     <Page>
-      <h2>My meetings
+      <h2>
+        My meetings
         <br />
         <small style={{ color: "grey" }}>
           Your personal control panel over your meeting sessions.
@@ -94,7 +90,8 @@ const CalendarPage = () => {
         }}
         style={{ height: 500 }}
       />
-      <EventModal editable
+      <EventModal
+        editable
         onClose={() => {
           setOpen(false);
         }}
@@ -105,7 +102,18 @@ const CalendarPage = () => {
             await api.put("/events", temp);
             setMessage("Your meeting was successfully created.");
           } else {
-            await api.patch(`/events/${event.id}`, temp);
+            const ptch = Object.fromEntries(
+              Object.entries(temp).filter(
+                ([key, value]) => event[key] !== value
+              )
+            ) as PatchEventDto;
+            if (
+              ptch.participants?.length === temp.participants?.length &&
+              ptch.participants.every((a) => !temp.participants.includes(a))
+            ) {
+              delete ptch.participants;
+            }
+            await api.patch(`/events/${event.id}`, ptch);
             setMessage("Your meeting was successfully edited.");
           }
 

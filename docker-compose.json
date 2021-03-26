@@ -16,7 +16,8 @@
       "networks": [
         "db",
         "main"
-      ]
+      ],
+      "restart": "always"
     },
     "db": {
       "env_file": "./development.env",

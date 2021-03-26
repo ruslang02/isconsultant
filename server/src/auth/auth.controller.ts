@@ -7,6 +7,8 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
+  LoggerService,
   Param,
   Post,
   Request,
@@ -35,6 +37,8 @@ import { VerifyService } from './mail.service';
 @Controller('/api/auth')
 export class AuthController {
   constructor(
+    @Inject('Logger')
+    private logger: LoggerService,
     private auth: AuthService,
     private i18n: I18nService,
     private users: UsersService,
@@ -100,7 +104,7 @@ export class AuthController {
 
       return { access_token: this.jwt.sign({ id: data.id, verified: false, type: data.type }) };
     } catch (e) {
-      console.error(e);
+      this.logger.error(`/api/auth/register: `, '[ERROR]', e);
       throw new BadRequestException(
         'Data entered did not match the format or the user exists.'
       );
@@ -120,7 +124,7 @@ export class AuthController {
         await this.users.updateOne(id, { verified: true })
       }
     } catch (e) {
-      console.error(e);
+      this.logger.error(`/api/auth/verify: `, '[ERROR]', e);
       throw new BadRequestException(
         'Token for verification is wrong!'
       );

@@ -24,15 +24,24 @@ export class PendingEvent {
   @Column('timestamp without time zone')
   end_timestamp: Date;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'from_id' })
   from: User;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'lawyer_id' })
   lawyer: User;
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinTable({
     joinColumn: {
       name: 'event_id',

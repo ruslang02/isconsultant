@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -30,14 +31,20 @@ export class Report {
   @Column('text')
   description: string;
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'author_id' })
   @ApiProperty({
     description: 'Автор жалобы.',
   })
   author: User;
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User, {
+    cascade: ["insert", "update", "remove"],
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'receiver_id' })
   @ApiProperty({
     description: 'Получатель жалобы.',

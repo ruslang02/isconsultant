@@ -1,3 +1,3 @@
 import { createContext } from "react";
 
-export const MessageContext = createContext({ value: "", setValue: (nv: string) => { } });
+export const MessageContext = createContext<[string, (nv: string) => void]>(["", () => { }]);

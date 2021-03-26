@@ -88,7 +88,7 @@ export class SchedulesController {
   })
   @ApiBearerAuth()
   @ApiOperation({
-    description: "Получение событий (встреч).",
+    description: "Получение событий (встреч) от всех пользователей системы.",
   })
   async getAllEvents(
     @Request() { user }: ExtendedRequest,
@@ -98,7 +98,6 @@ export class SchedulesController {
       const events = await this.schedules.findAllEvents();
       return Promise.all(events.map(this.adapter.transform(true, i18n)));
     } catch (e) {
-      console.log(e);
       throw new NotFoundException();
     }
   }
@@ -107,6 +106,9 @@ export class SchedulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Put("/")
+  @ApiOperation({
+    description: "Создание нового события в календаре.",
+  })
   createEvent(
     @Request() { user }: ExtendedRequest,
     @Body() data: CreateEventDto
@@ -121,6 +123,9 @@ export class SchedulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("/")
+  @ApiOperation({
+    description: "Получение событий (встреч), доступных данному юристу.",
+  })
   async getEvents(
     @Request() { user }: ExtendedRequest,
     @I18n() i18n: I18nContext
@@ -129,7 +134,6 @@ export class SchedulesController {
       const events = await this.schedules.findManyByLawyer(user.id.toString());
       return Promise.all(events.map(this.adapter.transform(true, i18n)));
     } catch (e) {
-      console.log(e);
       throw new NotFoundException();
     }
   }
@@ -137,6 +141,9 @@ export class SchedulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("/@me")
+  @ApiOperation({
+    description: "Получение событий (встреч), в которых участвует пользователь.",
+  })
   async getMyEvents(
     @Request() { user }: ExtendedRequest,
     @I18n() i18n: I18nContext
@@ -145,7 +152,6 @@ export class SchedulesController {
       const events = await this.users.findEvents(user.id.toString());
       return Promise.all(events.map(this.adapter.transform(false, i18n)));
     } catch (e) {
-      console.log(e);
       throw new NotFoundException();
     }
   }
@@ -153,6 +159,9 @@ export class SchedulesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("/:eid")
+  @ApiOperation({
+    description: "Получение информации о событии.",
+  })
   async getEvent(
     @Param("eid") eid: string,
     @Request() { user }: ExtendedRequest,
@@ -160,8 +169,6 @@ export class SchedulesController {
   ): Promise<GetEventDto> {
     try {
       const event = await this.schedules.findEvent(eid);
-      console.log(event);
-      console.log(user);
       const participantsId = event.participants.map(user => user.id);
 
       if (user.type === UserType.CLIENT || user.type === UserType.LAWYER) {
@@ -170,13 +177,12 @@ export class SchedulesController {
         }
       }
 
-      if(user.type === UserType.CLIENT || (user.type === UserType.LAWYER && event.owner != user)) {
-        return this.adapter.transform(user.type !== UserType.CLIENT, i18n)({...event, roomSecret: null});
+      if (user.type === UserType.CLIENT || (user.type === UserType.LAWYER && event.owner != user)) {
+        return this.adapter.transform(user.type !== UserType.CLIENT, i18n)({ ...event, roomSecret: null });
       }
 
       return this.adapter.transform(true, i18n)(event);
     } catch (e) {
-      console.log(e);
       throw new NotFoundException();
     }
   }
@@ -224,6 +230,9 @@ export class SchedulesController {
   }
 
   @Get("/:eid/log/json")
+  @ApiOperation({
+    description: "Получение текстовой записи всех сообщений данной встречи в формате JSON.",
+  })
   async getChatLogJSON(@Param("eid") eventId: string) {
     try {
       return this.chat.getForEvent(eventId, true);
@@ -234,6 +243,9 @@ export class SchedulesController {
 
   @Get(["/:eid/log/text", "/:eid/log/text/:fname"])
   @Header('Content-Type', 'application/octet-stream')
+  @ApiOperation({
+    description: "Получение текстовой записи всех сообщений данной встречи в формате текстового файла.",
+  })
   async getChatLogText(@Param("eid") eventId: string) {
     try {
       const event = await this.schedules.findEvent(eventId);
@@ -329,7 +341,6 @@ ${_.content}
       throw new ForbiddenException();
     }
 
-    console.log(event)
     await this.schedules.createRoom(event.roomId, event.roomPassword, event.roomSecret);
     return this.schedules.updateStatus(id, Status.STARTED)
   }

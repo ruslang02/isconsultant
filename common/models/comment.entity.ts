@@ -18,7 +18,7 @@ export class Comment {
   })
   id: number;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'author_id' })
   @ApiProperty({
     description: 'Автор комментария.',
@@ -39,7 +39,7 @@ export class Comment {
   })
   created_timestamp: Date;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @ApiProperty({
     description: 'Пользователь, которому направлен комментарий.',
   })
