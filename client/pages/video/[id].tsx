@@ -106,7 +106,7 @@ const Files: React.FC = () => {
 
   return (
     <section className={styles.Files}>
-      <b style={{fontSize: "14px", margin: "9px", display: "inline-block"}}>{t("pages.video.files_title")}</b>
+      <b style={{fontSize: "16px", margin: "9px", display: "inline-block"}}>{t("pages.video.files_title")}</b>
       <span style={{ position: "relative", float: "right" }}>
         <input
           type="file"
@@ -270,9 +270,9 @@ const Chat: React.FC = () => {
         height: "300px",
       }}
     >
-      <b style={{fontSize: "14px", margin: "9px", display: "inline-block"}}>{t("pages.video.text_chat_title")}</b>
+      <b style={{fontSize: "16px", margin: "9px", display: "inline-block"}}>{t("pages.video.text_chat_title")}</b>
       <div
-        style={{ flexGrow: 1, margin: "10px 0", overflow: "auto" }}
+        style={{ flexGrow: 1, margin: "10px 0", overflow: "auto", paddingLeft: "10px" }}
         ref={commentsRef}
       >
         <Comment.Group>
@@ -369,7 +369,7 @@ const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: bool
             header={error}
             content={<>
               <p>You may need to log in to view this meeting.</p>
-              <Button onClick={() => router.replace("/login?redirect=" + location.pathname)} />
+              <Button onClick={() => router.replace("/login?redirect=" + location.pathname)} content="Log in" primary />
             </>}
           /> 
         : !loaded ?
@@ -422,8 +422,7 @@ export default function Video() {
         setLoaded(true);
         setError("")
       } catch (e) {
-        setError("This event is not available to you or it doesn't exist")
-        router.replace("/")
+        setError("Event is unavailable.")
       }
     })();
   }, [id]);
