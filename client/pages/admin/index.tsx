@@ -46,6 +46,24 @@ const Empty = () => {
         header="Reports"
         description="View reports directed towards your lawyers"
       />
+      <Card
+        fluid
+        onClick={() => router.push("/lawyers")}
+        header="Users"
+        description="View all registered users"
+      />
+      <Card
+        fluid
+        onClick={() => router.push("/calendar/requests")}
+        header="Meeting requests"
+        description="View all meeting requests from clients"
+      />
+      <Card
+        fluid
+        onClick={() => router.push("/calendar")}
+        header="Meetings"
+        description="View all registered meetings"
+      />
       {auth?.user?.type === "admin" && (
         <>
           <h3>Actions</h3>

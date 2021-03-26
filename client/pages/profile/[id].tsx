@@ -23,7 +23,7 @@ const Empty = () => {
   const [auth] = useAuth();
   const [, setMessage] = useContext(MessageContext);
   const [description, setDescription] = useState("");
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   console.log(router);
   const { id } = router.query;
 

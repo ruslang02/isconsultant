@@ -16,7 +16,7 @@ const LawyersPage = () => {
     (async () => {
       const { data } = await api.get<GetUserInfoDto[]>("/users");
 
-      setLawyers(data);
+      setLawyers(data.filter(_ => _.type === "lawyer"));
     })();
   }, []);
 
@@ -38,7 +38,7 @@ const LawyersPage = () => {
               src={u.avatar}
             />
             <Item.Content>
-              <Item.Header as="a">{u.first_name} {u.last_name}</Item.Header>
+              <Item.Header><a href={`/profile/${u.id}`}>{u.first_name} {u.last_name}</a></Item.Header>
               <Item.Description>Rating: {u.rating}<br />Joined at: {new Date(u.created_timestamp).toLocaleDateString()}
               </Item.Description>
               <Button floated="right" content="Request a meeting" primary onClick={() => {
