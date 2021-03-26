@@ -53,10 +53,10 @@ const TopBar: React.FC = function () {
       <div className={styles.TopYar_info}>
         <div className={styles.TopYar_roomName}>{t('pages.video.room_title')} #{roomId}</div>
       </div>
-      <div className={styles.TopYar_actions}>
+      { /*<div className={styles.TopYar_actions}>
         <Button primary>{t('pages.video.room_settings')}</Button>
         <Button color="red" onClick={(e: any) => router.replace("/profile/@me")}>{t('pages.video.leave_call')}</Button>
-      </div>
+  </div>*/ }
     </header>
   );
 };
@@ -106,8 +106,8 @@ const Files: React.FC = () => {
 
   return (
     <section className={styles.Files}>
-      <b>{t("pages.video.files_title")}</b>
-      <div style={{ position: "relative" }}>
+      <b style={{fontSize: "14px", margin: "9px", display: "inline-block"}}>{t("pages.video.files_title")}</b>
+      <span style={{ position: "relative", float: "right" }}>
         <input
           type="file"
           name="file"
@@ -136,8 +136,8 @@ const Files: React.FC = () => {
             opacity: 0,
           }}
         />
-        <Button primary>{t('pages.video.upload_file')}</Button>
-      </div>
+        <Button primary><Icon name="upload" /></Button>
+      </span>
       <div style={{ flexGrow: 1, marginTop: ".5rem" }}>
         {files.map((file) => (
           <File
@@ -270,7 +270,7 @@ const Chat: React.FC = () => {
         height: "300px",
       }}
     >
-      <b>{t("pages.video.text_chat_title")}</b>
+      <b style={{fontSize: "14px", margin: "9px", display: "inline-block"}}>{t("pages.video.text_chat_title")}</b>
       <div
         style={{ flexGrow: 1, margin: "10px 0", overflow: "auto" }}
         ref={commentsRef}
@@ -346,7 +346,7 @@ const Sidebar: React.FC = () => (
   </section>
 );
 
-const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: boolean }> = ({ event, status, loaded }) => {
+const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: boolean, error: string }> = ({ event, status, loaded, error }) => {
   const router = useRouter();
   return (
     <div
@@ -364,7 +364,15 @@ const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: bool
           maxWidth: "400px"
         }}
       >
-        {!loaded ?
+        {error ? 
+          <Message warning
+            header={error}
+            content={<>
+              <p>You may need to log in to view this meeting.</p>
+              <Button onClick={() => router.replace("/login?redirect=" + location.pathname)} />
+            </>}
+          /> 
+        : !loaded ?
           <Message
             header="Loading meeting..."
           /> :
@@ -398,6 +406,7 @@ export default function Video() {
   const [auth] = useAuth();
   const [status, setStatus] = useState<Status>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!id) {
@@ -411,8 +420,9 @@ export default function Video() {
         setEvent(data);
         setStatus(data.room_status)
         setLoaded(true);
+        setError("")
       } catch (e) {
-        alert("This event is not available to you or it doesn't exist")
+        setError("This event is not available to you or it doesn't exist")
         router.replace("/")
       }
     })();
@@ -422,9 +432,9 @@ export default function Video() {
     <UserStoreContext.Provider value={{ users, setUsers }}>
       <FilesContext.Provider value={{ files, setFiles }}>
         <EventContext.Provider value={event}>
-
+          
           {(status != Status.STARTED) ?
-            <WaitingScreen event={event} status={status} loaded={loaded} /> :
+            <WaitingScreen event={event} status={status} loaded={loaded} error={error} /> :
             <main
               style={{
                 display: "flex",
