@@ -32,7 +32,6 @@ export class Report {
   description: string;
 
   @ManyToOne(() => User, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'author_id' })
@@ -42,7 +41,6 @@ export class Report {
   author: User;
 
   @ManyToOne(() => User, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'receiver_id' })

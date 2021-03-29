@@ -7,5 +7,5 @@ export class GetPendingEventDto {
   timespan_end: string;
   description: string;
   participants: string[];
-  lawyer_id?: string;
+  lawyer?: GetUserInfoDto;
 }

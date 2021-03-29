@@ -48,7 +48,7 @@ const Empty = () => {
       />
       <Card
         fluid
-        onClick={() => router.push("/lawyers")}
+        onClick={() => router.push("/admin/users")}
         header="Users"
         description="View all registered users"
       />

@@ -18,7 +18,6 @@ export class File {
   name: string;
 
   @ManyToOne(() => User, u => u.files, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinColumn()

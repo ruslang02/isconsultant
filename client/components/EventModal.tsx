@@ -104,9 +104,9 @@ Join the meeting room: https://consultant.infostrategic.com/video/${
         event.id
       }
 
-Room ID: ${event.id}
+Meeting ID: ${event.id}
 ${
-  temp.room_access == 0
+  temp.room_access == 1
     ? "You will also be required to log in to your account."
     : `Passcode: ${event.room_password}`
 }`
@@ -276,8 +276,8 @@ ${
               <label>Room Access Level</label>
               <Select
                 options={[
-                  { value: 0, text: "Only participants" },
-                  { value: 1, text: "Anyone with password" },
+                  { value: 0, text: "Anyone with password" },
+                  { value: 1, text: "Only participants" },
                 ]}
                 onChange={(e, { value }) =>
                   setTemp({

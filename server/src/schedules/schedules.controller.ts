@@ -49,7 +49,7 @@ import { I18n, I18nContext } from "nestjs-i18n";
 import { PendingEventAdapter } from "./pending-event.adapter";
 import { ChatGateway } from "chat/chat.gateway";
 import { ChatService } from "chat/chat.service";
-import { Status } from "@common/models/calendar-event.entity";
+import { RoomAccess, Status } from "@common/models/calendar-event.entity";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
@@ -62,22 +62,56 @@ export class SchedulesController {
     private pAdapter: PendingEventAdapter,
     @Inject(forwardRef(() => ChatService))
     private chat: ChatService
-  ) { }
+  ) {}
 
   @Types(UserType.ADMIN, UserType.MODERATOR, UserType.LAWYER)
   @UseGuards(JwtAuthGuard, UserGuard)
   @Get("requests")
   @ApiBearerAuth()
   @ApiOperation({
-    description:
-      "Создание заявку на создание события в календаре текущего пользователя.",
+    description: "Получить все заявки, доступные данному юристу.",
   })
   async getPendingEvents(
     @Request() { user }: ExtendedRequest,
     @I18n() i18n: I18nContext
   ): Promise<GetPendingEventDto[]> {
     const events = await this.schedules.findPendingEvents(user.id.toString());
-    return Promise.all(events.map(this.pAdapter.transform(i18n)))
+    return Promise.all(events.map(this.pAdapter.transform(i18n)));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("requests/@me")
+  @ApiBearerAuth()
+  @ApiOperation({
+    description: "Получить заявку, отправленную текущим пользователем.",
+  })
+  async getMyPendingEvent(
+    @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
+  ): Promise<GetPendingEventDto> {
+    try {
+      const event = await this.schedules.findPendingEventByUser(
+        user.id.toString()
+      );
+      return this.pAdapter.transform(i18n)(event);
+    } catch (e) {
+      console.error(e);
+      throw new NotFoundException("No event registered from current user.");
+    }
+  }
+
+  @Types(UserType.ADMIN, UserType.MODERATOR)
+  @UseGuards(JwtAuthGuard, UserGuard)
+  @Get("requests/all")
+  @ApiBearerAuth()
+  @ApiOperation({
+    description: "Получить все заявки в системе.",
+  })
+  async getAllPendingEvents(
+    @I18n() i18n: I18nContext
+  ): Promise<GetPendingEventDto[]> {
+    const events = await this.schedules.findAllPendingEvents();
+    return Promise.all(events.map(this.pAdapter.transform(i18n)));
   }
 
   @Types(UserType.ADMIN, UserType.MODERATOR)
@@ -101,7 +135,6 @@ export class SchedulesController {
       throw new NotFoundException();
     }
   }
-
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -142,7 +175,8 @@ export class SchedulesController {
   @ApiBearerAuth()
   @Get("/@me")
   @ApiOperation({
-    description: "Получение событий (встреч), в которых участвует пользователь.",
+    description:
+      "Получение событий (встреч), в которых участвует пользователь.",
   })
   async getMyEvents(
     @Request() { user }: ExtendedRequest,
@@ -156,7 +190,7 @@ export class SchedulesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("/:eid")
   @ApiOperation({
@@ -169,20 +203,33 @@ export class SchedulesController {
   ): Promise<GetEventDto> {
     try {
       const event = await this.schedules.findEvent(eid);
-      const participantsId = event.participants.map(user => user.id);
+      const participantsId = event.participants.map((user) => user.id);
 
-      if (user.type === UserType.CLIENT || user.type === UserType.LAWYER) {
-        if (!(participantsId.includes(user.id) || event.owner.id == user.id)) {
+      if (event.roomAccess === RoomAccess.ONLY_PARTICIPANTS) {
+        if (!user) {
           throw new ForbiddenException();
+        }
+        if (user.type === UserType.CLIENT || user.type === UserType.LAWYER) {
+          if (!participantsId.includes(user.id) && event.owner.id !== user.id) {
+            throw new ForbiddenException();
+          }
         }
       }
 
-      if (user.type === UserType.CLIENT || (user.type === UserType.LAWYER && event.owner != user)) {
-        return this.adapter.transform(user.type !== UserType.CLIENT, i18n)({ ...event, roomSecret: null });
+      if (
+        event.roomAccess === RoomAccess.PASSWORD ||
+        user.type === UserType.CLIENT ||
+        (user.type === UserType.LAWYER && event.owner != user)
+      ) {
+        return this.adapter.transform(
+          user?.type !== UserType.CLIENT,
+          i18n
+        )({ ...event, roomSecret: null });
       }
 
       return this.adapter.transform(true, i18n)(event);
     } catch (e) {
+      console.error(e);
       throw new NotFoundException();
     }
   }
@@ -231,32 +278,48 @@ export class SchedulesController {
 
   @Get("/:eid/log/json")
   @ApiOperation({
-    description: "Получение текстовой записи всех сообщений данной встречи в формате JSON.",
+    description:
+      "Получение текстовой записи всех сообщений данной встречи в формате JSON.",
   })
   async getChatLogJSON(@Param("eid") eventId: string) {
     try {
       return this.chat.getForEvent(eventId, true);
     } catch (e) {
-      throw new BadRequestException("The event does not exist or the chat log is empty.");
+      throw new BadRequestException(
+        "The event does not exist or the chat log is empty."
+      );
     }
   }
 
   @Get(["/:eid/log/text", "/:eid/log/text/:fname"])
-  @Header('Content-Type', 'application/octet-stream')
+  @Header("Content-Type", "application/octet-stream")
   @ApiOperation({
-    description: "Получение текстовой записи всех сообщений данной встречи в формате текстового файла.",
+    description:
+      "Получение текстовой записи всех сообщений данной встречи в формате текстового файла.",
   })
   async getChatLogText(@Param("eid") eventId: string) {
     try {
       const event = await this.schedules.findEvent(eventId);
       const messages = await this.chat.getForEvent(eventId, true);
-      return `Log from meeting "${event.title}", meeting moderator: ${event.owner.first_name} ${event.owner.last_name}:
+      return (
+        `Log from meeting "${event.title}", meeting moderator: ${event.owner.first_name} ${event.owner.last_name}:
 
-` + messages.map(_ => (`${_.from.first_name} ${_.from.last_name} (${_.from.type}) sent in ${_.created_timestamp.toString()}:
+` +
+        messages
+          .map(
+            (_) => `${_.from.first_name} ${_.from.last_name} (${
+              _.from.type
+            }) sent in ${_.created_timestamp.toString()}:
 ${_.content}
-`)).join("\n") + "\nEnd of log"
+`
+          )
+          .join("\n") +
+        "\nEnd of log"
+      );
     } catch (e) {
-      throw new BadRequestException("The event does not exist or the chat log is empty.");
+      throw new BadRequestException(
+        "The event does not exist or the chat log is empty."
+      );
     }
   }
 
@@ -287,7 +350,12 @@ ${_.content}
     @Request() { user }: ExtendedRequest,
     @UploadedFile() file?: Express.Multer.File
   ) {
-    await this.storage.create(fileName, file?.filename, user.id.toString(), eventId);
+    await this.storage.create(
+      fileName,
+      file?.filename,
+      user.id.toString(),
+      eventId
+    );
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -307,7 +375,10 @@ ${_.content}
         user_id: user.id.toString(),
       });
     } catch (e) {
-      throw new BadRequestException("You have already sent a meeting request. Please wait for it to be either declined or accepted and try again later.");
+      console.error(e);
+      throw new BadRequestException(
+        "You have already sent a meeting request. Please wait for it to be either declined or accepted and try again later."
+      );
     }
   }
 
@@ -326,42 +397,63 @@ ${_.content}
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
+  @Post("request/decline")
+  @ApiBearerAuth()
+  @ApiOperation({
+    description: "Удаление заявки на создание встречи.",
+  })
+  async declineRequestEvent(
+    @Request() { user }: ExtendedRequest,
+    @Body() data: { id: string }
+  ) {
+    await this.schedules.deleteRequestEvent(data.id);
+  }
+
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Post("/:eid/start")
   @ApiBearerAuth()
   @ApiOperation({
-    description:
-      "Создание комнаты для видеозвонка.",
+    description: "Создание комнаты для видеозвонка.",
   })
   async startRoom(
     @Request() { user }: ExtendedRequest,
-    @Param("eid") id: string,
+    @Param("eid") id: string
   ) {
     const event = await this.schedules.findEvent(id);
-    if (user.type == UserType.CLIENT || (user.type == UserType.LAWYER && user == event.owner)) {
+    if (
+      user.type == UserType.CLIENT ||
+      (user.type == UserType.LAWYER && user == event.owner)
+    ) {
       throw new ForbiddenException();
     }
 
-    await this.schedules.createRoom(event.roomId, event.roomPassword, event.roomSecret);
-    return this.schedules.updateStatus(id, Status.STARTED)
+    await this.schedules.createRoom(
+      event.roomId,
+      event.roomPassword,
+      event.roomSecret
+    );
+    return this.schedules.updateStatus(id, Status.STARTED);
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
   @Post("/:eid/stop")
   @ApiBearerAuth()
   @ApiOperation({
-    description:
-      "Удаление комнаты для видеозвонка.",
+    description: "Удаление комнаты для видеозвонка.",
   })
   async stopRoom(
     @Request() { user }: ExtendedRequest,
-    @Param("eid") id: string,
+    @Param("eid") id: string
   ) {
     const event = await this.schedules.findEvent(id);
-    if (user.type == UserType.CLIENT || (user.type == UserType.LAWYER && user == event.owner)) {
+    if (
+      user.type == UserType.CLIENT ||
+      (user.type == UserType.LAWYER && user == event.owner)
+    ) {
       throw new ForbiddenException();
     }
 
     await this.schedules.destroyRoom(event.roomId, event.roomSecret);
-    return this.schedules.updateStatus(id, Status.NEW)
+    return this.schedules.updateStatus(id, Status.NEW);
   }
 }

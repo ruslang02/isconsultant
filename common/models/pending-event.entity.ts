@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -25,21 +26,18 @@ export class PendingEvent {
   end_timestamp: Date;
 
   @OneToOne(() => User, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'from_id' })
   from: User;
 
-  @OneToOne(() => User, {
-    cascade: ["insert", "update", "remove"],
+  @ManyToOne(() => User, user => user.requests, {
     onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'lawyer_id' })
-  lawyer: User;
+  lawyer?: User;
 
   @ManyToMany(() => User, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinTable({

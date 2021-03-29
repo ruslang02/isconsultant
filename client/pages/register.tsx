@@ -90,7 +90,7 @@ export default () => {
               <Form.Field>
                 <label>Password:</label>
                 <input
-                  placeholder=""
+                  placeholder="Not less than 6 symbols"
                   type="password"
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}

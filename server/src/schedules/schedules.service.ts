@@ -1,56 +1,68 @@
 import { ArrangeEventDto } from "@common/dto/arrange-event.dto";
 import { CreateEventDto } from "@common/dto/create-event.dto";
 import { PatchEventDto } from "@common/dto/patch-event.dto";
-import { CalendarEvent, RoomAccess, Status } from "@common/models/calendar-event.entity";
+import {
+  CalendarEvent,
+  RoomAccess,
+  Status,
+} from "@common/models/calendar-event.entity";
 import { PendingEvent } from "@common/models/pending-event.entity";
 import { User } from "@common/models/user.entity";
-import { Inject, Injectable, LoggerService, OnModuleInit } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  LoggerService,
+  OnModuleInit,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
-const Janus = require("janus-gateway-js")
-const genChar = () => String.fromCharCode(Math.round(Math.random() * (122 - 48) + 48));
+const Janus = require("janus-gateway-js");
+const genChar = () =>
+  String.fromCharCode(Math.round(Math.random() * (122 - 48) + 48));
 
 const genRoomId = () => Math.round(Math.random() * 10_000_000);
 
-const {
-  JANUS
-} = process.env
+const { JANUS } = process.env;
 
 @Injectable()
 export class SchedulesService implements OnModuleInit {
   constructor(
-    @Inject('Logger')
+    @Inject("Logger")
     private logger: LoggerService,
     @InjectRepository(CalendarEvent)
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
-    private pEvents: Repository<PendingEvent>,
-  ) { }
+    private pEvents: Repository<PendingEvent>
+  ) {}
 
-  private pluginHandle: any
+  private pluginHandle: any;
 
   async onModuleInit() {
     try {
       var client = new Janus.Client(JANUS, {
-        token: '',
-        apisecret: '',
-        keepalive: 'true'
+        token: "",
+        apisecret: "",
+        keepalive: "true",
       });
 
-      var connection = await client.createConnection()
-      var session = await connection.createSession()
-      this.pluginHandle = await session.attachPlugin("janus.plugin.videoroom")
+      var connection = await client.createConnection();
+      var session = await connection.createSession();
+      this.pluginHandle = await session.attachPlugin("janus.plugin.videoroom");
     } catch (error) {
-      this.logger.log('JanusInit:', error);
+      this.logger.log("JanusInit:", error);
     }
   }
 
   async createRoom(id: number, pin: string, secret: string) {
-    await this.pluginHandle?.sendWithTransaction({ body: { request: "create", room: id, pin: pin, secret: secret } })
+    await this.pluginHandle?.sendWithTransaction({
+      body: { request: "create", room: id, pin: pin, secret: secret },
+    });
   }
 
   async destroyRoom(id: number, secret: string) {
-    await this.pluginHandle?.sendWithTransaction({ body: { request: "destroy", room: id, secret: secret } })
+    await this.pluginHandle?.sendWithTransaction({
+      body: { request: "destroy", room: id, secret: secret },
+    });
   }
 
   async findManyByLawyer(uid: string) {
@@ -63,15 +75,25 @@ export class SchedulesService implements OnModuleInit {
   }
 
   async findEvent(eid: string) {
-    return this.events.findOneOrFail(eid, { relations: ["files", "owner", "participants"] });
+    return this.events.findOneOrFail(eid, {
+      relations: ["files", "owner", "participants"],
+    });
   }
 
   async findEventByRoom(rid: string) {
-    return this.events.findOneOrFail({ where: { roomId: rid } });
+    return this.events.findOneOrFail({
+      where: { roomId: rid },
+      relations: ["files", "owner", "participants"],
+    });
   }
 
   async findAllEvents() {
-    return this.events.find();
+    return this.events.find({ relations: ["files", "owner", "participants"] });
+  }
+
+
+  async findAllPendingEvents() {
+    return this.pEvents.find({ relations: ["from", "lawyer"] });
   }
 
   async findPendingEvents(uid: string) {
@@ -83,8 +105,19 @@ export class SchedulesService implements OnModuleInit {
       .getMany();
   }
 
+  async findPendingEventByUser(uid: string) {
+    return this.pEvents
+      .createQueryBuilder("event")
+      .leftJoinAndSelect("event.lawyer", "lawyer")
+      .leftJoinAndSelect("event.from", "from")
+      .where("event.from_id = :uid", { uid })
+      .getOneOrFail();
+  }
+
   async transferEvent(eid: string, lid: string) {
-    const pending = await this.pEvents.findOne(eid, { relations: ["from", "participants"] });
+    const pending = await this.pEvents.findOne(eid, {
+      relations: ["from", "participants"],
+    });
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
     event.id = +pending.id;
     event.title = `Meeting with ${pending.from.first_name} ${pending.from.last_name}`;
@@ -135,14 +168,18 @@ export class SchedulesService implements OnModuleInit {
       event.roomPassword += genChar();
       event.roomSecret += genChar();
     }
-    event.participants = (data.participants ?? []).map((id) => ({ id: Number(id) }));
+    event.participants = (data.participants ?? []).map((id) => ({
+      id: Number(id),
+    }));
     event.roomStatus = Status.NEW;
 
     return this.events.save(event);
   }
 
   async updateEvent(eventId: string, data: PatchEventDto) {
-    const model = await this.events.findOne(eventId) as Partial<CalendarEvent>;
+    const model = (await this.events.findOne(
+      eventId
+    )) as Partial<CalendarEvent>;
     if ("timespan_start" in data) {
       model.start_timestamp = new Date(data.timespan_start);
     }
@@ -157,7 +194,7 @@ export class SchedulesService implements OnModuleInit {
     }
     if ("participants" in data) {
       model.participants = (data.participants.map((id) => ({
-        id,
+        id: +id,
       })) as unknown) as User[];
     }
     if ("room_access" in data) {
@@ -181,7 +218,6 @@ export class SchedulesService implements OnModuleInit {
     event.from = { id: Number(data.user_id) };
     event.lawyer = data.lawyer_id ? { id: Number(data.lawyer_id) } : undefined;
     event.participants = data.additional_ids.map((id) => ({ id: +id }));
-
 
     return this.pEvents.save(event);
   }

@@ -15,7 +15,7 @@ export const SideMenu: React.FC = () => {
         link
         onClick={() => router.push('/profile/@me')}
       />
-      { auth?.user?.type !== "client" && <Menu.Item
+      { auth?.user?.type === "lawyer" && <Menu.Item
         name='Meetings'
         active={router.pathname.includes('/calendar')}
         link
@@ -28,7 +28,7 @@ export const SideMenu: React.FC = () => {
         onClick={() => router.push('/meetings')}
       />}
       <Menu.Item
-        name='Lawyers Directory'
+        name='Lawyers'
         active={router.pathname.includes('/lawyers')}
         link
         onClick={() => router.push('/lawyers')}

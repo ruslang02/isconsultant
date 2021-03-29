@@ -13,7 +13,7 @@ const RequestsPage = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get<GetPendingEventDto[]>("/events/requests");
+      const { data } = await api.get<GetPendingEventDto[]>(`/events/requests${["admin", "moderator"].includes(auth?.user?.type) ? "/all" : ""}`);
       setRequests(data);
     })();
   }, []);
@@ -34,6 +34,11 @@ const RequestsPage = () => {
                   <div>
                     Starting at {new Date(r.timespan_start).toLocaleString()}{" "}
                       until {new Date(r.timespan_end).toLocaleString()}
+                  </div>
+                </Comment.Metadata>
+                <Comment.Metadata>
+                  <div>
+                    To: {r.lawyer ? `${r.lawyer.first_name} ${r.lawyer.last_name}` : 'Anyone'}
                   </div>
                 </Comment.Metadata>
                 <Comment.Text>{r.description}</Comment.Text>

@@ -53,7 +53,6 @@ export class CalendarEvent {
   end_timestamp: Date;
 
   @ManyToOne(() => User, user => user.ownedEvents, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'owner_id' })
@@ -63,7 +62,6 @@ export class CalendarEvent {
   owner: User;
 
   @ManyToMany(() => User, user => user.events, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinTable({
@@ -80,7 +78,6 @@ export class CalendarEvent {
   participants: User[];
 
   @ManyToMany(() => File, {
-    cascade: ["insert", "update", "remove"],
     onDelete: 'CASCADE'
   })
   @JoinTable({

@@ -17,11 +17,3 @@ api.interceptors.request.use(function (config) {
   console.error(error);
   return Promise.reject(error);
 });
-
-(api.interceptors.response as AxiosInterceptorManager<AxiosResponse<ErrorDto>>).use(function (response) {
-  if (response.status > 300) {
-    throw response.data;
-  }
-
-  return response;
-})

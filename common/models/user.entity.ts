@@ -13,6 +13,7 @@ import {
 import { File } from './file.entity';
 import { CalendarEvent } from './calendar-event.entity';
 import { ChatMessage } from './chat-message.entity';
+import { PendingEvent } from './pending-event.entity';
 
 export enum UserType {
   ADMIN = 'admin',
@@ -123,4 +124,7 @@ export class User {
 
   @OneToMany(() => ChatMessage, message => message.from)
   messages: ChatMessage[]
+
+  @OneToMany(() => PendingEvent, event => event.lawyer)
+  requests: PendingEvent[]
 }

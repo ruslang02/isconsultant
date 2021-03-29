@@ -23,7 +23,7 @@ const CalendarPage = () => {
   const [, setMessage] = useContext(MessageContext);
 
   const loadEvents = async () => {
-    const { data } = await api.get<GetEventDto[]>("/events");
+    const { data } = await api.get<GetEventDto[]>(`/events${["admin", "moderator"].includes(auth?.user?.type) ? "/all" : ""}`);
 
     setEvents(
       data.map((_) => ({
@@ -99,7 +99,7 @@ const CalendarPage = () => {
         event={event}
         onSubmit={async (temp: GetEventDto) => {
           if (event === undefined) {
-            await api.put("/events", temp);
+            await api.put(`/events`, temp);
             setMessage("Your meeting was successfully created.");
           } else {
             const ptch = Object.fromEntries(
@@ -109,7 +109,7 @@ const CalendarPage = () => {
             ) as PatchEventDto;
             if (
               ptch.participants?.length === temp.participants?.length &&
-              ptch.participants.every((a) => !temp.participants.includes(a))
+              ptch.participants?.every((a) => !temp.participants.includes(a))
             ) {
               delete ptch.participants;
             }
