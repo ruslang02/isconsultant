@@ -48,14 +48,13 @@ export default () => {
       >
         {!success && (<>
           <Message
-            attached="top"
             header="Create an account at ISConsultant"
             content="You will be able to arrange a meeting afterwards."
           />
-          <Segment attached>
+          <Segment>
             <Form onSubmit={handleSubmit}>
               <Form.Field>
-                <label>First name:</label>
+                <label>First name<span style={{color: "red"}}>*</span>:</label>
                 <input
                   placeholder="John"
                   onChange={(e) => setFirstName(e.target.value)}
@@ -71,7 +70,7 @@ export default () => {
                 />
               </Form.Field>
               <Form.Field>
-                <label>Last name:</label>
+                <label>Last name<span style={{color: "red"}}>*</span>:</label>
                 <input
                   placeholder="Smith"
                   onChange={(e) => setLastName(e.target.value)}
@@ -79,7 +78,7 @@ export default () => {
                 />
               </Form.Field>
               <Form.Field>
-                <label>E-mail:</label>
+                <label>E-mail<span style={{color: "red"}}>*</span>:</label>
                 <input
                   placeholder="example@example.org"
                   onChange={(e) => setEmail(e.target.value)}
@@ -88,13 +87,13 @@ export default () => {
                 />
               </Form.Field>
               <Form.Field>
-                <label>Password:</label>
+                <label>Password<span style={{color: "red"}}>*</span>:</label>
                 <input
-                  placeholder="Not less than 6 symbols"
                   type="password"
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
                 />
+                <small>Not less than 6 symbols</small>
               </Form.Field>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <Button compact onClick={() => router.push("/login")}><Icon name="arrow left" />Back to Sign in</Button>
@@ -106,9 +105,9 @@ export default () => {
           </Segment>
         </>
         )}
-        {error && <Message attached="bottom" color="red" content={error} />}
+        {error && <Message color="red" content={error} />}
         {success && <>
-          <Message color="green" content={<>
+          <Message color="green" floating content={<>
             {"We have successfully created your account. You also need to "}
             <b>{"verify"}</b>
             {" your account from the email we sent you."}

@@ -23,7 +23,11 @@ const CalendarPage = () => {
   const [, setMessage] = useContext(MessageContext);
 
   const loadEvents = async () => {
-    const { data } = await api.get<GetEventDto[]>(`/events${["admin", "moderator"].includes(auth?.user?.type) ? "/all" : ""}`);
+    const { data } = await api.get<GetEventDto[]>(
+      `/events${
+        ["admin", "moderator"].includes(auth?.user?.type) ? "/all" : ""
+      }`
+    );
 
     setEvents(
       data.map((_) => ({
@@ -94,6 +98,8 @@ const CalendarPage = () => {
         editable
         onClose={() => {
           setOpen(false);
+          setEvent(undefined);
+          loadEvents();
         }}
         open={open}
         event={event}

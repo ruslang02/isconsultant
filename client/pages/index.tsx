@@ -7,10 +7,12 @@ import {
   Form,
   Grid,
   Header as SHeader,
+  Icon,
   Image,
   Message,
   Modal,
   Segment,
+  Statistic,
   TextArea,
 } from "semantic-ui-react";
 import { Header } from "../components/Header";
@@ -24,6 +26,7 @@ import { AxiosError } from "@common/node_modules/axios";
 import { MessageContext } from "utils/MessageContext";
 import { ErrorDto } from "@common/dto/error.dto";
 import { EventArrange } from "components/EventArrange";
+import { GetUserDto } from "@common/dto/get-user.dto";
 
 function Promo() {
   const { t } = useTranslation();
@@ -39,34 +42,41 @@ function Promo() {
         backgroundSize: "cover",
       }}
     >
-      <Container style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "flex-end" }}>
-          <section
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.7)",
-              backdropFilter: "blur(15px)",
-              borderRadius: "10px",
-              padding: "2rem",
-              maxWidth: "500px"
-            }}
-          >
-            <h2>{t("pages.index.title")}</h2>
-            <p style={{ fontSize: "13pt" }}>{t("pages.index.subtitle")}</p>
-            <TextArea
-              style={{ resize: "none" }}
-              onChange={(e) => setDescription(e.target.value)}
-              value={description}
-            ></TextArea>
-            <div style={{ textAlign: "right", marginTop: "1rem" }}>
-              <Button primary onClick={() => setOpen(true)}>
-                {t("pages.index.arrange_event")}
-              </Button>
-            </div>
-            <EventArrange
-              open={open}
-              onClose={() => setOpen(false)}
-              description={description}
-            />
-          </section>
+      <Container
+        style={{
+          display: "flex",
+          height: "100%",
+          alignItems: "center",
+          justifyContent: "flex-end",
+        }}
+      >
+        <section
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            backdropFilter: "blur(15px)",
+            borderRadius: "10px",
+            padding: "2rem",
+            maxWidth: "500px",
+          }}
+        >
+          <h2>{t("pages.index.title")}</h2>
+          <p style={{ fontSize: "13pt" }}>{t("pages.index.subtitle")}</p>
+          <TextArea
+            style={{ resize: "none" }}
+            onChange={(e) => setDescription(e.target.value)}
+            value={description}
+          ></TextArea>
+          <div style={{ textAlign: "right", marginTop: "1rem" }}>
+            <Button primary onClick={() => setOpen(true)}>
+              {t("pages.index.arrange_event")}
+            </Button>
+          </div>
+          <EventArrange
+            open={open}
+            onClose={() => setOpen(false)}
+            description={description}
+          />
+        </section>
       </Container>
     </Form>
   );
@@ -107,6 +117,14 @@ function PromoAdvantages() {
 }
 
 function Lawyers() {
+  const [list, setList] = useState<GetUserDto[]>([]);
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get<GetUserDto[]>("/users/top");
+      setList(data);
+    })();
+  }, []);
+
   return (
     <Container id="lawyers">
       <h1 style={{ marginTop: "20px" }}>Our lawyers</h1>
@@ -119,34 +137,21 @@ function Lawyers() {
           width: "100%",
         }}
       >
-        <Card
-          image="https://react.semantic-ui.com/images/avatar/large/elliot.jpg"
-          header="Elliot Baker"
-          meta="Lawyer"
-          style={{ margin: 0 }}
-          description="Elliot is a sound engineer living in Nashville who enjoys playing guitar and hanging with his cat."
-        />
-        <Card
-          image="https://react.semantic-ui.com/images/avatar/large/elliot.jpg"
-          header="Elliot Baker"
-          meta="Lawyer"
-          style={{ margin: 0 }}
-          description="Elliot is a sound engineer living in Nashville who enjoys playing guitar and hanging with his cat."
-        />
-        <Card
-          image="https://react.semantic-ui.com/images/avatar/large/elliot.jpg"
-          header="Elliot Baker"
-          meta="Lawyer"
-          style={{ margin: 0 }}
-          description="Elliot is a sound engineer living in Nashville who enjoys playing guitar and hanging with his cat."
-        />
-        <Card
-          image="https://react.semantic-ui.com/images/avatar/large/elliot.jpg"
-          header="Elliot Baker"
-          meta="Lawyer"
-          style={{ margin: 0 }}
-          description="Elliot is a sound engineer living in Nashville who enjoys playing guitar and hanging with his cat."
-        />
+        {list.map((l) => (
+          <Card
+            image={l.avatar}
+            header={l.first_name + " " + l.last_name}
+            meta={`Rating: ${l.rating}`}
+            style={{ margin: 0 }}
+            description={
+              <div style={{ marginTop: "10px" }}>
+                <Button primary fluid size="small">
+                  Request a meeting
+                </Button>
+              </div>
+            }
+          />
+        ))}
       </div>
     </Container>
   );
@@ -155,7 +160,7 @@ function Lawyers() {
 export default function Home() {
   const router = useRouter();
   const { verify } = router.query;
-  const  [, setMessage] = useContext(MessageContext);
+  const [, setMessage] = useContext(MessageContext);
 
   useEffect(() => {
     if (verify == "success") {
@@ -172,6 +177,55 @@ export default function Home() {
       <Promo />
       <PromoAdvantages />
       <Lawyers />
+      <div
+        style={{
+          marginTop: "2rem",
+          borderTop: "1px solid lightgray",
+          padding: "2rem",
+          textAlign: "center",
+          background: "#eee",
+        }}
+      >
+        <Container style={{ display: "flex", marginBottom: "2rem" }}>
+          <div>
+            <Statistic size="small">
+              <Statistic.Value>
+                <Icon name="video" /> Modern
+              </Statistic.Value>
+              <Statistic.Label>
+                We use modern WebRTC solutions <br />
+                to make your calls fast, flexible and secure.
+              </Statistic.Label>
+            </Statistic>
+          </div>
+          <div style={{ flexGrow: 1 }}></div>
+          <div>
+            <Statistic size="small">
+              <Statistic.Value>
+                <Icon name="users" /> Quality
+              </Statistic.Value>
+              <Statistic.Label>
+                We are a professional team <br />
+                which knows its job.
+              </Statistic.Label>
+            </Statistic>
+          </div>
+          <div style={{ flexGrow: 1 }}></div>
+          <div>
+            <Statistic size="small">
+              <Statistic.Value>
+                <Icon name="file" /> Safety
+              </Statistic.Value>
+              <Statistic.Label>
+                We guarantee our customers
+                <br />
+                that their data is well organized.
+              </Statistic.Label>
+            </Statistic>
+          </div>
+        </Container>
+        <p style={{ fontSize: "16px" }}>&copy; 2020-2021. ISConsultant.</p>
+      </div>
     </section>
   );
 }

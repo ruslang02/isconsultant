@@ -74,6 +74,26 @@ export class UsersController {
     return Promise.all(hydrated);
   }
 
+  @Get('top')
+  @ApiOperation({
+    description: 'Получение лучших юристов в организации.',
+  })
+  async getTopLawyers(@I18n() i18n: I18nContext) {
+    return Promise.all(
+      (
+        await this.users.findMany({
+          where: {
+            type: UserType.LAWYER
+          },
+          order: {
+            rating: "DESC"
+          },
+          take: 4
+        })
+      ).map(u => this.adapter.transform(u, i18n))
+    );
+  }
+
   @Get(':uid')
   @ApiOkResponse({
     description: 'Предоставлена информация о пользователе.',

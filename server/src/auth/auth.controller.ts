@@ -90,12 +90,17 @@ export class AuthController {
     type: CreateUserDto,
   })
   async register(@Body() u: CreateUserDto) {
+    if (u.password.length < 6) {
+      throw new BadRequestException(
+        'The password is too short.'
+      );
+    }
+    if (!u.first_name || !u.last_name || !u.email || !u.password) {
+      throw new BadRequestException(
+        'Please fill all fields with a * sign.'
+      );
+    }
     try {
-      if (u.password.length < 6) {
-        throw new BadRequestException(
-          'The password is too short.'
-        );
-      }
       await this.users.insertOne({ ...u, type: UserType.CLIENT });
       // Send email!
       const data: Pick<User, 'id' | 'email' | 'type'> = await this.users.findOneByEmail(u.email);
@@ -106,7 +111,7 @@ export class AuthController {
     } catch (e) {
       this.logger.error(`/api/auth/register: `, '[ERROR]', e);
       throw new BadRequestException(
-        'Data entered did not match the format or the user exists.'
+        'User with this email already exists.'
       );
     }
   }

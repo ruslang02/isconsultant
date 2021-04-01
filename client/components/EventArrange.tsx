@@ -45,6 +45,17 @@ export function EventArrange({
     if (open) setLawyer(lawyerId);
   }, [open]);
 
+  useEffect(() => {
+    if (lawyerId && !users[lawyerId]) {
+      (async () => {
+        const { data } = await api.get<GetUserDto[]>(
+          `/users/search?ids=${lawyerId}`
+        );
+        setUsers([...(users.filter(u => !data.some(v => v.id === u.id))), ...data]);
+      })();
+    }
+  }, [lawyerId]);
+
   const handleSubmit = async () => {
     let access_token = auth?.access_token;
     if (!access_token) {
@@ -199,7 +210,7 @@ export function EventArrange({
                     text: `${user.first_name} ${user.last_name}`,
                     value: user.id,
                   }))}
-                  value={lawyer}
+                  value={lawyer ?? lawyerId}
                 />
               </Form.Field>
             </>

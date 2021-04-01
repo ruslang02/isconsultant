@@ -42,11 +42,11 @@ const UsersPage = () => {
                 <br />
                 Joined at: {new Date(u.created_timestamp).toLocaleDateString()}
                 <br />
-                Banned or non-verified: {u.verified ? "No" : "Yes"}
+                Verified: {u.verified ? "Yes" : "No"}
               </Item.Description>
               <Button
                 floated="right"
-                content="Ban"
+                content="Deverify"
                 color="red"
                 onClick={() => {
                   api.patch(`/users/${u.id}`, {

@@ -52,7 +52,7 @@ const Empty = () => {
             {" "}
             {auth?.user?.middle_name}
             <br/>
-          <small>{auth?.user?.type === "client" ? "Client" : "Lawyer"}</small>
+          <small>{auth?.user?.type[0].toUpperCase() + auth?.user?.type.slice(1)}</small>
           </h3>
             { editing && <>
           <p>

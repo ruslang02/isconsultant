@@ -28,7 +28,7 @@ const Login: React.FC = () => {
       );
 
       if ("message" in data) {
-        setError(data.message);
+        setError(data.message === "Unauthorized" ? "Email or password incorrect." : data.message);
       } else {
         setError("");
         if (!data.user.avatar) {
