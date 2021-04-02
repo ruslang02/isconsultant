@@ -12,6 +12,7 @@ import {
   TextArea,
   Image,
   Dropdown,
+  Message,
 } from "semantic-ui-react";
 import { api } from "utils/api";
 import { MessageContext } from "utils/MessageContext";
@@ -35,6 +36,7 @@ export function EventArrange({
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [description, setDescription] = useState(descr);
   const [auth] = useAuth();
   const [users, setUsers] = useContext(UserCacheContext);
@@ -51,33 +53,47 @@ export function EventArrange({
         const { data } = await api.get<GetUserDto[]>(
           `/users/search?ids=${lawyerId}`
         );
-        setUsers([...(users.filter(u => !data.some(v => v.id === u.id))), ...data]);
+        setUsers([
+          ...users.filter((u) => !data.some((v) => v.id === u.id)),
+          ...data,
+        ]);
       })();
     }
   }, [lawyerId]);
 
   const handleSubmit = async () => {
     let access_token = auth?.access_token;
+    if (!description) {
+      setError("You did not specify request's description.");
+      return;
+    }
     if (!access_token) {
       try {
-        access_token = (
-          await api.post<{ access_token: string }>("/auth/register", {
-            email,
-            first_name: firstName,
-            middle_name: middleName,
-            last_name: lastName,
-            password,
-          } as CreateUserDto)
-        ).data.access_token;
+        const { data: regData } = await api.post<
+          { access_token: string } | ErrorDto
+        >("/auth/register", {
+          email,
+          first_name: firstName,
+          middle_name: middleName,
+          last_name: lastName,
+          password,
+        } as CreateUserDto);
+        if ("message" in regData) {
+          setError(regData.message);
+          return;
+        }
+        access_token = regData.access_token;
 
-        createRequest(access_token);
-        setMessage(
-          "Your meeting request was created. In order for it to be accepted, you need to <b>verify your email address</b> using the link we sent you."
-        );
-        onClose();
+        if (await createRequest(access_token)) {
+          setMessage(
+            "Your meeting request was created. In order for it to get accepted, you need to <b>verify your email address</b> using the link we sent you."
+          );
+          setError("");
+          onClose();
+        }
       } catch (e) {
         console.log(e);
-        setMessage("Error: " + (e as ErrorDto).message);
+        setError((e as ErrorDto).message);
       }
     } else {
       if (await createRequest(access_token)) {
@@ -110,7 +126,7 @@ export function EventArrange({
         }
       );
       if (status > 300) {
-        setMessage(data.message);
+        setError(data.message);
         return false;
       }
       return true;
@@ -125,7 +141,9 @@ export function EventArrange({
           {!auth?.access_token ? (
             <>
               <Form.Field>
-                <label>First name:</label>
+                <label>
+                  First name<span style={{ color: "red" }}>*</span>:
+                </label>
                 <input
                   placeholder="John"
                   onChange={(e) => setFirstName(e.target.value)}
@@ -141,7 +159,9 @@ export function EventArrange({
                 />
               </Form.Field>
               <Form.Field>
-                <label>Last name:</label>
+                <label>
+                  Last name<span style={{ color: "red" }}>*</span>:
+                </label>
                 <input
                   placeholder="Smith"
                   onChange={(e) => setLastName(e.target.value)}
@@ -149,7 +169,9 @@ export function EventArrange({
                 />
               </Form.Field>
               <Form.Field>
-                <label>E-mail:</label>
+                <label>
+                  E-mail<span style={{ color: "red" }}>*</span>:
+                </label>
                 <input
                   placeholder="example@example.org"
                   onChange={(e) => setEmail(e.target.value)}
@@ -158,13 +180,16 @@ export function EventArrange({
                 />
               </Form.Field>
               <Form.Field>
-                <label>Password:</label>
+                <label>
+                  Password<span style={{ color: "red" }}>*</span>:
+                </label>
                 <input
                   placeholder=""
                   type="password"
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
                 />
+                <small>At least 6 symbols</small>
               </Form.Field>
             </>
           ) : (
@@ -216,7 +241,9 @@ export function EventArrange({
             </>
           )}
           <Form.Field>
-            <label>Description:</label>
+            <label>
+              Description<span style={{ color: "red" }}>*</span>:
+            </label>
             <textarea
               onChange={(e) => setDescription(e.target.value)}
               value={description}
@@ -230,6 +257,7 @@ export function EventArrange({
               Send
             </Button>
           </div>
+          {error && <Message color="red" content={error} />}
         </Form>
       </Modal.Content>
     </Modal>

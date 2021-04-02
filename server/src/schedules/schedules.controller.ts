@@ -368,6 +368,9 @@ ${_.content}
     @Request() { user }: ExtendedRequest,
     @Body() data: ArrangeEventDto
   ) {
+    if (!data.description) {
+      throw new BadRequestException("You did not specify request's description.");
+    }
     try {
       await this.schedules.createPendingEvent({
         ...data,
