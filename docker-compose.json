@@ -8,7 +8,7 @@
     "proxy": {
       "image": "nginx",
       "ports": [
-        "9000:80"
+        "80:80"
       ],
       "volumes": [
         "./proxy/nginx.conf:/etc/nginx/nginx.conf"
@@ -20,7 +20,6 @@
       "restart": "always"
     },
     "db": {
-      "env_file": "./development.env",
       "image": "postgres",
       "networks": {
         "db": {
@@ -39,7 +38,6 @@
         "dockerfile": "./Dockerfile.server",
         "context": "."
       },
-      "env_file": "./development.env",
       "networks": [
         "db",
         "main"
@@ -55,7 +53,6 @@
         "dockerfile": "./Dockerfile.client",
         "context": "."
       },
-      "env_file": "./development.env",
       "networks": [
         "main"
       ],
