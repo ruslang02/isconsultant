@@ -114,7 +114,7 @@ export function EventArrange({
         "/events/request",
         {
           description,
-          lawyer_id: lawyer,
+          lawyer_id: access_token ? lawyer : undefined,
           additional_ids: [auth.user.id],
           timespan_start: new Date().toISOString(),
           timespan_end: timespan_end.toISOString(),

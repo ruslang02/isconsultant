@@ -118,6 +118,8 @@ function PromoAdvantages() {
 
 function Lawyers() {
   const [list, setList] = useState<GetUserDto[]>([]);
+  const [open, setOpen] = useState(false);
+  const [lawyer, setLawyer] = useState("");
   useEffect(() => {
     (async () => {
       const { data } = await api.get<GetUserDto[]>("/users/top");
@@ -145,7 +147,15 @@ function Lawyers() {
             style={{ margin: 0 }}
             description={
               <div style={{ marginTop: "10px" }}>
-                <Button primary fluid size="small">
+                <Button
+                  primary
+                  fluid
+                  size="small"
+                  onClick={() => {
+                    setLawyer(l.id);
+                    setOpen(true);
+                  }}
+                >
                   Request a meeting
                 </Button>
               </div>
@@ -153,6 +163,11 @@ function Lawyers() {
           />
         ))}
       </div>
+      <EventArrange
+        open={open}
+        onClose={() => setOpen(false)}
+        lawyerId={lawyer}
+      />
     </Container>
   );
 }
