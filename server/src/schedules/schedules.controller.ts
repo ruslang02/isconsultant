@@ -216,18 +216,11 @@ export class SchedulesController {
         }
       }
 
-      if (
-        event.roomAccess === RoomAccess.PASSWORD ||
-        user.type === UserType.CLIENT ||
-        (user.type === UserType.LAWYER && event.owner != user)
-      ) {
-        return this.adapter.transform(
-          user?.type !== UserType.CLIENT,
-          i18n
-        )({ ...event, roomSecret: null });
-      }
+      const showSecret =
+        [UserType.MODERATOR, UserType.ADMIN].includes(user.type) ||
+        (user.type === UserType.LAWYER && event.owner.id === user.id);
 
-      return this.adapter.transform(true, i18n)(event);
+      return this.adapter.transform(showSecret, i18n)(event);
     } catch (e) {
       console.error(e);
       throw new NotFoundException();
