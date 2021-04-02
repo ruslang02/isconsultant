@@ -62,7 +62,7 @@ export class SchedulesController {
     private pAdapter: PendingEventAdapter,
     @Inject(forwardRef(() => ChatService))
     private chat: ChatService
-  ) {}
+  ) { }
 
   @Types(UserType.ADMIN, UserType.MODERATOR, UserType.LAWYER)
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -190,7 +190,7 @@ export class SchedulesController {
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("/:eid")
   @ApiOperation({
@@ -307,9 +307,8 @@ export class SchedulesController {
 ` +
         messages
           .map(
-            (_) => `${_.from.first_name} ${_.from.last_name} (${
-              _.from.type
-            }) sent in ${_.created_timestamp.toString()}:
+            (_) => `${_.from.first_name} ${_.from.last_name} (${_.from.type
+              }) sent in ${_.created_timestamp.toString()}:
 ${_.content}
 `
           )

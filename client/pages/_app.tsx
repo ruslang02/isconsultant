@@ -10,7 +10,12 @@ import { MessageContext } from "utils/MessageContext";
 import { UserCacheContext } from "utils/UserCacheContext";
 import { GetUserDto } from "@common/dto/get-user.dto";
 
-const isPublic = (path: string) => path === "/" || path === "/login" || path === "/register" || path.startsWith("/verify");
+const isPublic = (path: string) =>
+  path === "/" ||
+  path === "/login" ||
+  path === "/register" ||
+  path.startsWith("/verify") ||
+  path.startsWith("/video");
 
 function MyApp({
   Component,
@@ -22,18 +27,21 @@ function MyApp({
   const { i18n } = useTranslation();
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const [auth, setAuth] = useAuth();
+  const [auth] = useAuth();
   const [users, setUsers] = useState<GetUserDto[]>([]);
-  const [allowed, setAllowed] = useState(typeof window === "undefined" || isPublic(router.pathname));
-  /*
-    useEffect(() => {
-      if (!auth?.access_token && !isPublic(router.pathname)) {
-        if (typeof window !== "undefined") location.replace("/login?redirect=" + location.pathname);
-      } else {
-        setAllowed(true);
-      }
-    }, [auth]);
-  */
+  const [allowed, setAllowed] = useState(
+    typeof window === "undefined" || isPublic(router.pathname)
+  );
+
+  useEffect(() => {
+    if (!auth?.access_token && !isPublic(router.pathname)) {
+      if (typeof window !== "undefined")
+        location.replace("/login?redirect=" + location.pathname);
+    } else {
+      setAllowed(true);
+    }
+  }, [auth]);
+
   return (
     <MessageContext.Provider value={[message, setMessage]}>
       <Button
@@ -45,7 +53,7 @@ function MyApp({
         {i18n.language === "en" ? "RU" : "EN"}
       </Button>
       <UserCacheContext.Provider value={[users, setUsers]}>
-        <Component {...pageProps} />
+        {allowed && <Component {...pageProps} />}
       </UserCacheContext.Provider>
       <div
         style={{
@@ -54,11 +62,13 @@ function MyApp({
           left: "5%",
           zIndex: 99000,
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.25)",
-          cursor: "pointer"
+          cursor: "pointer",
         }}
         onClick={() => setMessage("")}
       >
-        <Message hidden={!message}><span dangerouslySetInnerHTML={{ __html: message }}></span></Message>
+        <Message hidden={!message}>
+          <span dangerouslySetInnerHTML={{ __html: message }}></span>
+        </Message>
       </div>
     </MessageContext.Provider>
   );

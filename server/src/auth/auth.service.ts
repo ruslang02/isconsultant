@@ -30,6 +30,26 @@ export class AuthService implements OnApplicationBootstrap {
         this.logger.log(`AuthService:`, 'Client test account created.');
       }).catch(() => { });
 
+      user.email = "user1@user.com"
+      user.first_name = "user1"
+      user.last_name = "user1"
+      user.middle_name = "user1"
+      user.password = "user1"
+
+      this.users.insertOne({ ...user, type: UserType.CLIENT, verified: true }).then((insertRes: any) => {
+        this.logger.log(`AuthService:`, 'Client 1 test account created.');
+      }).catch(() => { });
+
+      user.email = "user2@user.com"
+      user.first_name = "user2"
+      user.last_name = "user2"
+      user.middle_name = "user2"
+      user.password = "user2"
+
+      this.users.insertOne({ ...user, type: UserType.CLIENT, verified: true }).then((insertRes: any) => {
+        this.logger.log(`AuthService:`, 'Client 2 test account created.');
+      }).catch(() => { });
+
       user.email = "lawyer@lawyer.com"
       user.first_name = "lawyer"
       user.last_name = "lawyer"
@@ -38,6 +58,16 @@ export class AuthService implements OnApplicationBootstrap {
 
       this.users.insertOne({ ...user, type: UserType.LAWYER, verified: true }).then((insertRes: any) => {
         this.logger.log(`AuthService:`, 'Lawyer test account created.');
+      }).catch(() => { });
+
+      user.email = "lawyer2@lawyer.com"
+      user.first_name = "lawyer2"
+      user.last_name = "lawyer2"
+      user.middle_name = "lawyer2"
+      user.password = "lawyer2"
+
+      this.users.insertOne({ ...user, type: UserType.LAWYER, verified: true }).then((insertRes: any) => {
+        this.logger.log(`AuthService:`, 'Lawyer 2 test account created.');
       }).catch(() => { });
 
       user.email = "moderator@moderator.com"
