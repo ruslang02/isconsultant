@@ -32,4 +32,4 @@ deploy:
     - deploy-prod
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker-compose -f docker-compose.json --env-file="/home/falcon/production.env" up -d
+    - ENV_FILE=/home/falcon/production.env docker-compose -f docker-compose.json up -d

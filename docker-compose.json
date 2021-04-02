@@ -21,6 +21,7 @@
     },
     "db": {
       "image": "postgres",
+      "env_file": "$ENV_FILE",
       "networks": {
         "db": {
           "aliases": [
@@ -34,6 +35,7 @@
       "restart": "always"
     },
     "server": {
+      "env_file": "$ENV_FILE",
       "build": {
         "dockerfile": "./Dockerfile.server",
         "context": "."
