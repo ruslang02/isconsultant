@@ -43,7 +43,7 @@ export function EventModal({
   const [files, setFiles] = useState<File[]>([]);
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
   const [users, setUsers] = useContext(UserCacheContext);
-  const  [, setMessage] = useContext(MessageContext);
+  const [, setMessage] = useContext(MessageContext);
   const router = useRouter();
   const [, update] = useState();
 
@@ -67,12 +67,15 @@ export function EventModal({
         setChatLog(data);
       })();
       if (event.participants?.length) {
-      (async () => {
-        const { data } = await api.get<GetUserDto[]>(
-          `/users/search?ids=${event.participants.join(",")}`
-        );
-        setUsers([...(users.filter(u => !data.some(v => v.id === u.id))), ...data]);
-      })();
+        (async () => {
+          const { data } = await api.get<GetUserDto[]>(
+            `/users/search?ids=${event.participants.join(",")}`
+          );
+          setUsers([
+            ...users.filter((u) => !data.some((v) => v.id === u.id)),
+            ...data,
+          ]);
+        })();
       }
       setTemp({ ...event });
     }
@@ -100,9 +103,7 @@ export function EventModal({
 Topic: ${temp.title}
 Time: ${new Date(temp.timespan_start).toLocaleString("en-GB")}
 
-Join the meeting room: https://consultant.infostrategic.com/video/${
-        event.id
-      }
+Join the meeting room: https://consultant.infostrategic.com/video/${event.id}
 
 Meeting ID: ${event.id}
 ${
@@ -114,33 +115,45 @@ ${
 
   return (
     <Modal style={{ width: "900px" }} onClose={() => onClose()} open={open}>
-      <Modal.Header style={{"display": "flex",
-    "padding": "1rem 1.5rem",
-    "align-items": "center"}}>
-        {editable ? event === undefined ? "Create new meeting" : "Update meeting info" : "View meeting info"}
-        {event !== undefined && <Button
-              primary
-              icon="arrow right"
-              labelPosition="right"
-              content="Join meeting"
-              onClick={() => {
-                window.open(`/video/${event.id}`);
-              }}
-              style={{ marginLeft: "auto" }}
-            />}
+      <Modal.Header
+        style={{
+          display: "flex",
+          padding: "1rem 1.5rem",
+          "align-items": "center",
+        }}
+      >
+        {editable
+          ? event === undefined
+            ? "Create new meeting"
+            : "Update meeting info"
+          : "View meeting info"}
+        {event !== undefined && (
+          <Button
+            primary
+            icon="arrow right"
+            labelPosition="right"
+            content="Join meeting"
+            onClick={() => {
+              window.open(`/video/${event.id}`);
+            }}
+            style={{ marginLeft: "auto" }}
+          />
+        )}
       </Modal.Header>
       <Modal.Content style={{ display: "flex" }}>
         <section style={{ width: "100%" }}>
           <Form>
             <Form.Field>
-              <Form.Input readOnly={!editable}
+              <Form.Input
+                readOnly={!editable}
                 label="Title"
                 onChange={(_e, data) => setTemp({ ...temp, title: data.value })}
                 value={temp?.title}
               />
             </Form.Field>
             <Form.Field>
-              <Form.TextArea readOnly={!editable}
+              <Form.TextArea
+                readOnly={!editable}
                 label="Description"
                 onChange={(_e, data) =>
                   setTemp({ ...temp, description: data.value.toString() })
@@ -150,7 +163,8 @@ ${
             </Form.Field>
             <Form.Field inline>
               <label>Starts at</label>
-              <SemanticDatepicker readOnly={!editable}
+              <SemanticDatepicker
+                readOnly={!editable}
                 onChange={(_e, { value }) =>
                   setTemp({
                     ...temp,
@@ -164,7 +178,8 @@ ${
                 }
               />{" "}
               &nbsp;
-              <input readOnly={!editable}
+              <input
+                readOnly={!editable}
                 onChange={(e) => {
                   const date = new Date(temp.timespan_start);
                   const value = e.target.valueAsDate;
@@ -188,7 +203,8 @@ ${
             </Form.Field>
             <Form.Field inline>
               <label>Ends at</label>
-              <SemanticDatepicker readOnly={!editable}
+              <SemanticDatepicker
+                readOnly={!editable}
                 onChange={(_e, { value }) =>
                   setTemp({
                     ...temp,
@@ -200,7 +216,8 @@ ${
                 }
               />{" "}
               &nbsp;
-              <input readOnly={!editable}
+              <input
+                readOnly={!editable}
                 onChange={(e) => {
                   const date = new Date(temp.timespan_end);
                   const value = e.target.valueAsDate;
@@ -211,28 +228,42 @@ ${
                 value={
                   temp !== undefined
                     ? new Date(temp.timespan_end).toLocaleTimeString(
-                      undefined,
-                      { hour: "2-digit", minute: "2-digit", hour12: false }
-                    )
+                        undefined,
+                        { hour: "2-digit", minute: "2-digit", hour12: false }
+                      )
                     : undefined
                 }
               />
             </Form.Field>
             <Form.Field inline>
               <label>Participants</label>
-              <Dropdown readOnly={!editable}
+              <Dropdown
+                readOnly={!editable}
                 fluid
                 multiple
                 search
                 selection
                 onChange={(_e, d) => {
-                  const nTemp = {...temp, participants: d.value.toString().split(",").filter(x => x)};
+                  const nTemp = {
+                    ...temp,
+                    participants: d.value
+                      .toString()
+                      .split(",")
+                      .filter((x) => x),
+                  };
                   setTemp(nTemp);
                 }}
                 onSearchChange={(_e, d) => {
-                  api.get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`).then(({ data }) => {
-                    setUsers([...(users.filter(u => !data.some(v => v.id === u.id))), ...data]);
-                  });
+                  api
+                    .get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`)
+                    .then(({ data }) => {
+                      setUsers([
+                        ...users.filter(
+                          (u) => !data.some((v) => v.id === u.id)
+                        ),
+                        ...data,
+                      ]);
+                    });
                 }}
                 options={users.map((user) => ({
                   key: user.id,
@@ -240,7 +271,7 @@ ${
                   value: user.id,
                 }))}
                 value={temp?.participants?.map((v) => {
-                  const user = users.find(u => u.id === v) as GetUserDto;
+                  const user = users.find((u) => u.id === v) as GetUserDto;
                   return user?.id;
                 })}
               />
@@ -254,41 +285,47 @@ ${
                 value={event?.id}
               />
             </Form.Field>
-            
-            { editable && <Form.Field>
-              <Form.Input
-                label="Room Secret (only for you)"
-                placeholder="(will be generated later)"
-                readOnly
-                value={temp?.room_secret}
-              />
-            </Form.Field>}
+
+            {editable && (
+              <Form.Field>
+                <Form.Input
+                  label="Room Secret (only for you)"
+                  placeholder="(will be generated later)"
+                  readOnly
+                  value={temp?.room_secret}
+                />
+              </Form.Field>
+            )}
             <Form.Field>
               <Form.Input
-                label={editable ? "Room Password (for unregistered users)" : "Room Password"}
+                label={
+                  editable
+                    ? "Room Password (for unregistered users)"
+                    : "Room Password"
+                }
                 placeholder="(will be generated later)"
                 readOnly
                 value={temp?.room_password}
               />
             </Form.Field>
-            { editable && 
-            <Form.Field>
-              <label>Room Access Level</label>
-              <Select
-                options={[
-                  { value: 0, text: "Anyone with password" },
-                  { value: 1, text: "Only participants" },
-                ]}
-                onChange={(e, { value }) =>
-                  setTemp({
-                    ...temp,
-                    room_access: +value,
-                  })
-                }
-                value={temp?.room_access}
-              />
-            </Form.Field>
-}
+            {editable && (
+              <Form.Field>
+                <label>Room Access Level</label>
+                <Select
+                  options={[
+                    { value: 0, text: "Anyone with password" },
+                    { value: 1, text: "Only participants" },
+                  ]}
+                  onChange={(e, { value }) =>
+                    setTemp({
+                      ...temp,
+                      room_access: +value,
+                    })
+                  }
+                  value={temp?.room_access}
+                />
+              </Form.Field>
+            )}
           </Form>
         </section>
         <section
@@ -303,7 +340,11 @@ ${
         >
           <div>
             <h4>Shared files</h4>
-            <List divided relaxed>
+            <List
+              divided
+              relaxed
+              style={{ "max-height": "100px", overflow: "auto" }}
+            >
               {files && files.length ? (
                 files.map((f) => (
                   <List.Item>
@@ -327,32 +368,55 @@ ${
               )}
             </List>
           </div>
-          <div style={{ marginTop: "1rem", flexGrow: 1, height: 0, display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              marginTop: "1rem",
+              flexGrow: 1,
+              height: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             <h4>Chat log</h4>
-            <Segment style={{ marginTop: 0, flexGrow: 1, height: 0, overflow: "auto" }}>
-              <Comment.Group style={{minHeight: "100%", position: "relative"}}>
-                {chatLog && chatLog.length ? chatLog.map((message) => (
-                  <Comment key={message.from.id}>
-                    <Comment.Avatar
-                      src={
-                        message.from.avatar ??
-                        "https://react.semantic-ui.com/images/avatar/small/matt.jpg"
-                      }
-                    />
-                    <Comment.Content>
-                      <Comment.Author as="a">
-                        {message.from.last_name} {message.from.first_name}
-                      </Comment.Author>
-                      <Comment.Metadata>
-                        <div>{new Date(message.created_timestamp).toLocaleTimeString()}</div>
-                      </Comment.Metadata>
-                      <Comment.Text>{message.content}</Comment.Text>
-                    </Comment.Content>
-                  </Comment>
-                )) : <div style={{color: "grey", textAlign: "center"}}>No messages yet.</div>}
+            <Segment
+              style={{ marginTop: 0, flexGrow: 1, height: 0, overflow: "auto" }}
+            >
+              <Comment.Group
+                style={{ minHeight: "100%", position: "relative" }}
+              >
+                {chatLog && chatLog.length ? (
+                  chatLog.map((message) => (
+                    <Comment key={message.from.id}>
+                      <Comment.Avatar
+                        src={
+                          message.from.avatar ??
+                          "https://react.semantic-ui.com/images/avatar/small/matt.jpg"
+                        }
+                      />
+                      <Comment.Content>
+                        <Comment.Author as="a">
+                          {message.from.last_name} {message.from.first_name}
+                        </Comment.Author>
+                        <Comment.Metadata>
+                          <div>
+                            {new Date(
+                              message.created_timestamp
+                            ).toLocaleTimeString()}
+                          </div>
+                        </Comment.Metadata>
+                        <Comment.Text>{message.content}</Comment.Text>
+                      </Comment.Content>
+                    </Comment>
+                  ))
+                ) : (
+                  <div style={{ color: "grey", textAlign: "center" }}>
+                    No messages yet.
+                  </div>
+                )}
               </Comment.Group>
             </Segment>
-            <Button fluid
+            <Button
+              fluid
               primary
               content="Download"
               onClick={() => {
@@ -404,16 +468,17 @@ ${
         )}
 
         <Button color="black" onClick={() => onClose()}>
-        { editable ? "Cancel" : "Close" }
+          {editable ? "Cancel" : "Close"}
         </Button>
-        { editable && <Button
-          content={event === undefined ? "Create" : "Update"}
-          labelPosition="right"
-          icon="edit"
-          onClick={() => onSubmit(temp)}
-          positive
-        />}
-        
+        {editable && (
+          <Button
+            content={event === undefined ? "Create" : "Update"}
+            labelPosition="right"
+            icon="edit"
+            onClick={() => onSubmit(temp)}
+            positive
+          />
+        )}
       </Modal.Actions>
     </Modal>
   );

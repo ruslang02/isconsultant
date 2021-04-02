@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import VideoContainer from "components/VideoContainer";
 import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
+import { ChatMessage } from "@common/models/chat-message.entity";
 
 export enum Status {
   NEW = 0,
@@ -253,6 +254,28 @@ const Chat: React.FC = () => {
       }
     });
 
+    (async () => {
+      const { data } = await api.get<ChatMessage[]>(
+        `/events/${+location.pathname.split("/")[2]}/log/json`
+      );
+
+      setMessages(
+        data.map((_) => ({
+          content: _.content,
+          count: _.id,
+          created_at: new Date(_.created_timestamp),
+          user: (_.from as unknown) as GetUserInfoDto,
+        }))
+      );
+    })();
+
+    (async () => {
+      const { data } = await api.get<RemoteFile[]>(
+        `/events/${+location.pathname.split("/")[2]}/files`
+      );
+      setFiles(() => data);
+    })();
+
     return () => {
       client.close();
     };
@@ -314,29 +337,28 @@ const Chat: React.FC = () => {
         </Comment.Group>
       </div>
 
-      <form style={{ display: "flex" }}>
+      <form
+        style={{ display: "flex" }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          ws.current.send(
+            JSON.stringify({
+              event: "post_message",
+              data: {
+                message: input,
+              },
+            } as WSMessage<PostChatMessageDto>)
+          );
+          setInput("");
+        }}
+      >
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           style={{ flexGrow: 1, marginRight: ".5rem" }}
           placeholder={t("pages.video.chat_input_placeholder")}
         ></Input>
-        <Button
-          icon
-          primary
-          type="submit"
-          disabled={!client}
-          onClick={() => {
-            ws.current.send(
-              JSON.stringify({
-                event: "post_message",
-                data: {
-                  message: input,
-                },
-              } as WSMessage<PostChatMessageDto>)
-            );
-          }}
-        >
+        <Button icon primary type="submit" disabled={!client}>
           <Icon name="send" />
         </Button>
       </form>
