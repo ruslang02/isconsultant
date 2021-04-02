@@ -25,17 +25,17 @@ import { useAuth } from "utils/useAuth";
 export enum Status {
   NEW = 0,
   STARTED = 1,
-  FINISHED = 2
+  FINISHED = 2,
 }
 
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
   setUsers: (users: GetUserInfoDto[]) => void;
-}>({ users: [], setUsers: () => { } });
+}>({ users: [], setUsers: () => {} });
 const FilesContext = createContext<{
   files: RemoteFile[];
   setFiles: (reducer: (prevFiles: RemoteFile[]) => RemoteFile[]) => void;
-}>({ files: [], setFiles: () => () => { } });
+}>({ files: [], setFiles: () => () => {} });
 const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
@@ -51,12 +51,14 @@ const TopBar: React.FC = function () {
   return (
     <header className={styles.TopYar}>
       <div className={styles.TopYar_info}>
-        <div className={styles.TopYar_roomName}>{t('pages.video.room_title')} #{roomId}</div>
+        <div className={styles.TopYar_roomName}>
+          {t("pages.video.room_title")} #{roomId}
+        </div>
       </div>
-      { /*<div className={styles.TopYar_actions}>
+      {/*<div className={styles.TopYar_actions}>
         <Button primary>{t('pages.video.room_settings')}</Button>
         <Button color="red" onClick={(e: any) => router.replace("/profile/@me")}>{t('pages.video.leave_call')}</Button>
-  </div>*/ }
+  </div>*/}
     </header>
   );
 };
@@ -106,7 +108,9 @@ const Files: React.FC = () => {
 
   return (
     <section className={styles.Files}>
-      <b style={{fontSize: "16px", margin: "9px", display: "inline-block"}}>{t("pages.video.files_title")}</b>
+      <b style={{ fontSize: "16px", margin: "9px", display: "inline-block" }}>
+        {t("pages.video.files_title")}
+      </b>
       <span style={{ position: "relative", float: "right" }}>
         <input
           type="file"
@@ -136,7 +140,9 @@ const Files: React.FC = () => {
             opacity: 0,
           }}
         />
-        <Button primary><Icon name="upload" /></Button>
+        <Button primary>
+          <Icon name="upload" />
+        </Button>
       </span>
       <div style={{ flexGrow: 1, marginTop: ".5rem" }}>
         {files.map((file) => (
@@ -176,8 +182,9 @@ const Chat: React.FC = () => {
   useEffect(() => {
     console.log("Loading chat...");
     const client = new WebSocket(
-      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname}${location.port ? ":" + location.port : ""
-      }/chat/${auth?.access_token}`
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${
+        location.hostname
+      }${location.port ? ":" + location.port : ""}/chat/${auth?.access_token}`
     );
 
     // const client = new WebSocket(
@@ -188,11 +195,11 @@ const Chat: React.FC = () => {
 
     client.addEventListener("close", (ev: CloseEvent) => {
       console.log(ev);
-    })
+    });
 
     client.addEventListener("error", (ev: Event) => {
-      console.log("WS-Error: " + ev)
-    })
+      console.log("WS-Error: " + ev);
+    });
 
     client.addEventListener("open", () => {
       client.send(
@@ -218,8 +225,8 @@ const Chat: React.FC = () => {
             try {
               const { data } = await api.get<GetUserInfoDto>(`/users/${uid}`);
               user = data;
-            } catch(error) {
-              user = { first_name: "", last_name: "" } as GetUserInfoDto
+            } catch (error) {
+              user = { first_name: "", last_name: "" } as GetUserInfoDto;
             }
           }
 
@@ -230,16 +237,16 @@ const Chat: React.FC = () => {
                 content: data.message,
                 user,
                 created_at: new Date(),
-                count: messageCount.current
+                count: messageCount.current,
               },
-            ]
+            ];
             messageCount.current++;
             return newArray;
           });
           break;
         case "new_file":
           const { file } = data;
-          setFiles((files: RemoteFile[]) => ([...files, file]));
+          setFiles((files: RemoteFile[]) => [...files, file]);
           break;
         default:
           console.error(data);
@@ -270,9 +277,16 @@ const Chat: React.FC = () => {
         height: "300px",
       }}
     >
-      <b style={{fontSize: "16px", margin: "9px", display: "inline-block"}}>{t("pages.video.text_chat_title")}</b>
+      <b style={{ fontSize: "16px", margin: "9px", display: "inline-block" }}>
+        {t("pages.video.text_chat_title")}
+      </b>
       <div
-        style={{ flexGrow: 1, margin: "10px 0", overflow: "auto", paddingLeft: "10px" }}
+        style={{
+          flexGrow: 1,
+          margin: "10px 0",
+          overflow: "auto",
+          paddingLeft: "10px",
+        }}
         ref={commentsRef}
       >
         <Comment.Group>
@@ -285,8 +299,10 @@ const Chat: React.FC = () => {
                 }
               />
               <Comment.Content>
-                <Comment.Author as="a">
-                  {message.user.last_name} {message.user.first_name}
+                <Comment.Author>
+                  <a href={`/profile/${message.user.id}`} target="_blank">
+                    {message.user.last_name} {message.user.first_name}
+                  </a>
                 </Comment.Author>
                 <Comment.Metadata>
                   <div>{message.created_at.toLocaleTimeString()}</div>
@@ -298,7 +314,7 @@ const Chat: React.FC = () => {
         </Comment.Group>
       </div>
 
-      <div style={{ display: "flex" }}>
+      <form style={{ display: "flex" }}>
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -308,6 +324,7 @@ const Chat: React.FC = () => {
         <Button
           icon
           primary
+          type="submit"
           disabled={!client}
           onClick={() => {
             ws.current.send(
@@ -322,7 +339,7 @@ const Chat: React.FC = () => {
         >
           <Icon name="send" />
         </Button>
-      </div>
+      </form>
     </section>
   );
 };
@@ -346,7 +363,12 @@ const Sidebar: React.FC = () => (
   </section>
 );
 
-const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: boolean, error: string }> = ({ event, status, loaded, error }) => {
+const WaitingScreen: React.FC<{
+  event: GetEventDto;
+  status: Status;
+  loaded: boolean;
+  error: string;
+}> = ({ event, status, loaded, error }) => {
   const router = useRouter();
   return (
     <div
@@ -361,40 +383,52 @@ const WaitingScreen: React.FC<{ event: GetEventDto, status: Status, loaded: bool
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          maxWidth: "400px"
+          maxWidth: "400px",
         }}
       >
-        {error ? 
-          <Message warning
-            header={error}
-            content={<>
-              <p>You may need to log in to view this meeting.</p>
-              <Button onClick={() => router.replace("/login?redirect=" + location.pathname)} content="Log in" primary />
-            </>}
-          /> 
-        : !loaded ?
+        {error ? (
           <Message
-            header="Loading meeting..."
-          /> :
-          status == Status.NEW ?
-            <Message
-              header="Meeting not started"
-              content="Wait for organizer to start it"
-            />
-            :
-            <Message
-              header="Meeting already finished"
-              content="Organizer has already finished this meeting"
-            />
-        }
-        {loaded && status == Status.NEW && event.room_secret ?
-          <Button onClick={e => {
-            api.post(`events/${event.id}/start`).then(a => router.reload());
-          }}/> : <></>}
+            warning
+            header={error}
+            content={
+              <>
+                <p>You may need to log in to view this meeting.</p>
+                <Button
+                  onClick={() =>
+                    router.replace("/login?redirect=" + location.pathname)
+                  }
+                  content="Log in"
+                  primary
+                />
+              </>
+            }
+          />
+        ) : !loaded ? (
+          <Message header="Loading meeting..." />
+        ) : status == Status.NEW ? (
+          <Message
+            header="Meeting not started"
+            content="Wait for organizer to start it"
+          />
+        ) : (
+          <Message
+            header="Meeting already finished"
+            content="Organizer has already finished this meeting"
+          />
+        )}
+        {loaded && status == Status.NEW && event.room_secret ? (
+          <Button
+            onClick={(e) => {
+              api.post(`events/${event.id}/start`).then((a) => router.reload());
+            }}
+          />
+        ) : (
+          <></>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function Video() {
   const router = useRouter();
@@ -410,7 +444,7 @@ export default function Video() {
 
   useEffect(() => {
     if (!id) {
-      return
+      return;
     }
 
     (async () => {
@@ -418,11 +452,11 @@ export default function Video() {
         const { data } = await api.get<GetEventDto>(`/events/${id}`);
         //console.log(data.room_secret)
         setEvent(data);
-        setStatus(data.room_status)
+        setStatus(data.room_status);
         setLoaded(true);
-        setError("")
+        setError("");
       } catch (e) {
-        setError("Event is unavailable.")
+        setError("Event is unavailable.");
       }
     })();
   }, [id]);
@@ -431,9 +465,14 @@ export default function Video() {
     <UserStoreContext.Provider value={{ users, setUsers }}>
       <FilesContext.Provider value={{ files, setFiles }}>
         <EventContext.Provider value={event}>
-          
-          {(status != Status.STARTED) ?
-            <WaitingScreen event={event} status={status} loaded={loaded} error={error} /> :
+          {status != Status.STARTED ? (
+            <WaitingScreen
+              event={event}
+              status={status}
+              loaded={loaded}
+              error={error}
+            />
+          ) : (
             <main
               style={{
                 display: "flex",
@@ -452,13 +491,16 @@ export default function Video() {
                   flexGrow: 1,
                 }}
               >
-
-                <VideoContainer roomNumber={event.room_id} roomPin={event.room_password} roomSecret={event.room_secret} />
+                <VideoContainer
+                  roomNumber={event.room_id}
+                  roomPin={event.room_password}
+                  roomSecret={event.room_secret}
+                />
 
                 <Sidebar />
               </section>
             </main>
-          }
+          )}
         </EventContext.Provider>
       </FilesContext.Provider>
     </UserStoreContext.Provider>
