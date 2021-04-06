@@ -9,6 +9,7 @@ import "../videoroom"
 import VideoMenu from "./VideoMenu";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "utils/useAuth";
+import router from "next/router";
 
 const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any }> = function ({ roomNumber, roomPin, roomSecret }) {
   const [userState, setState] = useState<number[]>([]);
@@ -87,8 +88,8 @@ const VideoContainer: React.FC<{ roomNumber: any, roomPin: any, roomSecret: any 
 
         if (leaving) {
           if (reason == "kicked") {
-            alert(t('pages.video.room_kicked'))
-            location.href = "/video"
+            alert(t('pages.video.room_kicked'));
+            location.assign("/profile/@me");
           }
         }
       }

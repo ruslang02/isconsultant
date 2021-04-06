@@ -22,6 +22,7 @@ import VideoContainer from "components/VideoContainer";
 import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
 import { ChatMessage } from "@common/models/chat-message.entity";
+import Head from "next/head";
 
 export enum Status {
   NEW = 0,
@@ -417,7 +418,7 @@ const WaitingScreen: React.FC<{
                 <p>You may need to log in to view this meeting.</p>
                 <Button
                   onClick={() =>
-                    router.replace("/login?redirect=" + location.pathname)
+                    location.assign("/login?redirect=" + location.pathname)
                   }
                   content="Log in"
                   primary
@@ -487,6 +488,9 @@ export default function Video() {
     <UserStoreContext.Provider value={{ users, setUsers }}>
       <FilesContext.Provider value={{ files, setFiles }}>
         <EventContext.Provider value={event}>
+          <Head>
+            <title>Ongoing meeting - ISConsultant</title>
+          </Head>
           {status != Status.STARTED ? (
             <WaitingScreen
               event={event}

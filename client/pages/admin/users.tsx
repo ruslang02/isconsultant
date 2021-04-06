@@ -2,6 +2,7 @@ import { GetUserInfoDto } from "@common/dto/get-user-info.dto";
 import { PatchUserDto } from "@common/dto/patch-user.dto";
 import { EventArrange } from "components/EventArrange";
 import { Page } from "components/Page";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Button, Item } from "semantic-ui-react";
 import { api } from "utils/api";
@@ -32,9 +33,9 @@ const UsersPage = () => {
             <Item.Image avatar size="tiny" src={u.avatar} />
             <Item.Content>
               <Item.Header>
-                <a href={`/profile/${u.id}`}>
-                  {u.first_name} {u.last_name}
-                </a>
+                <Link href={`/profile/${u.id}`}>
+                  <a>{u.first_name} {u.last_name}</a>
+                </Link>
               </Item.Header>
               <Item.Meta>{u.type[0].toUpperCase() + u.type.slice(1)}</Item.Meta>
               <Item.Description>

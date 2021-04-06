@@ -9,6 +9,7 @@ import { useAuth } from "utils/useAuth";
 import { MessageContext } from "utils/MessageContext";
 import { UserCacheContext } from "utils/UserCacheContext";
 import { GetUserDto } from "@common/dto/get-user.dto";
+import { api } from "utils/api";
 
 const isPublic = (path: string) =>
   path === "/" ||
@@ -27,16 +28,30 @@ function MyApp({
   const { i18n } = useTranslation();
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const [auth] = useAuth();
+  const [auth, setAuth] = useAuth();
   const [users, setUsers] = useState<GetUserDto[]>([]);
   const [allowed, setAllowed] = useState(
     typeof window === "undefined" || isPublic(router.pathname)
   );
 
   useEffect(() => {
-    if (!auth?.access_token && !isPublic(router.pathname)) {
-      if (typeof window !== "undefined")
-        location.replace("/login?redirect=" + location.pathname);
+    if (!isPublic(router.pathname)) {
+      if (!auth?.access_token) {
+        if (typeof window !== "undefined")
+          router.replace("/login?redirect=" + router.pathname);
+      } else {
+        (async() => {
+          const { data, status } = await api.get<GetUserDto>("/users/@me");
+          if (status > 300) {
+            setAllowed(false);
+            await router.push("/login?redirect=" + router.pathname);
+            setAllowed(true);
+          } else {
+            setAuth((auth) => ({...auth, user: {...auth.user, ...data}}));
+            setAllowed(true);
+          }
+        })();
+      }
     } else {
       setAllowed(true);
     }

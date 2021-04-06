@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Button, Input } from "semantic-ui-react";
 import Janus from "janus-gateway-js"
+import router from "next/router";
 
 function RoomSelect() {
   const [roomName, changeRoomName] = useState<string>(null);
@@ -21,7 +22,7 @@ function RoomSelect() {
     if (secret.current)
       params += "&secret=" + secret.current
 
-    location.href = "/video/" + roomName + params;
+    router.replace("/video/" + roomName + params);
   }
 
   function onRoomNameChange(e, d) {

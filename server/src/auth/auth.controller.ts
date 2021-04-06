@@ -107,7 +107,7 @@ export class AuthController {
       const token = await this.auth.generateVerifyToken(data);
       this.verifyMail.send(data.email, token)
 
-      return { access_token: this.jwt.sign({ id: data.id, verified: false, type: data.type }) };
+      return { access_token: this.jwt.sign({ id: data.id, verified: false, type: data.type }), user: data };
     } catch (e) {
       this.logger.error(`/api/auth/register: `, '[ERROR]', e);
       throw new BadRequestException(

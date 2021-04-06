@@ -1,4 +1,5 @@
 import { CreateUserDto } from "@common/dto/create-user.dto";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { Form, Button, Segment, Message, Icon } from "semantic-ui-react";
@@ -40,6 +41,9 @@ export default () => {
         height: "100vh",
       }}
     >
+      <Head>
+        <title>Register - ISConsultant</title>
+      </Head>
       <div
         style={{
           display: "flex",

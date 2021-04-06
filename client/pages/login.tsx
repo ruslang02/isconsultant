@@ -1,4 +1,5 @@
 import { LoginUserSuccessDto } from "@common/dto/login-user-success.dto";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useContext, useState } from "react";
 import { Button, Card, Checkbox, Form, Message } from "semantic-ui-react";
@@ -17,22 +18,25 @@ const Login: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      const { data } = await api.post<LoginUserSuccessDto | { message: string }>(
-        "/auth/login",
-        JSON.stringify({ email, password }),
-        {
-          headers: {
-            "Content-type": "application/json",
-          },
-        }
-      );
+      const { data } = await api.post<
+        LoginUserSuccessDto | { message: string }
+      >("/auth/login", JSON.stringify({ email, password }), {
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
 
       if ("message" in data) {
-        setError(data.message === "Unauthorized" ? "Email or password incorrect." : data.message);
+        setError(
+          data.message === "Unauthorized"
+            ? "Email or password incorrect."
+            : data.message
+        );
       } else {
         setError("");
         if (!data.user.avatar) {
-          data.user.avatar = "https://react.semantic-ui.com/images/avatar/large/matt.jpg";
+          data.user.avatar =
+            "https://react.semantic-ui.com/images/avatar/large/matt.jpg";
         }
         setAuth(data);
         router.replace(redirect || "/profile/@me");
@@ -51,12 +55,15 @@ const Login: React.FC = () => {
         height: "100vh",
       }}
     >
+      <Head>
+        <title>Log in - ISConsultant</title>
+      </Head>
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          maxWidth: "400px"
+          maxWidth: "400px",
         }}
       >
         <Message
@@ -87,8 +94,12 @@ const Login: React.FC = () => {
             <Checkbox label="Remember me" />
           </Form.Field>
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <Button type="button" onClick={() => router.push("/register")}>Register</Button>
-            <Button primary type="submit">Sign in</Button>
+            <Button type="button" onClick={() => router.push("/register")}>
+              Register
+            </Button>
+            <Button primary type="submit">
+              Sign in
+            </Button>
           </div>
         </Form>
         {error && (

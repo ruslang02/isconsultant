@@ -74,6 +74,21 @@ export class UsersController {
     return Promise.all(hydrated);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('@me')
+  @ApiOperation({
+    description: 'Получение всех зарегистрированных пользователей.',
+  })
+  @ApiBearerAuth()
+  async getMe(
+    @Request() { user }: ExtendedRequest,
+    @I18n() i18n: I18nContext
+  ): Promise<GetUserDto> {
+    const fullUser = await this.users.findOne(user.id);
+    const hydrated = this.adapter.transform(fullUser, i18n);
+    return hydrated;
+  }
+
   @Get('top')
   @ApiOperation({
     description: 'Получение лучших юристов в организации.',
