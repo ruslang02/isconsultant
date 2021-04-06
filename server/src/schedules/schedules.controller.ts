@@ -421,7 +421,7 @@ ${_.content}
     const event = await this.schedules.findEvent(id);
     if (
       user.type == UserType.CLIENT ||
-      (user.type == UserType.LAWYER && user == event.owner)
+      !(user.type == UserType.LAWYER && user.id == event.owner.id)
     ) {
       throw new ForbiddenException();
     }
