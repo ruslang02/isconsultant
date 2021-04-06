@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Button, Comment, Icon, Input, Message } from "semantic-ui-react";
+import { Button, Comment, Icon, Input, InputOnChangeData, Message } from "semantic-ui-react";
 import styles from "./[id].module.css";
 import "../../videoroom";
 
@@ -30,14 +30,19 @@ export enum Status {
   FINISHED = 2,
 }
 
+export enum RoomAccess {
+  PASSWORD = 0,
+  ONLY_PARTICIPANTS = 1
+}
+
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
   setUsers: (users: GetUserInfoDto[]) => void;
-}>({ users: [], setUsers: () => {} });
+}>({ users: [], setUsers: () => { } });
 const FilesContext = createContext<{
   files: RemoteFile[];
   setFiles: (reducer: (prevFiles: RemoteFile[]) => RemoteFile[]) => void;
-}>({ files: [], setFiles: () => () => {} });
+}>({ files: [], setFiles: () => () => { } });
 const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
@@ -184,8 +189,7 @@ const Chat: React.FC = () => {
   useEffect(() => {
     console.log("Loading chat...");
     const client = new WebSocket(
-      `${location.hostname == "localhost" ? "ws" : "wss"}://${
-        location.hostname
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname
       }${location.port ? ":" + location.port : ""}/chat/${auth?.access_token}`
     );
 
@@ -465,6 +469,8 @@ export default function Video() {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState("");
 
+  const inputPin = useRef<string>("");
+
   useEffect(() => {
     if (!id) {
       return;
@@ -484,6 +490,10 @@ export default function Video() {
     })();
   }, [id]);
 
+  function onPinChange(event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) {
+    inputPin.current = data.value
+  }
+
   return (
     <UserStoreContext.Provider value={{ users, setUsers }}>
       <FilesContext.Provider value={{ files, setFiles }}>
@@ -498,35 +508,74 @@ export default function Video() {
               loaded={loaded}
               error={error}
             />
-          ) : (
-            <main
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                overflow: "hidden",
-                flexGrow: 1,
-              }}
-            >
-              <TopBar />
-              <section
-                style={{
-                  display: "flex",
-                  background: "white",
-                  borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
-                  flexGrow: 1,
-                }}
-              >
-                <VideoContainer
-                  roomNumber={event.room_id}
-                  roomPin={event.room_password}
-                  roomSecret={event.room_secret}
-                />
+          ) :
+            event.room_access == RoomAccess.PASSWORD && !event.room_password ?
+              (<>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    height: "100vh",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      maxWidth: "400px",
+                    }}
+                  >
 
-                <Sidebar />
-              </section>
-            </main>
-          )}
+                    <Message
+                      warning
+                      header={error}
+                      content={
+                        <>
+                          <p>Enter room password: </p>
+                          <Input onChange={onPinChange}/>
+                          <Button
+                            onClick={() =>
+                              setEvent(e => ({...e, room_password: inputPin.current}))
+                            }
+                            content="Enter"
+                            primary
+                          />
+                        </>
+                      }
+                    />
+                  </div>
+                </div>
+              </>) :
+              (
+                <main
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    overflow: "hidden",
+                    flexGrow: 1,
+                  }}
+                >
+                  <TopBar />
+                  <section
+                    style={{
+                      display: "flex",
+                      background: "white",
+                      borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
+                      flexGrow: 1,
+                    }}
+                  >
+                    <VideoContainer
+                      roomNumber={event.room_id}
+                      roomPin={event.room_password}
+                      roomSecret={event.room_secret}
+                    />
+
+                    <Sidebar />
+                  </section>
+                </main>
+              )}
         </EventContext.Provider>
       </FilesContext.Provider>
     </UserStoreContext.Provider>

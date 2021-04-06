@@ -8,7 +8,7 @@ import { UserAdapter } from "users/user.adapter";
 export class EventAdapter {
   constructor(public userAdapter: UserAdapter) { }
 
-  public transform(showSecret: boolean, i18n: I18nContext) {
+  public transform(showSecret: boolean, showPin: boolean, i18n: I18nContext) {
     return async (event: CalendarEvent): Promise<GetEventDto> => ({
       id: event.id.toString(),
       description: event.description,
@@ -20,7 +20,7 @@ export class EventAdapter {
       timespan_end: event.end_timestamp.toISOString(),
       timespan_start: event.start_timestamp.toISOString(),
       title: event.title,
-      room_password: event.roomPassword,
+      room_password: showPin ? event.roomPassword : undefined,
       room_status: event.roomStatus
     });
   }

@@ -130,7 +130,7 @@ export class SchedulesController {
   ) {
     try {
       const events = await this.schedules.findAllEvents();
-      return Promise.all(events.map(this.adapter.transform(true, i18n)));
+      return Promise.all(events.map(this.adapter.transform(true, true, i18n)));
     } catch (e) {
       throw new NotFoundException();
     }
@@ -165,7 +165,7 @@ export class SchedulesController {
   ) {
     try {
       const events = await this.schedules.findManyByLawyer(user.id.toString());
-      return Promise.all(events.map(this.adapter.transform(true, i18n)));
+      return Promise.all(events.map(this.adapter.transform(true, true, i18n)));
     } catch (e) {
       throw new NotFoundException();
     }
@@ -184,7 +184,7 @@ export class SchedulesController {
   ) {
     try {
       const events = await this.users.findEvents(user.id.toString());
-      return Promise.all(events.map(this.adapter.transform(false, i18n)));
+      return Promise.all(events.map(this.adapter.transform(false, true, i18n)));
     } catch (e) {
       throw new NotFoundException();
     }
@@ -220,7 +220,11 @@ export class SchedulesController {
         [UserType.MODERATOR, UserType.ADMIN].includes(user.type) ||
         (user.type === UserType.LAWYER && event.owner.id === user.id);
 
-      return this.adapter.transform(showSecret, i18n)(event);
+      const showPin =
+        [UserType.MODERATOR, UserType.ADMIN].includes(user.type) ||
+        (event.roomAccess === RoomAccess.ONLY_PARTICIPANTS && participantsId.includes(user.id));
+
+      return this.adapter.transform(showSecret, showPin, i18n)(event);
     } catch (e) {
       console.error(e);
       throw new NotFoundException();
@@ -417,7 +421,7 @@ ${_.content}
     const event = await this.schedules.findEvent(id);
     if (
       user.type == UserType.CLIENT ||
-      (user.type == UserType.LAWYER && user == event.owner)
+      !(user.type == UserType.LAWYER && user.id == event.owner.id)
     ) {
       throw new ForbiddenException();
     }
