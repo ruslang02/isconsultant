@@ -38,7 +38,9 @@ function MyApp({
     if (!isPublic(router.pathname)) {
       if (!auth?.access_token) {
         if (typeof window !== "undefined")
-          router.replace("/login?redirect=" + router.pathname);
+          router.replace("/login?redirect=" + router.pathname).then(() => {
+            setAllowed(true);
+          });
       } else {
         (async() => {
           const { data, status } = await api.get<GetUserDto>("/users/@me");

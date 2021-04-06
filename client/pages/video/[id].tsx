@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Button, Comment, Icon, Input, InputOnChangeData, Message } from "semantic-ui-react";
+import { Button, Comment, Icon, Input, InputOnChangeData, Message, Segment } from "semantic-ui-react";
 import styles from "./[id].module.css";
 import "../../videoroom";
 
@@ -448,7 +448,7 @@ const WaitingScreen: React.FC<{
             onClick={(e) => {
               api.post(`events/${event.id}/start`).then((a) => router.reload());
             }}
-          />
+          >Start meeting</Button>
         ) : (
           <></>
         )}
@@ -523,27 +523,31 @@ export default function Video() {
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "center",
-                      maxWidth: "400px",
+                      width: "350px",
                     }}
                   >
-
-                    <Message
-                      warning
-                      header={error}
-                      content={
-                        <>
-                          <p>Enter room password: </p>
-                          <Input onChange={onPinChange}/>
+                    <Segment style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                      <span>
+                        Welcome to
+                      </span>
+                      <h2>ISConsultant</h2>
+                      <p style={{alignSelf: "flex-start"}}>
+                        You were invited to a meeting <b>{event.title}</b>, hosted by <b>{event.owner.first_name} {event.owner.last_name}</b>.
+                      </p>
+                      <div style={{alignSelf: "flex-start"}}>
+                        In order to join it, enter the meeting password from the invitation:
+                      </div>
+                      <br />
+                      <Input style={{width: "100%"}} placeholder="Meeting password" />
+                      <br />
                           <Button
                             onClick={() =>
                               setEvent(e => ({...e, room_password: inputPin.current}))
                             }
-                            content="Enter"
+                            content="Join meeting"
                             primary
                           />
-                        </>
-                      }
-                    />
+                    </Segment>
                   </div>
                 </div>
               </>) :
