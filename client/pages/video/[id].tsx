@@ -6,7 +6,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Button, Comment, Icon, Input, InputOnChangeData, Message, Segment } from "semantic-ui-react";
+import {
+  Button,
+  Comment,
+  Icon,
+  Input,
+  InputOnChangeData,
+  Message,
+  Segment,
+} from "semantic-ui-react";
 import styles from "./[id].module.css";
 import "../../videoroom";
 
@@ -32,17 +40,17 @@ export enum Status {
 
 export enum RoomAccess {
   PASSWORD = 0,
-  ONLY_PARTICIPANTS = 1
+  ONLY_PARTICIPANTS = 1,
 }
 
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
   setUsers: (users: GetUserInfoDto[]) => void;
-}>({ users: [], setUsers: () => { } });
+}>({ users: [], setUsers: () => {} });
 const FilesContext = createContext<{
   files: RemoteFile[];
   setFiles: (reducer: (prevFiles: RemoteFile[]) => RemoteFile[]) => void;
-}>({ files: [], setFiles: () => () => { } });
+}>({ files: [], setFiles: () => () => {} });
 const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
@@ -189,7 +197,8 @@ const Chat: React.FC = () => {
   useEffect(() => {
     console.log("Loading chat...");
     const client = new WebSocket(
-      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${
+        location.hostname
       }${location.port ? ":" + location.port : ""}/chat/${auth?.access_token}`
     );
 
@@ -410,16 +419,19 @@ const WaitingScreen: React.FC<{
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          alignItems: "center",
           maxWidth: "400px",
         }}
       >
         {error ? (
           <Message
             warning
-            header={error}
+            header="Join meeting"
             content={
               <>
-                <p>You may need to log in to view this meeting.</p>
+                <p>
+                  This meeting is <b>private</b>. Please log in to continue.
+                </p>
                 <Button
                   onClick={() =>
                     location.assign("/login?redirect=" + location.pathname)
@@ -435,7 +447,11 @@ const WaitingScreen: React.FC<{
         ) : status == Status.NEW ? (
           <Message
             header="Meeting not started"
-            content="Wait for organizer to start it"
+            content={
+              loaded && status == Status.NEW && event.room_secret
+                ? "Press the button below to start it"
+                : "Wait for organizer to start it"
+            }
           />
         ) : (
           <Message
@@ -445,10 +461,15 @@ const WaitingScreen: React.FC<{
         )}
         {loaded && status == Status.NEW && event.room_secret ? (
           <Button
+            labelPosition="left"
+            icon
             onClick={(e) => {
               api.post(`events/${event.id}/start`).then((a) => router.reload());
             }}
-          >Start meeting</Button>
+          >
+            <Icon name="play" />
+            Start meeting
+          </Button>
         ) : (
           <></>
         )}
@@ -490,8 +511,11 @@ export default function Video() {
     })();
   }, [id]);
 
-  function onPinChange(event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) {
-    inputPin.current = data.value
+  function onPinChange(
+    event: React.ChangeEvent<HTMLInputElement>,
+    data: InputOnChangeData
+  ) {
+    inputPin.current = data.value;
   }
 
   return (
@@ -508,78 +532,94 @@ export default function Video() {
               loaded={loaded}
               error={error}
             />
-          ) :
-            event.room_access == RoomAccess.PASSWORD && !event.room_password ?
-              (<>
+          ) : event.room_access == RoomAccess.PASSWORD &&
+            !event.room_password ? (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  height: "100vh",
+                }}
+              >
                 <div
                   style={{
                     display: "flex",
+                    flexDirection: "column",
                     justifyContent: "center",
-                    height: "100vh",
+                    width: "350px",
                   }}
                 >
-                  <div
+                  <Segment
                     style={{
                       display: "flex",
                       flexDirection: "column",
-                      justifyContent: "center",
-                      width: "350px",
+                      alignItems: "center",
                     }}
                   >
-                    <Segment style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-                      <span>
-                        Welcome to
-                      </span>
-                      <h2>ISConsultant</h2>
-                      <p style={{alignSelf: "flex-start"}}>
-                        You were invited to a meeting <b>{event.title}</b>, hosted by <b>{event.owner.first_name} {event.owner.last_name}</b>.
-                      </p>
-                      <div style={{alignSelf: "flex-start"}}>
-                        In order to join it, enter the meeting password from the invitation:
-                      </div>
-                      <br />
-                      <Input style={{width: "100%"}} placeholder="Meeting password" />
-                      <br />
-                          <Button
-                            onClick={() =>
-                              setEvent(e => ({...e, room_password: inputPin.current}))
-                            }
-                            content="Join meeting"
-                            primary
-                          />
-                    </Segment>
-                  </div>
-                </div>
-              </>) :
-              (
-                <main
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    overflow: "hidden",
-                    flexGrow: 1,
-                  }}
-                >
-                  <TopBar />
-                  <section
-                    style={{
-                      display: "flex",
-                      background: "white",
-                      borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
-                      flexGrow: 1,
-                    }}
-                  >
-                    <VideoContainer
-                      roomNumber={event.room_id}
-                      roomPin={event.room_password}
-                      roomSecret={event.room_secret}
+                    <span>Welcome to</span>
+                    <h2>ISConsultant</h2>
+                    <p style={{ alignSelf: "flex-start" }}>
+                      You were invited to a meeting <b>{event.title}</b>, hosted
+                      by{" "}
+                      <b>
+                        {event.owner.first_name} {event.owner.last_name}
+                      </b>
+                      .
+                    </p>
+                    <div style={{ alignSelf: "flex-start" }}>
+                      In order to join it, enter the meeting password from the
+                      invitation:
+                    </div>
+                    <br />
+                    <Input
+                      style={{ width: "100%" }}
+                      placeholder="Meeting password"
                     />
+                    <br />
+                    <Button
+                      onClick={() =>
+                        setEvent((e) => ({
+                          ...e,
+                          room_password: inputPin.current,
+                        }))
+                      }
+                      content="Join meeting"
+                      primary
+                    />
+                  </Segment>
+                </div>
+              </div>
+            </>
+          ) : (
+            <main
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                overflow: "hidden",
+                flexGrow: 1,
+              }}
+            >
+              <TopBar />
+              <section
+                style={{
+                  display: "flex",
+                  background: "white",
+                  borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
+                  flexGrow: 1,
+                }}
+              >
+                <VideoContainer
+                  roomNumber={event.room_id}
+                  roomPin={event.room_password}
+                  roomSecret={event.room_secret}
+                />
 
-                    <Sidebar />
-                  </section>
-                </main>
-              )}
+                <Sidebar />
+              </section>
+            </main>
+          )}
         </EventContext.Provider>
       </FilesContext.Provider>
     </UserStoreContext.Provider>

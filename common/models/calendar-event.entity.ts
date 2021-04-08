@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn
+  Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn
 } from 'typeorm';
 import { ChatMessage } from './chat-message.entity';
 import { File } from './file.entity';
@@ -19,7 +19,7 @@ export enum Status {
 
 @Entity()
 export class CalendarEvent {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: number;
 
   @CreateDateColumn()

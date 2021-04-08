@@ -42,22 +42,29 @@ function MyApp({
             setAllowed(true);
           });
       } else {
-        (async() => {
-          const { data, status } = await api.get<GetUserDto>("/users/@me");
-          if (status > 300) {
-            setAllowed(false);
-            await router.push("/login?redirect=" + router.pathname);
-            setAllowed(true);
-          } else {
-            setAuth((auth) => ({...auth, user: {...auth.user, ...data}}));
-            setAllowed(true);
-          }
-        })();
       }
     } else {
       setAllowed(true);
     }
   }, [auth]);
+
+  useEffect(() => {
+    (async () => {
+      const { data, status } = await api.get<GetUserDto>("/users/@me");
+      if (status > 300) {
+        setAllowed(false);
+        setAuth({});
+        if (!isPublic(router.pathname)) {
+          location.assign("/login?redirect=" + router.pathname);
+        } else if (auth?.access_token) {
+          location.reload();
+        }
+      } else {
+        setAuth((auth) => ({ ...auth, user: { ...auth.user, ...data } }));
+        setAllowed(true);
+      }
+    })();
+  }, []);
 
   return (
     <MessageContext.Provider value={[message, setMessage]}>

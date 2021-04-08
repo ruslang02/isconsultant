@@ -33,7 +33,7 @@ export class SchedulesService implements OnModuleInit {
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
     private pEvents: Repository<PendingEvent>
-  ) {}
+  ) { }
 
   private pluginHandle: any;
 
@@ -114,19 +114,21 @@ export class SchedulesService implements OnModuleInit {
       .getOneOrFail();
   }
 
+  private counter = 0;
+
   async transferEvent(eid: string, lid: string) {
     const pending = await this.pEvents.findOne(eid, {
       relations: ["from", "participants"],
     });
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
-    event.id = +pending.id;
+    event.id = (Math.floor((new Date().getTime() - new Date(2020, 0).getTime()) / 1000) << 4) + ((this.counter++ % 16));
     event.title = `Meeting with ${pending.from.first_name} ${pending.from.last_name}`;
     event.description = pending.description;
     event.start_timestamp = pending.start_timestamp;
     event.end_timestamp = pending.end_timestamp;
     event.owner = { id: +lid };
     event.roomAccess = RoomAccess.ONLY_PARTICIPANTS;
-    event.roomId = genRoomId();
+    event.roomId = event.id;
     event.roomPassword = "";
     event.roomSecret = "";
     for (let i = 0; i < 6; i++) {
@@ -155,13 +157,14 @@ export class SchedulesService implements OnModuleInit {
     data: CreateEventDto & { user_id: string }
   ): Promise<CalendarEvent> {
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
+    event.id = (Math.floor((new Date().getTime() - new Date(2020, 0).getTime()) / 1000) << 4) + ((this.counter++ % 16));
     event.title = data.title;
     event.description = data.description;
     event.start_timestamp = new Date(data.timespan_start);
     event.end_timestamp = new Date(data.timespan_end);
     event.owner = { id: Number(data.user_id) };
     event.roomAccess = data.room_access ?? 0;
-    event.roomId = genRoomId();
+    event.roomId = event.id;
     event.roomPassword = "";
     event.roomSecret = "";
     for (let i = 0; i < 6; i++) {

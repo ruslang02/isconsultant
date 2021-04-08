@@ -34,7 +34,9 @@ const UsersPage = () => {
             <Item.Content>
               <Item.Header>
                 <Link href={`/profile/${u.id}`}>
-                  <a>{u.first_name} {u.last_name}</a>
+                  <a>
+                    {u.first_name} {u.last_name}
+                  </a>
                 </Link>
               </Item.Header>
               <Item.Meta>{u.type[0].toUpperCase() + u.type.slice(1)}</Item.Meta>
@@ -45,10 +47,33 @@ const UsersPage = () => {
                 <br />
                 Verified: {u.verified ? "Yes" : "No"}
               </Item.Description>
+              <Button.Group floated="right" style={{ marginRight: ".5rem" }}>
+                <Button
+                  content="Rating +"
+                  color="green"
+                  onClick={() => {
+                    api.patch(`/users/${u.id}`, {
+                      rating: u.rating + 1,
+                    } as PatchUserDto);
+                    reload();
+                  }}
+                />
+                <Button
+                  content="Rating -"
+                  secondary
+                  onClick={() => {
+                    api.patch(`/users/${u.id}`, {
+                      rating: u.rating - 1,
+                    } as PatchUserDto);
+                    reload();
+                  }}
+                />
+              </Button.Group>
               <Button
                 floated="right"
                 content="Deverify"
                 color="red"
+                style={{ marginRight: ".5rem" }}
                 onClick={() => {
                   api.patch(`/users/${u.id}`, {
                     verified: false,
@@ -59,6 +84,7 @@ const UsersPage = () => {
               <Button
                 floated="right"
                 content="Change role"
+                style={{ marginRight: ".5rem" }}
                 secondary
                 onClick={() => {
                   const answer = prompt(
