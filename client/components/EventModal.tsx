@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import { GetUserDto } from "@common/dto/get-user.dto";
 import { ChatMessage } from "@common/models/chat-message.entity";
 import { UserCacheContext } from "utils/UserCacheContext";
+import { useAuth } from "utils/useAuth";
 
 interface EventModalProps {
   editable?: boolean;
@@ -45,6 +46,7 @@ export function EventModal({
   const [users, setUsers] = useContext(UserCacheContext);
   const [, setMessage] = useContext(MessageContext);
   const router = useRouter();
+  const [auth] = useAuth();
   const [, update] = useState();
 
   useEffect(() => {
@@ -138,7 +140,7 @@ ${
             primary
             icon="arrow right"
             labelPosition="right"
-            content="Join meeting"
+            content={event.owner.id === auth?.user?.id ? "Start meeting" : "Join meeting"}
             onClick={() => {
               window.open(`/video/${event.id}`);
             }}
@@ -226,7 +228,7 @@ ${
                   };
                   setTemp(nTemp);
                 }}
-                placeholder="Start typing participants name..."
+                placeholder="Start typing participant's name..."
                 onSearchChange={(_e, d) => {
                   api
                     .get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`)

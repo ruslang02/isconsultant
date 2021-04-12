@@ -527,8 +527,7 @@ export default function Video() {
   const [status, setStatus] = useState<Status>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState("");
-
-  const inputPin = useRef<string>("");
+  const [inputPin, setInputPin] = useState("");
 
   useEffect(() => {
     if (!id) {
@@ -548,13 +547,6 @@ export default function Video() {
       }
     })();
   }, [id]);
-
-  function onPinChange(
-    event: React.ChangeEvent<HTMLInputElement>,
-    data: InputOnChangeData
-  ) {
-    inputPin.current = data.value;
-  }
 
   return (
     <UserStoreContext.Provider value={{ users, setUsers }}>
@@ -613,13 +605,15 @@ export default function Video() {
                     <Input
                       style={{ width: "100%" }}
                       placeholder="Meeting password"
+                      value={inputPin}
+                      onChange={(props, val) => setInputPin(val.value)}
                     />
                     <br />
                     <Button
                       onClick={() =>
                         setEvent((e) => ({
                           ...e,
-                          room_password: inputPin.current,
+                          room_password: inputPin,
                         }))
                       }
                       content="Join meeting"
