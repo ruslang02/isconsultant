@@ -50,6 +50,7 @@ import { PendingEventAdapter } from "./pending-event.adapter";
 import { ChatGateway } from "chat/chat.gateway";
 import { ChatService } from "chat/chat.service";
 import { RoomAccess, Status } from "@common/models/calendar-event.entity";
+import { OptionalJwtAuthGuard } from "guards/optional-jwt.guard";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
@@ -190,7 +191,7 @@ export class SchedulesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth()
   @Get("/:eid")
   @ApiOperation({
