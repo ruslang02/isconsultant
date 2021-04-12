@@ -110,11 +110,6 @@ function PromoAdvantages() {
             <Image size="medium" src="/assets/lawyer.png" />
           </Grid.Column>
         </Grid.Row>
-        <Grid.Row>
-          <Grid.Column textAlign="center">
-            <Button size="huge">{t("pages.index.arrange_event")}</Button>
-          </Grid.Column>
-        </Grid.Row>
       </Grid>
     </Segment>
   );

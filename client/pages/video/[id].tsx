@@ -31,6 +31,7 @@ import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
 import { ChatMessage } from "@common/models/chat-message.entity";
 import Head from "next/head";
+import { MessageContext } from "utils/MessageContext";
 
 export enum Status {
   NEW = 0,
@@ -56,6 +57,30 @@ const EventContext = createContext<GetEventDto | null>(null);
 const TopBar: React.FC = function () {
   const [roomId, setRoomId] = useState(0);
   const router = useRouter();
+  const event = useContext(EventContext);
+  const [, setMessage] = useContext(MessageContext);
+  const inviteText = event
+    ? `${event.owner.first_name} ${
+        event.owner.last_name
+      } invites you to a meeting on ISConsultant.
+Topic: ${event.title}
+Time: ${new Date(event.timespan_start).toLocaleDateString("en-GB")}, ${new Date(
+  event.timespan_start
+      ).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })}
+
+Join the meeting room: https://consultant.infostrategic.com/video/${event.id}
+
+Meeting ID: ${event.id}
+${
+  event.room_access == 1
+    ? "You will also be required to log in to your account."
+    : `Passcode: ${event.room_password}`
+}`
+    : "";
 
   useEffect(() => {
     setRoomId(+location.pathname.split("/")[2]);
@@ -66,6 +91,16 @@ const TopBar: React.FC = function () {
   return (
     <header className={styles.TopYar}>
       <div className={styles.TopYar_info}>
+        <Button size="small" icon title="Return to profile"
+        onClick={() => location.assign("/profile/@me")}><Icon name="arrow left" /></Button>
+        <Button size="small" primary
+        onClick={() => {
+          navigator.clipboard.writeText(inviteText);
+          setMessage("Meeting invitation copied.");
+        }} title="Click to copy the invitation text">
+          <Icon name="linkify" />
+          Copy invitation
+        </Button>
         <div className={styles.TopYar_roomName}>
           {t("pages.video.room_title")} #{roomId}
         </div>
@@ -126,7 +161,7 @@ const Files: React.FC = () => {
       <b style={{ fontSize: "16px", margin: "9px", display: "inline-block" }}>
         {t("pages.video.files_title")}
       </b>
-      <span style={{ position: "relative", float: "right" }}>
+      <span style={{ position: "relative", float: "right", cursor: "pointer" }}>
         <input
           type="file"
           name="file"
@@ -150,13 +185,16 @@ const Files: React.FC = () => {
             top: 0,
             left: 0,
             width: "100%",
-            height: "100%",
+            height: "36px",
             zIndex: 1,
             opacity: 0,
+            cursor: "pointer",
           }}
         />
-        <Button primary>
+        <Button primary icon>
           <Icon name="upload" />
+          {" "}
+          <span>Upload</span>
         </Button>
       </span>
       <div style={{ flexGrow: 1, marginTop: ".5rem" }}>

@@ -168,7 +168,7 @@ ${
               />
             </Form.Field>
             <Form.Field inline>
-              <label>Starts at</label>
+            <label>Starts at<span style={{color:"red"}}>*</span></label>
               <SemanticDatepicker
                 readOnly={!editable}
                 onChange={(_e, { value }) =>
@@ -306,8 +306,6 @@ ${
         </section>
         <section
           style={{
-            borderLeft: "1px solid grey",
-            paddingLeft: "1.5rem",
             marginLeft: "1.5rem",
             width: "100%",
             display: event ? "flex" : "none",

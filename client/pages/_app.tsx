@@ -71,14 +71,6 @@ function MyApp({
 
   return (
     <MessageContext.Provider value={[message, setMessage]}>
-      <Button
-        style={{ position: "fixed", bottom: 0, left: 0, zIndex: 100 }}
-        onClick={() =>
-          i18n.changeLanguage(i18n.language === "en" ? "ru" : "en")
-        }
-      >
-        {i18n.language === "en" ? "RU" : "EN"}
-      </Button>
       <UserCacheContext.Provider value={[users, setUsers]}>
         {allowed && <Component {...pageProps} />}
       </UserCacheContext.Provider>
