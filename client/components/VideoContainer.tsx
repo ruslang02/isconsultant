@@ -286,8 +286,7 @@ const VideoContainer: React.FC<{
   function clickScreen(enabled: boolean) {
     function onScreenJoin() {
       // @ts-ignore
-      navigator.mediaDevices
-        .getDisplayMedia()
+      navigator.mediaDevices.getDisplayMedia()
         .then(function (stream: any) {
           var pc = screenHandle.current.createPeerConnection();
           userStream.current = stream;
