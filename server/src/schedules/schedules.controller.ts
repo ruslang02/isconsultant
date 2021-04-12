@@ -420,19 +420,17 @@ ${_.content}
     @Param("eid") id: string
   ) {
     const event = await this.schedules.findEvent(id);
-    if (
-      user.type == UserType.CLIENT ||
-      !(user.type == UserType.LAWYER && user.id == event.owner.id)
-    ) {
-      throw new ForbiddenException();
+    if (user.id == event.owner.id
+      || [UserType.MODERATOR, UserType.ADMIN].includes(user.type)) {
+      await this.schedules.createRoom(
+        event.roomId,
+        event.roomPassword,
+        event.roomSecret
+      );
+      return this.schedules.updateStatus(id, Status.STARTED);
     }
 
-    await this.schedules.createRoom(
-      event.roomId,
-      event.roomPassword,
-      event.roomSecret
-    );
-    return this.schedules.updateStatus(id, Status.STARTED);
+    throw new ForbiddenException();
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -446,14 +444,12 @@ ${_.content}
     @Param("eid") id: string
   ) {
     const event = await this.schedules.findEvent(id);
-    if (
-      user.type == UserType.CLIENT ||
-      (user.type == UserType.LAWYER && user == event.owner)
-    ) {
-      throw new ForbiddenException();
+    if (user.id == event.owner.id
+      || [UserType.MODERATOR, UserType.ADMIN].includes(user.type)) {
+      await this.schedules.destroyRoom(event.roomId, event.roomSecret);
+      return this.schedules.updateStatus(id, Status.NEW);
     }
 
-    await this.schedules.destroyRoom(event.roomId, event.roomSecret);
-    return this.schedules.updateStatus(id, Status.NEW);
+    throw new ForbiddenException();
   }
 }
