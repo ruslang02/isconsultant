@@ -264,7 +264,7 @@ ${
               </Form.Field>
             )}
 
-            {editable && event && (
+            {editable && event && (<>
               <Form.Field>
                 <Form.Input
                   label="Meeting Secret (for meeting moderators)"
@@ -273,7 +273,6 @@ ${
                   value={temp?.room_secret}
                 />
               </Form.Field>
-            )}
             <Form.Field>
               <Form.Input
                 label={
@@ -286,6 +285,7 @@ ${
                 value={temp?.room_password}
               />
             </Form.Field>
+            </>)}
             {editable && (
               <Form.Field>
                 <label>Meeting Access Level</label>
