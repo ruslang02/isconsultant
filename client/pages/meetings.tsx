@@ -3,7 +3,8 @@ import { GetPendingEventDto } from "@common/dto/get-pending-event.dto";
 import { CalendarEvent } from "@common/models/calendar-event.entity";
 import { EventModal } from "components/EventModal";
 import { Page } from "components/Page";
-import { useEffect, useState } from "react";
+import Head from "next/head";
+import React, { useEffect, useState } from "react";
 import { Card, Item } from "semantic-ui-react";
 import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
@@ -43,25 +44,29 @@ const MeetingsList = () => {
 
   return (
     <Page>
+      <Head>
+        <title>My meetings - ISConsultant</title>
+      </Head>
       <h2>My meetings</h2>
       {request && (
         <>
           <Card.Group>
-            <Card
-              fluid
-            >
+            <Card fluid>
               <Card.Content>
                 <Card.Header>Pending request</Card.Header>
                 <Card.Description>
                   Lawyer:{" "}
                   <b>
-                    {request.lawyer ? `${request.lawyer.first_name} ${request.lawyer.last_name}` : "any"}
+                    {request.lawyer
+                      ? `${request.lawyer.first_name} ${request.lawyer.last_name}`
+                      : "any"}
                   </b>
                   <br />
                   Starts at:{" "}
                   <b>{new Date(request.timespan_start).toLocaleString()}</b>
                   <br />
-                  Ends at: <b>{new Date(request.timespan_end).toLocaleString()}</b>
+                  Ends at:{" "}
+                  <b>{new Date(request.timespan_end).toLocaleString()}</b>
                   <br />
                   <br />
                   Description: <br />

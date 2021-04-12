@@ -27,6 +27,7 @@ import { MessageContext } from "utils/MessageContext";
 import { ErrorDto } from "@common/dto/error.dto";
 import { EventArrange } from "components/EventArrange";
 import { GetUserDto } from "@common/dto/get-user.dto";
+import Head from "next/head";
 
 function Promo() {
   const { t } = useTranslation();
@@ -42,6 +43,9 @@ function Promo() {
         backgroundSize: "cover",
       }}
     >
+      <Head>
+        <title>ISConsultant</title>
+      </Head>
       <Container
         style={{
           display: "flex",
@@ -104,11 +108,6 @@ function PromoAdvantages() {
           </Grid.Column>
           <Grid.Column floated="right" width={6}>
             <Image size="medium" src="/assets/lawyer.png" />
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column textAlign="center">
-            <Button size="huge">{t("pages.index.arrange_event")}</Button>
           </Grid.Column>
         </Grid.Row>
       </Grid>

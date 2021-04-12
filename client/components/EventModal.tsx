@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import { GetUserDto } from "@common/dto/get-user.dto";
 import { ChatMessage } from "@common/models/chat-message.entity";
 import { UserCacheContext } from "utils/UserCacheContext";
+import { useAuth } from "utils/useAuth";
 
 interface EventModalProps {
   editable?: boolean;
@@ -45,6 +46,7 @@ export function EventModal({
   const [users, setUsers] = useContext(UserCacheContext);
   const [, setMessage] = useContext(MessageContext);
   const router = useRouter();
+  const [auth] = useAuth();
   const [, update] = useState();
 
   useEffect(() => {
@@ -101,7 +103,13 @@ export function EventModal({
         event.owner.last_name
       } invites you to a meeting on ISConsultant.
 Topic: ${temp.title}
-Time: ${new Date(temp.timespan_start).toLocaleString("en-GB")}
+Time: ${new Date(temp.timespan_start).toLocaleDateString("en-GB")}, ${new Date(
+        temp.timespan_start
+      ).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })}
 
 Join the meeting room: https://consultant.infostrategic.com/video/${event.id}
 
@@ -109,7 +117,7 @@ Meeting ID: ${event.id}
 ${
   temp.room_access == 1
     ? "You will also be required to log in to your account."
-    : `Passcode: ${event.room_password}`
+    : `Password: ${event.room_password}`
 }`
     : "";
 
@@ -132,7 +140,7 @@ ${
             primary
             icon="arrow right"
             labelPosition="right"
-            content="Join meeting"
+            content={event.owner.id === auth?.user?.id ? "Start meeting" : "Join meeting"}
             onClick={() => {
               window.open(`/video/${event.id}`);
             }}
@@ -146,7 +154,7 @@ ${
             <Form.Field>
               <Form.Input
                 readOnly={!editable}
-                label="Title"
+                label={<label>Title<span style={{color:"red"}}>*</span></label>}
                 onChange={(_e, data) => setTemp({ ...temp, title: data.value })}
                 value={temp?.title}
               />
@@ -162,7 +170,7 @@ ${
               />
             </Form.Field>
             <Form.Field inline>
-              <label>Starts at</label>
+            <label>Starts at<span style={{color:"red"}}>*</span></label>
               <SemanticDatepicker
                 readOnly={!editable}
                 onChange={(_e, { value }) =>
@@ -201,40 +209,7 @@ ${
                 }
               />
             </Form.Field>
-            <Form.Field inline>
-              <label>Ends at</label>
-              <SemanticDatepicker
-                readOnly={!editable}
-                onChange={(_e, { value }) =>
-                  setTemp({
-                    ...temp,
-                    timespan_end: ((value as Date) ?? new Date()).toISOString(),
-                  })
-                }
-                value={
-                  temp !== undefined ? new Date(temp.timespan_end) : undefined
-                }
-              />{" "}
-              &nbsp;
-              <input
-                readOnly={!editable}
-                onChange={(e) => {
-                  const date = new Date(temp.timespan_end);
-                  const value = e.target.valueAsDate;
-                  date.setHours(value.getUTCHours(), value.getUTCMinutes());
-                  setTemp({ ...temp, timespan_end: date.toISOString() });
-                }}
-                type="time"
-                value={
-                  temp !== undefined
-                    ? new Date(temp.timespan_end).toLocaleTimeString(
-                        undefined,
-                        { hour: "2-digit", minute: "2-digit", hour12: false }
-                      )
-                    : undefined
-                }
-              />
-            </Form.Field>
+            
             <Form.Field inline>
               <label>Participants</label>
               <Dropdown
@@ -253,6 +228,7 @@ ${
                   };
                   setTemp(nTemp);
                 }}
+                placeholder="Start typing participant's name..."
                 onSearchChange={(_e, d) => {
                   api
                     .get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`)
@@ -277,40 +253,42 @@ ${
               />
             </Form.Field>
             <h4>Security</h4>
-            <Form.Field>
-              <Form.Input
-                label="Room ID"
-                placeholder="(will be generated later)"
-                readOnly
-                value={event?.id}
-              />
-            </Form.Field>
-
-            {editable && (
+            {event && (
               <Form.Field>
                 <Form.Input
-                  label="Room Secret (only for you)"
+                  label="Meeting ID"
+                  placeholder="(will be generated later)"
+                  readOnly
+                  value={event?.id}
+                />
+              </Form.Field>
+            )}
+
+            {editable && event && (<>
+              <Form.Field>
+                <Form.Input
+                  label="Meeting Secret (for meeting moderators)"
                   placeholder="(will be generated later)"
                   readOnly
                   value={temp?.room_secret}
                 />
               </Form.Field>
-            )}
             <Form.Field>
               <Form.Input
                 label={
                   editable
-                    ? "Room Password (for unregistered users)"
-                    : "Room Password"
+                    ? "Meeting Password (for unregistered users)"
+                    : "Meeting Password"
                 }
                 placeholder="(will be generated later)"
                 readOnly
                 value={temp?.room_password}
               />
             </Form.Field>
+            </>)}
             {editable && (
               <Form.Field>
-                <label>Room Access Level</label>
+                <label>Meeting Access Level</label>
                 <Select
                   options={[
                     { value: 0, text: "Anyone with password" },
@@ -322,7 +300,7 @@ ${
                       room_access: +value,
                     })
                   }
-                  value={temp?.room_access}
+                  value={temp?.room_access ?? 1}
                 />
               </Form.Field>
             )}
@@ -330,8 +308,6 @@ ${
         </section>
         <section
           style={{
-            borderLeft: "1px solid grey",
-            paddingLeft: "1.5rem",
             marginLeft: "1.5rem",
             width: "100%",
             display: event ? "flex" : "none",
@@ -418,7 +394,7 @@ ${
             <Button
               fluid
               primary
-              content="Download"
+              content="Download Chat Log"
               onClick={() => {
                 window.open(
                   `/api/events/${event.id}/log/text/meeting_log_${event.id}.txt`

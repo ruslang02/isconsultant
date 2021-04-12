@@ -9,6 +9,7 @@ import { useAuth } from "utils/useAuth";
 import { MessageContext } from "utils/MessageContext";
 import { UserCacheContext } from "utils/UserCacheContext";
 import { GetUserDto } from "@common/dto/get-user.dto";
+import { api } from "utils/api";
 
 const isPublic = (path: string) =>
   path === "/" ||
@@ -27,31 +28,49 @@ function MyApp({
   const { i18n } = useTranslation();
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const [auth] = useAuth();
+  const [auth, setAuth] = useAuth();
   const [users, setUsers] = useState<GetUserDto[]>([]);
   const [allowed, setAllowed] = useState(
     typeof window === "undefined" || isPublic(router.pathname)
   );
 
   useEffect(() => {
-    if (!auth?.access_token && !isPublic(router.pathname)) {
-      if (typeof window !== "undefined")
-        location.replace("/login?redirect=" + location.pathname);
+    if (!isPublic(router.pathname)) {
+      if (!auth?.access_token) {
+        if (typeof window !== "undefined")
+          router.replace("/login?redirect=" + router.pathname).then(() => {
+            setAllowed(true);
+            document.querySelector("#__next").classList.add("loaded");
+          });
+      } else {
+        document.querySelector("#__next").classList.add("loaded");
+      }
     } else {
       setAllowed(true);
+      document.querySelector("#__next").classList.add("loaded");
     }
   }, [auth]);
 
+  useEffect(() => {
+    (async () => {
+      const { data, status } = await api.get<GetUserDto>("/users/@me");
+      if (status > 300) {
+        setAllowed(false);
+        setAuth({});
+        if (!isPublic(router.pathname)) {
+          location.assign("/login?redirect=" + router.pathname);
+        } else if (auth?.access_token) {
+          location.reload();
+        }
+      } else {
+        setAuth((auth) => ({ ...auth, user: { ...auth.user, ...data } }));
+        setAllowed(true);
+      }
+    })();
+  }, []);
+
   return (
     <MessageContext.Provider value={[message, setMessage]}>
-      <Button
-        style={{ position: "fixed", bottom: 0, left: 0, zIndex: 100 }}
-        onClick={() =>
-          i18n.changeLanguage(i18n.language === "en" ? "ru" : "en")
-        }
-      >
-        {i18n.language === "en" ? "RU" : "EN"}
-      </Button>
       <UserCacheContext.Provider value={[users, setUsers]}>
         {allowed && <Component {...pageProps} />}
       </UserCacheContext.Provider>

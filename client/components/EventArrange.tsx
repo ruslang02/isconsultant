@@ -70,7 +70,7 @@ export function EventArrange({
     if (!access_token) {
       try {
         const { data: regData } = await api.post<
-          { access_token: string } | ErrorDto
+          { access_token: string; user: GetUserDto } | ErrorDto
         >("/auth/register", {
           email,
           first_name: firstName,
@@ -84,7 +84,7 @@ export function EventArrange({
         }
         access_token = regData.access_token;
 
-        if (await createRequest(access_token)) {
+        if (await createRequest(regData)) {
           setMessage(
             "Your meeting request was created. In order for it to get accepted, you need to <b>verify your email address</b> using the link we sent you."
           );
@@ -96,7 +96,7 @@ export function EventArrange({
         setError((e as ErrorDto).message);
       }
     } else {
-      if (await createRequest(access_token)) {
+      if (await createRequest({ access_token, user: auth?.user })) {
         setMessage(
           "Your meeting request was created. You are now being redirected to the meetings page."
         );
@@ -104,7 +104,10 @@ export function EventArrange({
       }
     }
   };
-  const createRequest = async (access_token: string) => {
+  const createRequest = async (auth: {
+    access_token: string;
+    user: GetUserDto;
+  }) => {
     // TODO: choose time?
     const timespan_end = new Date();
     timespan_end.setDate(timespan_end.getDate() + 1);
@@ -114,14 +117,14 @@ export function EventArrange({
         "/events/request",
         {
           description,
-          lawyer_id: access_token ? lawyer : undefined,
-          additional_ids: [auth.user.id],
+          lawyer_id: auth.access_token ? lawyer : undefined,
+          additional_ids: [auth.user?.id].filter((x) => x),
           timespan_start: new Date().toISOString(),
           timespan_end: timespan_end.toISOString(),
         } as ArrangeEventDto,
         {
           headers: {
-            Authorization: `Bearer ${access_token}`,
+            Authorization: `Bearer ${auth.access_token}`,
           },
         }
       );
@@ -130,7 +133,9 @@ export function EventArrange({
         return false;
       }
       return true;
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (

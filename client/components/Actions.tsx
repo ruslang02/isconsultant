@@ -2,27 +2,23 @@ import styles from "../styles/Actions.module.css"
 import React, { useContext, useState } from "react"
 import { Button, Icon } from "semantic-ui-react"
 import video from "pages/video";
+import { useRouter } from "next/router";
 
 export const Actions: React.FC<{
-    audioAvailable: boolean, videoAvailable: boolean, audio: boolean, video: boolean,
-    changeAudio: Function, changeVideo: Function, changeScreen: Function, screen: boolean
-}> = function ({ audioAvailable, videoAvailable, audio, video, changeAudio, changeVideo, changeScreen, screen }) {
-    function onVideoClick(e: any) {
-        changeVideo(!video)
-    }
-
-    function onAudioClick(e: any) {
-        changeAudio(!audio)
-    }
-
-    function onScreenClick(e: any) {
-        changeScreen(!screen)
-    }
-
+    audioAvailable: boolean
+    videoAvailable: boolean
+    audio: boolean
+    video: boolean
+    changeAudio: (_: boolean) => void
+    changeVideo: (_: boolean) => void
+    changeScreen: (_: boolean) => void
+    screen: boolean
+}> = x => {
+    const router = useRouter();
 
     return (<div className={styles.Actions}>
         <Button
-            onClick={onScreenClick}
+            onClick={() => x.changeScreen(!x.screen)}
             icon
             secondary
             circular
@@ -34,8 +30,8 @@ export const Actions: React.FC<{
             <Icon style={{ width: "26px" }} name="tv" size="large"></Icon>
         </Button>
         <Button
-            disabled={!videoAvailable}
-            onClick={onVideoClick}
+            disabled={!x.videoAvailable}
+            onClick={() => x.changeVideo(!x.video)}
             icon
             primary
             circular
@@ -44,11 +40,11 @@ export const Actions: React.FC<{
                 height: "64px",
                 marginRight: "1rem"
             }}>
-            <Icon style={{ width: "26px" }} name={video ? "video camera" : "video play"} size="large"></Icon>
+            <Icon style={{ width: "26px" }} name={x.video ? "video camera" : "video play"} size="large"></Icon>
         </Button>
         <Button
-            disabled={!audioAvailable}
-            onClick={onAudioClick}
+            disabled={!x.audioAvailable}
+            onClick={() => x.changeAudio(!x.audio)}
             icon
             secondary
             circular
@@ -59,7 +55,22 @@ export const Actions: React.FC<{
             }}>
             <Icon
                 style={{ width: "26px" }}
-                name={!audio ? "microphone slash" : "microphone"}
+                name={!x.audio ? "microphone slash" : "microphone"}
+                size="large"></Icon>
+        </Button>
+        <Button
+            onClick={() => location.assign("/profile/@me")}
+            icon
+            color="red"
+            circular
+            style={{
+                width: "64px",
+                height: "64px",
+                marginRight: "1rem"
+            }}>
+            <Icon
+                style={{ width: "26px" }}
+                name="call"
                 size="large"></Icon>
         </Button>
     </div>)

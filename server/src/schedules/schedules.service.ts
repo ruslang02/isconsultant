@@ -16,11 +16,10 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
+import { generateId } from "utils/IdGenerator";
 const Janus = require("janus-gateway-js");
 const genChar = () =>
   String.fromCharCode(Math.round(Math.random() * (122 - 48) + 48));
-
-const genRoomId = () => Math.round(Math.random() * 10_000_000);
 
 const { JANUS } = process.env;
 
@@ -33,7 +32,7 @@ export class SchedulesService implements OnModuleInit {
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
     private pEvents: Repository<PendingEvent>
-  ) {}
+  ) { }
 
   private pluginHandle: any;
 
@@ -121,19 +120,21 @@ export class SchedulesService implements OnModuleInit {
       .getOneOrFail();
   }
 
+  private counter = 0;
+
   async transferEvent(eid: string, lid: string) {
     const pending = await this.pEvents.findOne(eid, {
       relations: ["from", "participants"],
     });
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
-    event.id = +pending.id;
+    event.id = (Math.floor((new Date().getTime() - new Date(2020, 0).getTime()) / 1000) << 4) + ((this.counter++ % 16));
     event.title = `Meeting with ${pending.from.first_name} ${pending.from.last_name}`;
     event.description = pending.description;
     event.start_timestamp = pending.start_timestamp;
     event.end_timestamp = pending.end_timestamp;
     event.owner = { id: +lid };
     event.roomAccess = RoomAccess.ONLY_PARTICIPANTS;
-    event.roomId = genRoomId();
+    event.roomId = event.id;
     event.roomPassword = "";
     event.roomSecret = "";
     for (let i = 0; i < 6; i++) {
@@ -162,13 +163,14 @@ export class SchedulesService implements OnModuleInit {
     data: CreateEventDto & { user_id: string }
   ): Promise<CalendarEvent> {
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
+    event.id = generateId();
     event.title = data.title;
     event.description = data.description;
     event.start_timestamp = new Date(data.timespan_start);
     event.end_timestamp = new Date(data.timespan_end);
     event.owner = { id: Number(data.user_id) };
     event.roomAccess = data.room_access ?? 0;
-    event.roomId = genRoomId();
+    event.roomId = event.id;
     event.roomPassword = "";
     event.roomSecret = "";
     for (let i = 0; i < 6; i++) {

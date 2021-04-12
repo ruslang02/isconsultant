@@ -5,6 +5,7 @@ import { UserContext } from '../utils/UserContext';
 import { PHONE_NUMBER } from '../utils/Constants';
 import styles from 'styles/Header.module.css';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useAuth } from 'utils/useAuth';
 
 
@@ -48,7 +49,7 @@ export function Header({ promo }: { promo?: boolean }) {
     <header className={styles.Header}>
       <Container>
         <div className={styles.Header_container}>
-          <a href="/"><Image src="/assets/logo.png" height="24" /></a>
+          <Link href="/"><a><Image src="/assets/logo.png" height="24" /></a></Link>
           {promo ? <CallPanel /> : <div style={{ flexGrow: 1 }} />}
           <AccountMenu />
         </div>

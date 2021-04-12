@@ -1,6 +1,8 @@
 import { GetUserInfoDto } from "@common/dto/get-user-info.dto";
 import { EventArrange } from "components/EventArrange";
 import { Page } from "components/Page";
+import Head from "next/head";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Button, Item } from "semantic-ui-react";
 import { api } from "utils/api";
@@ -16,12 +18,15 @@ const LawyersPage = () => {
     (async () => {
       const { data } = await api.get<GetUserInfoDto[]>("/users");
 
-      setLawyers(data.filter(_ => _.type === "lawyer"));
+      setLawyers(data.filter((_) => _.type === "lawyer"));
     })();
   }, []);
 
   return (
     <Page>
+      <Head>
+        <title>Lawyers - ISConsultant</title>
+      </Head>
       <h2>
         Lawyers Directory
         <br />
@@ -30,33 +35,41 @@ const LawyersPage = () => {
         </small>
       </h2>
       <Item.Group>
-        {lawyers?.map(u => (
+        {lawyers?.map((u) => (
           <Item>
-            <Item.Image
-              avatar
-              size="tiny"
-              src={u.avatar}
-            />
+            <Item.Image avatar size="tiny" src={u.avatar} />
             <Item.Content>
-              <Item.Header><a href={`/profile/${u.id}`}>{u.first_name} {u.last_name}</a></Item.Header>
-              <Item.Description>Rating: {u.rating}<br />Joined at: {new Date(u.created_timestamp).toLocaleDateString()}
+              <Item.Header>
+                <Link href={`/profile/${u.id}`}>
+                  <a>{u.first_name} {u.last_name}</a>
+                </Link>
+              </Item.Header>
+              <Item.Description>
+                Rating: {u.rating}
+                <br />
+                Joined at: {new Date(u.created_timestamp).toLocaleDateString()}
               </Item.Description>
-              <Button floated="right" content="Request a meeting" primary onClick={() => {
-                setLawyerId(u.id);
-                setOpen(true);
-              }} />
+              <Button
+                floated="right"
+                content="Request a meeting"
+                primary
+                onClick={() => {
+                  setLawyerId(u.id);
+                  setOpen(true);
+                }}
+              />
             </Item.Content>
           </Item>
         ))}
       </Item.Group>
-            <EventArrange
-              open={open}
-              onClose={() => {
-                setOpen(false);
-                setLawyerId(undefined);
-              }}
-              lawyerId={lawyerId}
-            />
+      <EventArrange
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          setLawyerId(undefined);
+        }}
+        lawyerId={lawyerId}
+      />
     </Page>
   );
 };

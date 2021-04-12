@@ -2,6 +2,7 @@ import { GetUserInfoDto } from "@common/dto/get-user-info.dto";
 import { PatchUserDto } from "@common/dto/patch-user.dto";
 import { EventArrange } from "components/EventArrange";
 import { Page } from "components/Page";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Button, Item } from "semantic-ui-react";
 import { api } from "utils/api";
@@ -32,9 +33,11 @@ const UsersPage = () => {
             <Item.Image avatar size="tiny" src={u.avatar} />
             <Item.Content>
               <Item.Header>
-                <a href={`/profile/${u.id}`}>
-                  {u.first_name} {u.last_name}
-                </a>
+                <Link href={`/profile/${u.id}`}>
+                  <a>
+                    {u.first_name} {u.last_name}
+                  </a>
+                </Link>
               </Item.Header>
               <Item.Meta>{u.type[0].toUpperCase() + u.type.slice(1)}</Item.Meta>
               <Item.Description>
@@ -44,10 +47,33 @@ const UsersPage = () => {
                 <br />
                 Verified: {u.verified ? "Yes" : "No"}
               </Item.Description>
+              <Button.Group floated="right" style={{ marginRight: ".5rem" }}>
+                <Button
+                  content="Rating +"
+                  color="green"
+                  onClick={() => {
+                    api.patch(`/users/${u.id}`, {
+                      rating: u.rating + 1,
+                    } as PatchUserDto);
+                    reload();
+                  }}
+                />
+                <Button
+                  content="Rating -"
+                  secondary
+                  onClick={() => {
+                    api.patch(`/users/${u.id}`, {
+                      rating: u.rating - 1,
+                    } as PatchUserDto);
+                    reload();
+                  }}
+                />
+              </Button.Group>
               <Button
                 floated="right"
                 content="Deverify"
                 color="red"
+                style={{ marginRight: ".5rem" }}
                 onClick={() => {
                   api.patch(`/users/${u.id}`, {
                     verified: false,
@@ -58,6 +84,7 @@ const UsersPage = () => {
               <Button
                 floated="right"
                 content="Change role"
+                style={{ marginRight: ".5rem" }}
                 secondary
                 onClick={() => {
                   const answer = prompt(

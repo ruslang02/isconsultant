@@ -49,6 +49,7 @@ import { I18n, I18nContext } from "nestjs-i18n";
 import { PendingEventAdapter } from "./pending-event.adapter";
 import { ChatService } from "chat/chat.service";
 import { RoomAccess, Status } from "@common/models/calendar-event.entity";
+import { OptionalJwtAuthGuard } from "guards/optional-jwt.guard";
 
 @ApiTags("Управление личным календарем")
 @Controller("/api/events")
@@ -189,7 +190,7 @@ export class SchedulesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth()
   @Get("/:eid")
   @ApiOperation({
@@ -418,18 +419,17 @@ ${_.content}
     @Param("eid") id: string
   ) {
     const event = await this.schedules.findEvent(id);
-    if (
-      user.type == UserType.CLIENT ||
-      (user.type == UserType.LAWYER && user.id != event.owner.id)
-    ) {
-      throw new ForbiddenException();
+    if (user.id == event.owner.id
+      || [UserType.MODERATOR, UserType.ADMIN].includes(user.type)) {
+      await this.schedules.createRoom(
+        event.roomId,
+        event.roomPassword,
+        event.roomSecret
+      );
+      return this.schedules.updateStatus(id, Status.STARTED);
     }
 
-    return  this.schedules.createRoom(
-      event.roomId,
-      event.roomPassword,
-      event.roomSecret
-    );
+    throw new ForbiddenException();
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -443,14 +443,13 @@ ${_.content}
     @Param("eid") id: string
   ) {
     const event = await this.schedules.findEvent(id);
-    if (
-      user.type == UserType.CLIENT ||
-      (user.type == UserType.LAWYER && user != event.owner)
-    ) {
-      throw new ForbiddenException();
+    if (user.id == event.owner.id
+      || [UserType.MODERATOR, UserType.ADMIN].includes(user.type)) {
+      await this.schedules.destroyRoom(event.roomId, event.roomSecret);
+      return this.schedules.updateStatus(id, Status.NEW);
     }
 
-    return this.schedules.destroyRoom(event.roomId, event.roomSecret); 
+    return this.schedules.destroyRoom(event.roomId, event.roomSecret);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -474,7 +473,7 @@ ${_.content}
     }
 
     const ids = event.participants.map(user => user.id.toString());
-    if(!(ids.includes(user.id.toString()) || event.owner.id == user.id)) {
+    if (!(ids.includes(user.id.toString()) || event.owner.id == user.id)) {
       await this.schedules.updateEvent(id, { participants: [...ids, user.id.toString()] });
     }
 

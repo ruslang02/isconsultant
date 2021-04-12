@@ -6,7 +6,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Button, Comment, Icon, Input, InputOnChangeData, Message } from "semantic-ui-react";
+import {
+  Button,
+  Comment,
+  Icon,
+  Input,
+  InputOnChangeData,
+  Message,
+  Segment,
+} from "semantic-ui-react";
 import styles from "./[id].module.css";
 import "../../videoroom";
 
@@ -22,6 +30,10 @@ import VideoContainer from "components/VideoContainer";
 import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
 import { ChatMessage } from "@common/models/chat-message.entity";
+import Head from "next/head";
+import { MessageContext } from "utils/MessageContext";
+import { LoginUserSuccessDto } from "@common/dto/login-user-success.dto";
+import { redirect } from "next/dist/next-server/server/api-utils";
 
 export enum Status {
   NEW = 0,
@@ -31,22 +43,46 @@ export enum Status {
 
 export enum RoomAccess {
   PASSWORD = 0,
-  ONLY_PARTICIPANTS = 1
+  ONLY_PARTICIPANTS = 1,
 }
 
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
   setUsers: (users: GetUserInfoDto[]) => void;
-}>({ users: [], setUsers: () => { } });
+}>({ users: [], setUsers: () => {} });
 const FilesContext = createContext<{
   files: RemoteFile[];
   setFiles: (reducer: (prevFiles: RemoteFile[]) => RemoteFile[]) => void;
-}>({ files: [], setFiles: () => () => { } });
+}>({ files: [], setFiles: () => () => {} });
 const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
   const [roomId, setRoomId] = useState(0);
   const router = useRouter();
+  const event = useContext(EventContext);
+  const [, setMessage] = useContext(MessageContext);
+  const inviteText = event
+    ? `${event.owner.first_name} ${
+        event.owner.last_name
+      } invites you to a meeting on ISConsultant.
+Topic: ${event.title}
+Time: ${new Date(event.timespan_start).toLocaleDateString("en-GB")}, ${new Date(
+  event.timespan_start
+      ).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })}
+
+Join the meeting room: https://consultant.infostrategic.com/video/${event.id}
+
+Meeting ID: ${event.id}
+${
+  event.room_access == 1
+    ? "You will also be required to log in to your account."
+    : `Password: ${event.room_password}`
+}`
+    : "";
 
   useEffect(() => {
     setRoomId(+location.pathname.split("/")[2]);
@@ -57,6 +93,16 @@ const TopBar: React.FC = function () {
   return (
     <header className={styles.TopYar}>
       <div className={styles.TopYar_info}>
+        <Button size="small" icon title="Return to profile"
+        onClick={() => location.assign("/profile/@me")}><Icon name="arrow left" /></Button>
+        <Button size="small" primary
+        onClick={() => {
+          navigator.clipboard.writeText(inviteText);
+          setMessage("Meeting invitation copied.");
+        }} title="Click to copy the invitation text">
+          <Icon name="linkify" />
+          Copy invitation
+        </Button>
         <div className={styles.TopYar_roomName}>
           {t("pages.video.room_title")} #{roomId}
         </div>
@@ -117,7 +163,7 @@ const Files: React.FC = () => {
       <b style={{ fontSize: "16px", margin: "9px", display: "inline-block" }}>
         {t("pages.video.files_title")}
       </b>
-      <span style={{ position: "relative", float: "right" }}>
+      <span style={{ position: "relative", float: "right", cursor: "pointer" }}>
         <input
           type="file"
           name="file"
@@ -141,13 +187,16 @@ const Files: React.FC = () => {
             top: 0,
             left: 0,
             width: "100%",
-            height: "100%",
+            height: "36px",
             zIndex: 1,
             opacity: 0,
+            cursor: "pointer",
           }}
         />
-        <Button primary>
+        <Button primary icon>
           <Icon name="upload" />
+          {" "}
+          <span>Upload</span>
         </Button>
       </span>
       <div style={{ flexGrow: 1, marginTop: ".5rem" }}>
@@ -188,7 +237,8 @@ const Chat: React.FC = () => {
   useEffect(() => {
     console.log("Loading chat...");
     const client = new WebSocket(
-      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${
+        location.hostname
       }${location.port ? ":" + location.port : ""}/chat/${auth?.access_token}`
     );
 
@@ -409,19 +459,22 @@ const WaitingScreen: React.FC<{
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          alignItems: "center",
           maxWidth: "400px",
         }}
       >
         {error ? (
           <Message
             warning
-            header={error}
+            header="Join meeting"
             content={
               <>
-                <p>You may need to log in to view this meeting.</p>
+                <p>
+                  This meeting is <b>private</b>. Please log in to continue.
+                </p>
                 <Button
                   onClick={() =>
-                    router.replace("/login?redirect=" + location.pathname)
+                    location.assign("/login?redirect=" + location.pathname)
                   }
                   content="Log in"
                   primary
@@ -434,7 +487,11 @@ const WaitingScreen: React.FC<{
         ) : status == Status.NEW ? (
           <Message
             header="Meeting not started"
-            content="Wait for organizer to start it"
+            content={
+              loaded && status == Status.NEW && event.room_secret
+                ? "Press the button below to start it"
+                : "Wait for organizer to start it"
+            }
           />
         ) : (
           <Message
@@ -444,10 +501,15 @@ const WaitingScreen: React.FC<{
         )}
         {loaded && status == Status.NEW && event.room_secret ? (
           <Button
+            labelPosition="left"
+            icon
             onClick={(e) => {
               api.post(`events/${event.id}/start`).then((a) => router.reload());
             }}
-          />
+          >
+            <Icon name="play" />
+            Start meeting
+          </Button>
         ) : (
           <></>
         )}
@@ -463,12 +525,12 @@ export default function Video() {
   const [users, setUsers] = useState<GetUserInfoDto[]>([]);
   const [files, setFiles] = useState<RemoteFile[]>([]);
   const [event, setEvent] = useState<GetEventDto | null>(null);
-  const [auth] = useAuth();
+  const [auth, setAuth] = useAuth();
   const [status, setStatus] = useState<Status>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState("");
-
-  const inputPin = useRef<string>("");
+  const [inputPin, setInputPin] = useState("");
+  const [name, setName] = useState("");
 
   useEffect(() => {
     if (!id) {
@@ -491,13 +553,46 @@ export default function Video() {
 
   function onPinChange(event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) {
     setError("");
-    inputPin.current = data.value
+    setInputPin(data.value)
   }
+  
+  const handleCreateTempUser = async () => {
+    try {
+      const { data } = await api.post<
+        LoginUserSuccessDto | { message: string }
+      >("/auth/login_temporary", JSON.stringify({ name }), {
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
+
+      if ("message" in data) {
+        setError(
+          data.message === "Unauthorized"
+            ? "Email or password incorrect."
+            : data.message
+        );
+      } else {
+        setError("");
+        if (!data.user.avatar) {
+          data.user.avatar =
+            "https://react.semantic-ui.com/images/avatar/large/matt.jpg";
+        }
+        setAuth(data);
+      }
+    } catch (e) {
+      setError(e.message);
+      console.error(e);
+    }
+  };
 
   return (
     <UserStoreContext.Provider value={{ users, setUsers }}>
       <FilesContext.Provider value={{ files, setFiles }}>
         <EventContext.Provider value={event}>
+          <Head>
+            <title>Ongoing meeting - ISConsultant</title>
+          </Head>
           {status != Status.STARTED ? (
             <WaitingScreen
               event={event}
@@ -505,82 +600,106 @@ export default function Video() {
               loaded={loaded}
               error={error}
             />
-          ) :
-            event.room_access == RoomAccess.PASSWORD && !event.room_password ?
-              (<>
+          ) : event.room_access == RoomAccess.PASSWORD &&
+            !event.room_password ? (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  height: "100vh",
+                }}
+              >
                 <div
                   style={{
                     display: "flex",
+                    flexDirection: "column",
                     justifyContent: "center",
-                    height: "100vh",
+                    width: "350px",
                   }}
                 >
-                  <div
+                  <Segment
                     style={{
                       display: "flex",
                       flexDirection: "column",
-                      justifyContent: "center",
-                      maxWidth: "400px",
+                      alignItems: "center",
                     }}
                   >
-
-                    <Message
-                      warning
-                      header={error}
-                      content={
-                        <>
-                          <p>Enter room password: </p>
-                          <Input onChange={onPinChange}/>
-                          <Button
-                            onClick={() =>
-                                api.get(`/events/${id}/${inputPin.current}`).then(response => {
-                                  if(response.status == 200) {
-                                    router.reload()
-                                  } else {
-                                    setError("Incorrect pin.")
-                                  }
-                                }).catch(error => {
-                                  console.log(error);
-                                })
-                            }
-                            content="Enter"
-                            primary
-                          />
-                        </>
+                    <span>Welcome to</span>
+                    <h2>ISConsultant</h2>
+                    <p style={{ alignSelf: "flex-start" }}>
+                      You were invited to a meeting <b>{event.title}</b>, hosted
+                      by{" "}
+                      <b>
+                        {event.owner.first_name} {event.owner.last_name}
+                      </b>
+                      .
+                    </p>
+                    <div style={{ alignSelf: "flex-start" }}>
+                      In order to join it, enter the meeting password from the
+                      invitation:
+                    </div>
+                    <br />
+                    <Input
+                      style={{ width: "100%" }}
+                      placeholder="Your name"
+                      value={name}
+                      onChange={(props, val) => setName(val.value)}
+                    />
+                    <br />
+                    <Input
+                      style={{ width: "100%" }}
+                      placeholder="Meeting password"
+                      value={inputPin}
+                      onChange={(props, val) => setInputPin(val.value)}
+                    />
+                    <br />
+                    <Button
+                      onClick={() =>
+                        handleCreateTempUser().then(() => setEvent((e) => ({
+                          ...e,
+                          room_password: inputPin,
+                        })))
                       }
+                      content="Join meeting"
+                      primary
                     />
-                  </div>
+                    { location.search.includes("wrong") && (
+                      <Message error>Wrong password entered.</Message>
+                    )}
+                  </Segment>
                 </div>
-              </>) :
-              (
-                <main
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    overflow: "hidden",
-                    flexGrow: 1,
-                  }}
-                >
-                  <TopBar />
-                  <section
-                    style={{
-                      display: "flex",
-                      background: "white",
-                      borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
-                      flexGrow: 1,
-                    }}
-                  >
-                    <VideoContainer
-                      roomNumber={event.room_id}
-                      roomPin={event.room_password}
-                      roomSecret={event.room_secret}
-                    />
+              </div>
+            </>
+          ) : (
+            <main
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                overflow: "hidden",
+                flexGrow: 1,
+              }}
+            >
+              <TopBar />
+              <section
+                style={{
+                  display: "flex",
+                  background: "white",
+                  borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
+                  flexGrow: 1,
+                }}
+              >
+                <VideoContainer
+                  roomNumber={event.room_id}
+                  roomPin={event.room_password}
+                  roomSecret={event.room_secret}
+                />
 
-                    <Sidebar />
-                  </section>
-                </main>
-              )}
+                <Sidebar />
+              </section>
+            </main>
+          )}
         </EventContext.Provider>
       </FilesContext.Provider>
     </UserStoreContext.Provider>
