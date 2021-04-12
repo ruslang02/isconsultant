@@ -117,7 +117,7 @@ Meeting ID: ${event.id}
 ${
   temp.room_access == 1
     ? "You will also be required to log in to your account."
-    : `Passcode: ${event.room_password}`
+    : `Password: ${event.room_password}`
 }`
     : "";
 

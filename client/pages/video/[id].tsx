@@ -78,7 +78,7 @@ Meeting ID: ${event.id}
 ${
   event.room_access == 1
     ? "You will also be required to log in to your account."
-    : `Passcode: ${event.room_password}`
+    : `Password: ${event.room_password}`
 }`
     : "";
 
@@ -619,6 +619,9 @@ export default function Video() {
                       content="Join meeting"
                       primary
                     />
+                    { location.search.includes("wrong") && (
+                      <Message error>Wrong password entered.</Message>
+                    )}
                   </Segment>
                 </div>
               </div>

@@ -228,7 +228,8 @@ const VideoContainer: React.FC<{
                   pin: roomPin.toString(),
                 },
               })
-              .then(onVideoroomJoin);
+              .then(onVideoroomJoin)
+              .catch(() => location.replace(location.pathname + "?wrongPin=true"));
           else
             plugin
               .sendWithTransaction({
