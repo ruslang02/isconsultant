@@ -32,6 +32,8 @@ import { useAuth } from "utils/useAuth";
 import { ChatMessage } from "@common/models/chat-message.entity";
 import Head from "next/head";
 import { MessageContext } from "utils/MessageContext";
+import { LoginUserSuccessDto } from "@common/dto/login-user-success.dto";
+import { redirect } from "next/dist/next-server/server/api-utils";
 
 export enum Status {
   NEW = 0,
@@ -523,11 +525,12 @@ export default function Video() {
   const [users, setUsers] = useState<GetUserInfoDto[]>([]);
   const [files, setFiles] = useState<RemoteFile[]>([]);
   const [event, setEvent] = useState<GetEventDto | null>(null);
-  const [auth] = useAuth();
+  const [auth, setAuth] = useAuth();
   const [status, setStatus] = useState<Status>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState("");
   const [inputPin, setInputPin] = useState("");
+  const [name, setName] = useState("");
 
   useEffect(() => {
     if (!id) {
@@ -547,6 +550,36 @@ export default function Video() {
       }
     })();
   }, [id]);
+
+  const handleCreateTempUser = async () => {
+    try {
+      const { data } = await api.post<
+        LoginUserSuccessDto | { message: string }
+      >("/auth/login_temporary", JSON.stringify({ name }), {
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
+
+      if ("message" in data) {
+        setError(
+          data.message === "Unauthorized"
+            ? "Email or password incorrect."
+            : data.message
+        );
+      } else {
+        setError("");
+        if (!data.user.avatar) {
+          data.user.avatar =
+            "https://react.semantic-ui.com/images/avatar/large/matt.jpg";
+        }
+        setAuth(data);
+      }
+    } catch (e) {
+      setError(e.message);
+      console.error(e);
+    }
+  };
 
   return (
     <UserStoreContext.Provider value={{ users, setUsers }}>
@@ -604,6 +637,13 @@ export default function Video() {
                     <br />
                     <Input
                       style={{ width: "100%" }}
+                      placeholder="Your name"
+                      value={name}
+                      onChange={(props, val) => setName(val.value)}
+                    />
+                    <br />
+                    <Input
+                      style={{ width: "100%" }}
                       placeholder="Meeting password"
                       value={inputPin}
                       onChange={(props, val) => setInputPin(val.value)}
@@ -611,10 +651,10 @@ export default function Video() {
                     <br />
                     <Button
                       onClick={() =>
-                        setEvent((e) => ({
+                        handleCreateTempUser().then(() => setEvent((e) => ({
                           ...e,
                           room_password: inputPin,
-                        }))
+                        })))
                       }
                       content="Join meeting"
                       primary

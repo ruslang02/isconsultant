@@ -28,6 +28,7 @@ import { UserGuard } from 'guards/user.guard';
 import { I18n, I18nContext, I18nService } from 'nestjs-i18n';
 import { UserAdapter } from 'users/user.adapter';
 import { ExtendedRequest } from 'utils/ExtendedRequest';
+import { generateId } from 'utils/IdGenerator';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -112,6 +113,43 @@ export class AuthController {
       this.logger.error(`/api/auth/register: `, '[ERROR]', e);
       throw new BadRequestException(
         'User with this email already exists.'
+      );
+    }
+  }
+
+  @Post('login_temporary')
+  @ApiCreatedResponse({
+    description: 'Регистрация успешна, аккаунт не подтвержден.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Входные данные были неверными.',
+  })
+  @ApiOperation({
+    description: 'Производит регистрацию пользователя.',
+  })
+  @ApiBody({
+    description: 'Данные для регистрации.',
+    type: CreateUserDto,
+  })
+  async loginTemporary(@Body() { name }: { name: string }) {
+    const email = `temp+${generateId()}@consultant.infostrategic.com`;
+    try {
+      await this.users.insertOne({
+        first_name: name,
+        middle_name: "",
+        last_name: "",
+        email,
+        password: Buffer.from(generateId().toString(), 'binary').toString('base64'),
+        type: UserType.CLIENT
+      });
+      // Send email!
+      const data: Pick<User, 'id' | 'email' | 'type'> = await this.users.findOneByEmail(email);
+
+      return { access_token: this.jwt.sign({ id: data.id, verified: false, type: data.type }), user: data };
+    } catch (e) {
+      console.error(`/api/auth/login_temporary: `, '[ERROR]', e.message);
+      throw new BadRequestException(
+        'Could not register temporary user.'
       );
     }
   }

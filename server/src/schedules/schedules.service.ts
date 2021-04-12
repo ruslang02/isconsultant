@@ -16,11 +16,10 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
+import { generateId } from "utils/IdGenerator";
 const Janus = require("janus-gateway-js");
 const genChar = () =>
   String.fromCharCode(Math.round(Math.random() * (122 - 48) + 48));
-
-const genRoomId = () => Math.round(Math.random() * 10_000_000);
 
 const { JANUS } = process.env;
 
@@ -157,7 +156,7 @@ export class SchedulesService implements OnModuleInit {
     data: CreateEventDto & { user_id: string }
   ): Promise<CalendarEvent> {
     const event = new CalendarEvent() as DeepPartial<CalendarEvent>;
-    event.id = (Math.floor((new Date().getTime() - new Date(2020, 0).getTime()) / 1000) << 4) + ((this.counter++ % 16));
+    event.id = generateId();
     event.title = data.title;
     event.description = data.description;
     event.start_timestamp = new Date(data.timespan_start);
