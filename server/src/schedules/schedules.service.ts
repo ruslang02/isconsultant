@@ -65,6 +65,13 @@ export class SchedulesService implements OnModuleInit {
     });
   }
 
+  async checkRoom(id: number) {
+    const response = await this.pluginHandle?.sendWithTransaction({
+      body: { request: "exists", room: id },
+    })
+    return response.data["exists"];
+  }
+ 
   async findManyByLawyer(uid: string) {
     return this.events
       .createQueryBuilder("event")

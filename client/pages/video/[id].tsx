@@ -490,6 +490,7 @@ export default function Video() {
   }, [id]);
 
   function onPinChange(event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) {
+    setError("");
     inputPin.current = data.value
   }
 
@@ -532,7 +533,15 @@ export default function Video() {
                           <Input onChange={onPinChange}/>
                           <Button
                             onClick={() =>
-                              setEvent(e => ({...e, room_password: inputPin.current}))
+                                api.get(`/events/${id}/${inputPin.current}`).then(response => {
+                                  if(response.status == 200) {
+                                    router.reload()
+                                  } else {
+                                    setError("Incorrect pin.")
+                                  }
+                                }).catch(error => {
+                                  console.log(error);
+                                })
                             }
                             content="Enter"
                             primary

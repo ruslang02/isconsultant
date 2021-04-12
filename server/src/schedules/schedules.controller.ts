@@ -47,7 +47,6 @@ import { UsersService } from "users/users.service";
 import { EventAdapter } from "./event.adapter";
 import { I18n, I18nContext } from "nestjs-i18n";
 import { PendingEventAdapter } from "./pending-event.adapter";
-import { ChatGateway } from "chat/chat.gateway";
 import { ChatService } from "chat/chat.service";
 import { RoomAccess, Status } from "@common/models/calendar-event.entity";
 
@@ -221,8 +220,8 @@ export class SchedulesController {
         (user.type === UserType.LAWYER && event.owner.id === user.id);
 
       const showPin =
-        [UserType.MODERATOR, UserType.ADMIN].includes(user.type) ||
-        (event.roomAccess === RoomAccess.ONLY_PARTICIPANTS && participantsId.includes(user.id));
+        showSecret ||
+        (participantsId.includes(user.id));
 
       return this.adapter.transform(showSecret, showPin, i18n)(event);
     } catch (e) {
@@ -421,17 +420,16 @@ ${_.content}
     const event = await this.schedules.findEvent(id);
     if (
       user.type == UserType.CLIENT ||
-      !(user.type == UserType.LAWYER && user.id == event.owner.id)
+      (user.type == UserType.LAWYER && user.id != event.owner.id)
     ) {
       throw new ForbiddenException();
     }
 
-    await this.schedules.createRoom(
+    return  this.schedules.createRoom(
       event.roomId,
       event.roomPassword,
       event.roomSecret
     );
-    return this.schedules.updateStatus(id, Status.STARTED);
   }
 
   @UseGuards(JwtAuthGuard, UserGuard)
@@ -447,12 +445,39 @@ ${_.content}
     const event = await this.schedules.findEvent(id);
     if (
       user.type == UserType.CLIENT ||
-      (user.type == UserType.LAWYER && user == event.owner)
+      (user.type == UserType.LAWYER && user != event.owner)
     ) {
       throw new ForbiddenException();
     }
 
-    await this.schedules.destroyRoom(event.roomId, event.roomSecret);
-    return this.schedules.updateStatus(id, Status.NEW);
+    return this.schedules.destroyRoom(event.roomId, event.roomSecret); 
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("/:eid/:password")
+  @ApiBearerAuth()
+  @ApiOperation({
+    description: "Получение данных о событии по паролю.",
+  })
+  async getEventByPassword(
+    @Request() { user }: ExtendedRequest,
+    @Param("eid") id: string,
+    @Param("password") pin: string,
+    @I18n() i18n: I18nContext
+  ) {
+    const event = await this.schedules.findEvent(id);
+    if (
+      event.roomAccess === RoomAccess.ONLY_PARTICIPANTS ||
+      event.roomPassword != pin
+    ) {
+      throw new ForbiddenException();
+    }
+
+    const ids = event.participants.map(user => user.id.toString());
+    if(!(ids.includes(user.id.toString()) || event.owner.id == user.id)) {
+      await this.schedules.updateEvent(id, { participants: [...ids, user.id.toString()] });
+    }
+
+    return this.adapter.transform(false, true, i18n)(event);
   }
 }
