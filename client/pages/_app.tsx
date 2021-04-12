@@ -40,11 +40,14 @@ function MyApp({
         if (typeof window !== "undefined")
           router.replace("/login?redirect=" + router.pathname).then(() => {
             setAllowed(true);
+            document.querySelector("#__next").classList.add("loaded");
           });
       } else {
+        document.querySelector("#__next").classList.add("loaded");
       }
     } else {
       setAllowed(true);
+      document.querySelector("#__next").classList.add("loaded");
     }
   }, [auth]);
 
