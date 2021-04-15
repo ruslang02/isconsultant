@@ -35,6 +35,16 @@ function MyApp({
   );
 
   useEffect(() => {
+    if (
+      !router.pathname.includes("video") &&
+      auth &&
+      auth.user &&
+      auth.user.verified === false
+    ) {
+      setAuth({});
+      location.reload();
+      return;
+    }
     if (!isPublic(router.pathname)) {
       if (!auth?.access_token) {
         if (typeof window !== "undefined")

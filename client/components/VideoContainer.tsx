@@ -385,7 +385,6 @@ const VideoContainer: React.FC<{
       onClick={onContainerClick}
     >
       <VideoMenu menuState={menuState} functions={{ kick: kick }} />
-      <div style={{ flexGrow: 1 }}></div>
       <div className={styles.Video_container_items}>
         <VideoItem
           user={{
@@ -412,7 +411,6 @@ const VideoContainer: React.FC<{
           />
         ))}
       </div>
-      <div style={{ flexGrow: 1 }}></div>
       <Actions
         audioAvailable={audioAvailable}
         videoAvailable={videoAvailable}

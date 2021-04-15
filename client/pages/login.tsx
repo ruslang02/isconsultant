@@ -90,9 +90,7 @@ const Login: React.FC = () => {
               value={password}
             />
           </Form.Field>
-          <Form.Field>
-            <Checkbox label="Remember me" />
-          </Form.Field>
+          <br />
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Button type="button" onClick={() => router.push("/register")}>
               Register

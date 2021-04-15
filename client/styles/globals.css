@@ -24,3 +24,14 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.date-picker .field:nth-child(2),
+.date-picker .field:nth-child(2) .field {
+  margin: 0 !important;
+  flex-grow: 1;
+  margin-right: .25rem !important;
+}
+
+.date-picker .field:nth-child(2) .field .input {
+  width: 100% !important;
+}

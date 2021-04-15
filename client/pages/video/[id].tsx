@@ -67,7 +67,7 @@ const TopBar: React.FC = function () {
       } invites you to a meeting on ISConsultant.
 Topic: ${event.title}
 Time: ${new Date(event.timespan_start).toLocaleDateString("en-GB")}, ${new Date(
-  event.timespan_start
+        event.timespan_start
       ).toLocaleTimeString("en-GB", {
         hour: "2-digit",
         minute: "2-digit",
@@ -93,13 +93,24 @@ ${
   return (
     <header className={styles.TopYar}>
       <div className={styles.TopYar_info}>
-        <Button size="small" icon title="Return to profile"
-        onClick={() => location.assign("/profile/@me")}><Icon name="arrow left" /></Button>
-        <Button size="small" primary
-        onClick={() => {
-          navigator.clipboard.writeText(inviteText);
-          setMessage("Meeting invitation copied.");
-        }} title="Click to copy the invitation text">
+        <Button
+          size="small"
+          icon
+          title="Return to profile"
+          onClick={() => location.assign("/profile/@me")}
+        >
+          <Icon name="arrow left" />
+        </Button>
+        <Button
+          size="small"
+          primary
+          onClick={() => {
+            navigator.clipboard.writeText(inviteText);
+            setMessage("Meeting invitation copied.");
+          }}
+          style={{ marginLeft: ".25rem" }}
+          title="Click to copy the invitation text"
+        >
           <Icon name="linkify" />
           Copy invitation
         </Button>
@@ -122,14 +133,17 @@ const File: React.FC<{ href: string; icon: string; name: string }> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div
+    <a
+      href={href}
+      target="_blank"
       style={{
-        background: "lightgray",
-        border: "1px solid rgba(0, 0, 0, 0.3)",
+        background: "white",
+        borderRadius: "5px",
         marginBottom: ".5rem",
         display: "flex",
         alignItems: "center",
-        padding: ".5rem 1rem",
+        padding: "1rem",
+        boxShadow: "0 3px 10px -2px rgba(0, 0, 0, 0.15)",
       }}
     >
       <Icon name={(icon as unknown) as undefined} size="big" />
@@ -144,11 +158,8 @@ const File: React.FC<{ href: string; icon: string; name: string }> = ({
         <div>
           <b>{name}</b>
         </div>
-        <a href={href} target="_blank">
-          {t("pages.video.download_file")}
-        </a>
       </div>
-    </div>
+    </a>
   );
 };
 
@@ -194,9 +205,7 @@ const Files: React.FC = () => {
           }}
         />
         <Button primary icon>
-          <Icon name="upload" />
-          {" "}
-          <span>Upload</span>
+          <Icon name="upload" /> <span>Upload</span>
         </Button>
       </span>
       <div style={{ flexGrow: 1, marginTop: ".5rem" }}>
@@ -352,6 +361,10 @@ const Chat: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         height: "300px",
+        margin: ".5rem",
+        background: "#FAFAFA",
+        borderRadius: "5px",
+        boxShadow: "0px 3px 10px -2px rgba(0, 0, 0, 0.15)",
       }}
     >
       <b style={{ fontSize: "16px", margin: "9px", display: "inline-block" }}>
@@ -395,6 +408,7 @@ const Chat: React.FC = () => {
         style={{ display: "flex" }}
         onSubmit={(e) => {
           e.preventDefault();
+          if (input.trim() === "") return;
           ws.current.send(
             JSON.stringify({
               event: "post_message",
@@ -423,8 +437,6 @@ const Chat: React.FC = () => {
 const Sidebar: React.FC = () => (
   <section
     style={{
-      boxShadow: "0 0 10px rgba(0, 0, 0, 0.3)",
-      background: "white",
       width: "30%",
       minWidth: "350px",
       maxWidth: "450px",
@@ -638,7 +650,12 @@ export default function Video() {
                     <Input
                       style={{ width: "100%" }}
                       placeholder="Your name"
-                      value={name}
+                      value={
+                        auth.user
+                          ? `Logged in as: ${auth.user.first_name} ${auth.user.last_name}`
+                          : name
+                      }
+                      disabled={!!auth.user}
                       onChange={(props, val) => setName(val.value)}
                     />
                     <br />
@@ -650,16 +667,17 @@ export default function Video() {
                     />
                     <br />
                     <Button
-                      onClick={() =>
-                        handleCreateTempUser().then(() => setEvent((e) => ({
+                      onClick={async () => {
+                        if (!auth?.user) await handleCreateTempUser();
+                        setEvent((e) => ({
                           ...e,
                           room_password: inputPin,
-                        })))
-                      }
+                        }));
+                      }}
                       content="Join meeting"
                       primary
                     />
-                    { location.search.includes("wrong") && (
+                    {location.search.includes("wrong") && (
                       <Message error>Wrong password entered.</Message>
                     )}
                   </Segment>
@@ -680,7 +698,7 @@ export default function Video() {
               <section
                 style={{
                   display: "flex",
-                  background: "white",
+                  background: "linear-gradient(white, lightblue)",
                   borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
                   flexGrow: 1,
                 }}

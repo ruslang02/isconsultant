@@ -268,7 +268,11 @@ export class SchedulesController {
       res.setHeader("Content-type", "application/octet-stream");
       res.setHeader("Content-disposition", "attachment");
       res.setHeader("filename", filename);
-      createReadStream(file.path).pipe(res);
+      const stream = createReadStream(file.path)
+      stream.on('error', () => {
+        res.status(404).send("{\"message\": \"File was not found.\"}");
+      });
+      stream.pipe(res)
     } catch (e) {
       throw new NotFoundException();
     }

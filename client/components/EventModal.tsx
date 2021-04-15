@@ -5,6 +5,7 @@ import {
   Comment,
   Dropdown,
   Form,
+  Icon,
   Input,
   List,
   Modal,
@@ -140,7 +141,11 @@ ${
             primary
             icon="arrow right"
             labelPosition="right"
-            content={event.owner.id === auth?.user?.id ? "Start meeting" : "Join meeting"}
+            content={
+              event.owner.id === auth?.user?.id
+                ? "Start meeting"
+                : "Join meeting"
+            }
             onClick={() => {
               window.open(`/video/${event.id}`);
             }}
@@ -154,7 +159,11 @@ ${
             <Form.Field>
               <Form.Input
                 readOnly={!editable}
-                label={<label>Title<span style={{color:"red"}}>*</span></label>}
+                label={
+                  <label>
+                    Title<span style={{ color: "red" }}>*</span>
+                  </label>
+                }
                 onChange={(_e, data) => setTemp({ ...temp, title: data.value })}
                 value={temp?.title}
               />
@@ -169,8 +178,14 @@ ${
                 value={temp?.description}
               />
             </Form.Field>
-            <Form.Field inline>
-            <label>Starts at<span style={{color:"red"}}>*</span></label>
+            <Form.Field
+              inline
+              style={{ display: "flex", alignItems: "center" }}
+              className="date-picker"
+            >
+              <label>
+                Starts at<span style={{ color: "red" }}>*</span>
+              </label>
               <SemanticDatepicker
                 readOnly={!editable}
                 onChange={(_e, { value }) =>
@@ -195,6 +210,7 @@ ${
                   setTemp({ ...temp, timespan_start: date.toISOString() });
                 }}
                 type="time"
+                style={{ height: "38px" }}
                 value={
                   temp !== undefined
                     ? new Date(temp.timespan_start).toLocaleTimeString(
@@ -209,7 +225,7 @@ ${
                 }
               />
             </Form.Field>
-            
+
             <Form.Field inline>
               <label>Participants</label>
               <Dropdown
@@ -264,28 +280,30 @@ ${
               </Form.Field>
             )}
 
-            {editable && event && (<>
-              <Form.Field>
-                <Form.Input
-                  label="Meeting Secret (for meeting moderators)"
-                  placeholder="(will be generated later)"
-                  readOnly
-                  value={temp?.room_secret}
-                />
-              </Form.Field>
-            <Form.Field>
-              <Form.Input
-                label={
-                  editable
-                    ? "Meeting Password (for unregistered users)"
-                    : "Meeting Password"
-                }
-                placeholder="(will be generated later)"
-                readOnly
-                value={temp?.room_password}
-              />
-            </Form.Field>
-            </>)}
+            {editable && event && (
+              <>
+                <Form.Field>
+                  <Form.Input
+                    label="Meeting Secret (for meeting moderators)"
+                    placeholder="(will be generated later)"
+                    readOnly
+                    value={temp?.room_secret}
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <Form.Input
+                    label={
+                      editable
+                        ? "Meeting Password (for unregistered users)"
+                        : "Meeting Password"
+                    }
+                    placeholder="(will be generated later)"
+                    readOnly
+                    value={temp?.room_password}
+                  />
+                </Form.Field>
+              </>
+            )}
             {editable && (
               <Form.Field>
                 <label>Meeting Access Level</label>
@@ -316,33 +334,45 @@ ${
         >
           <div>
             <h4>Shared files</h4>
-            <List
-              divided
-              relaxed
-              style={{ "max-height": "100px", overflow: "auto" }}
-            >
-              {files && files.length ? (
-                files.map((f) => (
-                  <List.Item>
-                    <List.Icon
-                      name="file"
-                      size="large"
-                      verticalAlign="middle"
-                    />
-                    <List.Content>
-                      <List.Header as="a">{f.name}</List.Header>
-                      <List.Description as="a">
-                        Uploaded by {f.owner.first_name} {f.owner.last_name}
-                      </List.Description>
-                    </List.Content>
-                  </List.Item>
-                ))
-              ) : (
-                <div style={{ textAlign: "center", color: "grey" }}>
-                  Nothing uploaded yet.
-                </div>
-              )}
-            </List>
+            <Segment>
+              <List
+                divided
+                relaxed
+                style={{ height: "100px", overflow: "auto" }}
+              >
+                {files && files.length ? (
+                  files.map((f) => (
+                    <List.Item>
+                      <List.Icon
+                        name="file"
+                        size="large"
+                        verticalAlign="middle"
+                        style={{ paddingLeft: ".5rem" }}
+                      />
+                      <List.Content>
+                        <List.Header
+                          as="a"
+                          onClick={() =>
+                            window.open(
+                              `/api/events/${event?.id}/files/${f.id}/${f.name}`
+                            )
+                          }
+                        >
+                          {f.name}
+                        </List.Header>
+                        <List.Description as="a">
+                          Uploaded by {f.owner.first_name} {f.owner.last_name}
+                        </List.Description>
+                      </List.Content>
+                    </List.Item>
+                  ))
+                ) : (
+                  <div style={{ textAlign: "center", color: "grey" }}>
+                    Nothing uploaded yet.
+                  </div>
+                )}
+              </List>
+            </Segment>
           </div>
           <div
             style={{
@@ -353,7 +383,21 @@ ${
               flexDirection: "column",
             }}
           >
-            <h4>Chat log</h4>
+            <h4 style={{ display: "flex", alignItems: "center" }}>
+              Chat log
+              <Button
+                size="tiny"
+                content="Download Log"
+                labelPosition="left"
+                icon={<Icon name="download" />}
+                style={{ marginLeft: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `/api/events/${event.id}/log/text/meeting_log_${event.id}.txt`
+                  );
+                }}
+              />
+            </h4>
             <Segment
               style={{ marginTop: 0, flexGrow: 1, height: 0, overflow: "auto" }}
             >
@@ -391,35 +435,27 @@ ${
                 )}
               </Comment.Group>
             </Segment>
-            <Button
-              fluid
-              primary
-              content="Download Chat Log"
-              onClick={() => {
-                window.open(
-                  `/api/events/${event.id}/log/text/meeting_log_${event.id}.txt`
-                );
-              }}
-            />
           </div>
           <Form style={{ marginTop: "1rem" }}>
-            <h4>Invitation</h4>
+            <h4 style={{ display: "flex", alignItems: "center" }}>
+              Invitation
+              <Button
+                primary
+                size="tiny"
+                icon="linkify"
+                labelPosition="left"
+                content="Copy invitation"
+                style={{ marginLeft: "auto" }}
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteText);
+                  setMessage("Invitation copied!");
+                }}
+              />
+            </h4>
             <Form.TextArea
               readOnly
-              style={{ resize: "none", height: "220px" }}
+              style={{ resize: "none", height: "180px" }}
               value={inviteText}
-            />
-
-            <Button
-              primary
-              icon="linkify"
-              labelPosition="left"
-              content="Copy invitation"
-              onClick={() => {
-                navigator.clipboard.writeText(inviteText);
-                setMessage("Invitation copied!");
-              }}
-              style={{ float: "left" }}
             />
           </Form>
         </section>
