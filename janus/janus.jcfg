@@ -39,7 +39,7 @@ media: {
 
 nat: {
 	ignore_mdns = true
-	nat_1_1_mapping = "consultant.infostrategics.com"
+	nat_1_1_mapping = "95.111.248.100"
 	ice_ignore_list = "vmnet"
 }
 

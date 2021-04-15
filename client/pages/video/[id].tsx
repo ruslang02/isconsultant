@@ -563,6 +563,11 @@ export default function Video() {
     })();
   }, [id]);
 
+  function onPinChange(event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) {
+    setError("");
+    setInputPin(data.value)
+  }
+  
   const handleCreateTempUser = async () => {
     try {
       const { data } = await api.post<
