@@ -10,6 +10,8 @@ import { MessageContext } from "utils/MessageContext";
 import { UserCacheContext } from "utils/UserCacheContext";
 import { GetUserDto } from "@common/dto/get-user.dto";
 import { api } from "utils/api";
+import styles from "styles/App.module.css";
+import { c } from "utils/classNames";
 
 const isPublic = (path: string) =>
   path === "/" ||
@@ -79,26 +81,18 @@ function MyApp({
     })();
   }, []);
 
+  useEffect(() => {
+    if (message !== "") {
+      setTimeout(() => setMessage(""), 3000);
+    }
+  }, [message]);
+
   return (
     <MessageContext.Provider value={[message, setMessage]}>
       <UserCacheContext.Provider value={[users, setUsers]}>
         {allowed && <Component {...pageProps} />}
       </UserCacheContext.Provider>
-      <div
-        style={{
-          position: "fixed",
-          bottom: "5%",
-          left: "5%",
-          zIndex: 99000,
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.25)",
-          cursor: "pointer",
-        }}
-        onClick={() => setMessage("")}
-      >
-        <Message hidden={!message}>
-          <span dangerouslySetInnerHTML={{ __html: message }}></span>
-        </Message>
-      </div>
+      <Message onClick={() => setMessage("")} className={styles.message}>{message}</Message>
     </MessageContext.Provider>
   );
 }

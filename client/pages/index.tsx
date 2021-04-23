@@ -1,4 +1,3 @@
-import { PromoHeader } from "components/PromoHeader";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   Button,
@@ -144,13 +143,16 @@ function Lawyers() {
             header={l.first_name + " " + l.last_name}
             meta={`Rating: ${l.rating}`}
             style={{ margin: 0 }}
+            as="a"
+            onClick={() => router.push(`/profile/${l.id}`)}
             description={
               <div style={{ marginTop: "10px" }}>
                 <Button
                   primary
                   fluid
                   size="small"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setLawyer(l.id);
                     setOpen(true);
                   }}
@@ -187,7 +189,6 @@ export default function Home() {
   return (
     <section>
       <Header />
-      <PromoHeader />
       <Promo />
       <PromoAdvantages />
       <Lawyers />

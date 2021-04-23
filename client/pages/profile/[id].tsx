@@ -38,6 +38,7 @@ const Empty = () => {
     try {
       await api.put(`/reports`, { author: auth?.user?.id, receiver: id, description });
       setMessage("Report was sent to the moderator.");
+      setOpen(false);
     } catch (e) {
       console.error(e);
       setMessage("There was an error sending the report.");
@@ -83,11 +84,11 @@ const Empty = () => {
             )}
           </p>
         </div>
-        <div style={{ textAlign: "right", margin: "1rem" }}>
+        {user.id !== auth?.user?.id && <div style={{ textAlign: "right", margin: "1rem" }}>
           <a href="#" onClick={() => setOpen(true)} style={{ color: "red" }}>
             <Icon name="envelope" /> Send feedback
           </a>
-        </div>
+        </div>}
       </Segment>
       <Modal open={open} onClose={() => setOpen(false)}>
         <Modal.Header>Report a lawyer</Modal.Header>
@@ -128,20 +129,20 @@ const Empty = () => {
                 value={description}
               />
             </Form.Field>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: "1.5rem",
-            }}
-          >
-            <Button onClick={() => setOpen(false)} type="button">
-              Cancel
-            </Button>
-            <Button primary type="submit" style={{ marginLeft: ".5rem" }}>
-              Send
-            </Button>
-          </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginTop: "1.5rem",
+              }}
+            >
+              <Button onClick={() => setOpen(false)} type="button">
+                Cancel
+              </Button>
+              <Button primary type="submit" style={{ marginLeft: ".5rem" }}>
+                Send
+              </Button>
+            </div>
           </Form>
         </Modal.Content>
       </Modal>

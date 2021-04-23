@@ -49,11 +49,11 @@ export enum RoomAccess {
 const UserStoreContext = createContext<{
   users: GetUserInfoDto[];
   setUsers: (users: GetUserInfoDto[]) => void;
-}>({ users: [], setUsers: () => {} });
+}>({ users: [], setUsers: () => { } });
 const FilesContext = createContext<{
   files: RemoteFile[];
   setFiles: (reducer: (prevFiles: RemoteFile[]) => RemoteFile[]) => void;
-}>({ files: [], setFiles: () => () => {} });
+}>({ files: [], setFiles: () => () => { } });
 const EventContext = createContext<GetEventDto | null>(null);
 
 const TopBar: React.FC = function () {
@@ -62,26 +62,24 @@ const TopBar: React.FC = function () {
   const event = useContext(EventContext);
   const [, setMessage] = useContext(MessageContext);
   const inviteText = event
-    ? `${event.owner.first_name} ${
-        event.owner.last_name
-      } invites you to a meeting on ISConsultant.
+    ? `${event.owner.first_name} ${event.owner.last_name
+    } invites you to a meeting on ISConsultant.
 Topic: ${event.title}
 Time: ${new Date(event.timespan_start).toLocaleDateString("en-GB")}, ${new Date(
-        event.timespan_start
-      ).toLocaleTimeString("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })}
+      event.timespan_start
+    ).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })}
 
 Join the meeting room: https://consultant.infostrategic.com/video/${event.id}
 
 Meeting ID: ${event.id}
-${
-  event.room_access == 1
-    ? "You will also be required to log in to your account."
-    : `Password: ${event.room_password}`
-}`
+${event.room_access == 1
+      ? "You will also be required to log in to your account."
+      : `Password: ${event.room_password}`
+    }`
     : "";
 
   useEffect(() => {
@@ -246,8 +244,7 @@ const Chat: React.FC = () => {
   useEffect(() => {
     console.log("Loading chat...");
     const client = new WebSocket(
-      `${location.hostname == "localhost" ? "ws" : "wss"}://${
-        location.hostname
+      `${location.hostname == "localhost" ? "ws" : "wss"}://${location.hostname
       }${location.port ? ":" + location.port : ""}/chat/${auth?.access_token}`
     );
 
@@ -272,6 +269,13 @@ const Chat: React.FC = () => {
           data: { id: +location.pathname.split("/")[2] },
         } as WSMessage<JoinChatRoomDto>)
       );
+      setInterval(() => {
+        client.send(
+          JSON.stringify({
+            event: "ping"
+          })
+        );
+      }, 15000)
 
       setClient(true);
     });
@@ -567,7 +571,7 @@ export default function Video() {
     setError("");
     setInputPin(data.value)
   }
-  
+
   const handleCreateTempUser = async () => {
     try {
       const { data } = await api.post<
