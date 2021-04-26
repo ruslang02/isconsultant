@@ -16,7 +16,7 @@ const VideoContainer: React.FC<{
   roomPin: any;
   roomSecret: any;
 }> = function ({ roomNumber, roomPin, roomSecret }) {
-  const [userState, setState] = useState<number[]>([]);
+  const [userState, setState] = useState<{id, name}[]>([]);
   const userStream = useRef<MediaStream>(null);
   const [video, setVideo] = useState<boolean>(false);
   const [audio, setAudio] = useState<boolean>(false);
@@ -60,7 +60,7 @@ const VideoContainer: React.FC<{
         if (participants) {
           participants.forEach((element: any) => {
             setState((e) => {
-              e = [...e, element["id"]];
+              e = [...e, {id: element["id"], name: element["display"]}];
               return e;
             });
           });
@@ -70,7 +70,7 @@ const VideoContainer: React.FC<{
         if (left) {
           console.log(userState);
           setState((e) => {
-            var i = e.indexOf(left);
+            var i = e.findIndex(v => v.id == left)
             if (i == -1) return e;
             const n = [...e];
             n.splice(i, 1);
@@ -83,7 +83,7 @@ const VideoContainer: React.FC<{
         if (left) {
           console.log(userState);
           setState((e) => {
-            var i = e.indexOf(left);
+            var i = e.findIndex(v => v.id == left)
             if (i == -1) return e;
             const n = [...e];
             n.splice(i, 1);
@@ -200,9 +200,9 @@ const VideoContainer: React.FC<{
       publish(isPublishing.current);
       isPublishing.current = true;
       var participants = response.getPluginData()["publishers"];
-      var newUsers: number[] = [];
+      var newUsers: {id, name}[] = [];
       participants.forEach((element: any) => {
-        newUsers.push(element["id"]);
+        newUsers.push({id: element["id"], name: element["display"]});
       });
 
       setState((e) => {
@@ -226,6 +226,7 @@ const VideoContainer: React.FC<{
                   room: parseInt(roomNumber),
                   ptype: "publisher",
                   pin: roomPin.toString(),
+                  display: auth.user.first_name + ' ' + auth.user.last_name
                 },
               })
               .then(onVideoroomJoin)
@@ -237,6 +238,7 @@ const VideoContainer: React.FC<{
                   request: "join",
                   room: parseInt(roomNumber),
                   ptype: "publisher",
+                  display: auth.user.first_name + ' ' + auth.user.last_name
                 },
               })
               .then(onVideoroomJoin);
@@ -327,6 +329,7 @@ const VideoContainer: React.FC<{
                   room: parseInt(roomNumber),
                   ptype: "publisher",
                   pin: roomPin.toString(),
+                  display: auth.user.first_name + ' ' + auth.user.last_name
                 },
               })
               .then(onScreenJoin);
@@ -337,6 +340,7 @@ const VideoContainer: React.FC<{
                   request: "join",
                   room: parseInt(roomNumber),
                   ptype: "publisher",
+                  display: auth.user.first_name + ' ' + auth.user.last_name
                 },
               })
               .then(onScreenJoin);
@@ -401,8 +405,9 @@ const VideoContainer: React.FC<{
 
         {userState.map((e) => (
           <VideoItemContainer
-            key={e}
-            userId={e}
+            key={e.id}
+            userId={e.id}
+            fullName={e.name}
             session={roomSession.current}
             changeMenu={changeMenuState}
             publisherHandle={publisherHandle}

@@ -84,7 +84,7 @@ const Empty = () => {
             )}
           </p>
         </div>
-        {user.id !== auth?.user?.id && <div style={{ textAlign: "right", margin: "1rem" }}>
+        {user?.id !== auth?.user?.id && <div style={{ textAlign: "right", margin: "1rem" }}>
           <a href="#" onClick={() => setOpen(true)} style={{ color: "red" }}>
             <Icon name="envelope" /> Send feedback
           </a>
