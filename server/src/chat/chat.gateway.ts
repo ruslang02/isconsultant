@@ -16,6 +16,11 @@ type ChatSocket = Socket & { room?: string, user: User };
 
 type Answer<T> = { event: string, data: T };
 
+class PostUserState {
+  audio: boolean
+  video: boolean
+}
+
 @WebSocketGateway(+process.env.CHAT_PORT)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   @WebSocketServer()
@@ -89,6 +94,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         if (client.room === socket.room) {
           client.send(JSON.stringify(m));
         }
+      }
+    }
+  }
+
+  @SubscribeMessage('user_state')
+  handleMuted(@ConnectedSocket() socket: ChatSocket, @MessageBody() payload: PostUserState) {
+    for (const client of this.server.clients as Set<ChatSocket>) {
+      if (client.room === socket.room && client.user.id != socket.user.id) {
+        client.send(JSON.stringify({...payload, id: socket.user.id }));
       }
     }
   }
