@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react"
 import { Button, Icon } from "semantic-ui-react"
 import video from "pages/video";
 import { useRouter } from "next/router";
+import { GetEventDto } from "@common/dto/get-event.dto";
 
 export const Actions: React.FC<{
     audioAvailable: boolean
@@ -12,7 +13,8 @@ export const Actions: React.FC<{
     changeAudio: (_: boolean) => void
     changeVideo: (_: boolean) => void
     changeScreen: (_: boolean) => void
-    screen: boolean
+    screen: boolean,
+    event?: GetEventDto
 }> = x => {
     const router = useRouter();
 
@@ -59,7 +61,13 @@ export const Actions: React.FC<{
                 size="large"></Icon>
         </Button>
         <Button
-            onClick={() => location.assign("/profile/@me")}
+            onClick={() => location.assign("/profile/@me?from="
+                + btoa(
+                    JSON.stringify({
+                        id: x.event?.owner.id,
+                        name: x.event?.owner.first_name + " " + x.event?.owner.last_name
+                    })
+                ))}
             icon
             color="red"
             circular

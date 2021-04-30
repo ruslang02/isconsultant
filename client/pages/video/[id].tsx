@@ -95,7 +95,17 @@ ${event.room_access == 1
           size="small"
           icon
           title="Return to profile"
-          onClick={() => location.assign("/profile/@me")}
+          onClick={() =>
+            location.assign(
+              "/profile/@me?from="
+              + btoa(
+                JSON.stringify({
+                  id: event.owner.id,
+                  name: event.owner.first_name + " " + event.owner.last_name
+                })
+              )
+            )
+          }
         >
           <Icon name="arrow left" />
         </Button>
@@ -716,6 +726,7 @@ export default function Video() {
                   roomNumber={event.room_id}
                   roomPin={event.room_password}
                   roomSecret={event.room_secret}
+                  event={event}
                 />
 
                 <Sidebar />

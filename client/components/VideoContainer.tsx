@@ -10,12 +10,14 @@ import VideoMenu from "./VideoMenu";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "utils/useAuth";
 import router from "next/router";
+import { GetEventDto } from "@common/dto/get-event.dto";
 
 const VideoContainer: React.FC<{
   roomNumber: any;
   roomPin: any;
   roomSecret: any;
-}> = function ({ roomNumber, roomPin, roomSecret }) {
+  event?: GetEventDto;
+}> = function ({ roomNumber, roomPin, roomSecret, event }) {
   const [userState, setState] = useState<number[]>([]);
   const userStream = useRef<MediaStream>(null);
   const [video, setVideo] = useState<boolean>(false);
@@ -420,6 +422,7 @@ const VideoContainer: React.FC<{
         changeVideo={clickVideo}
         changeScreen={clickScreen}
         screen={screen}
+        event={event}
       />
     </section>
   );

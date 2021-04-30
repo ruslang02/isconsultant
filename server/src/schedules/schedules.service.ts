@@ -8,6 +8,7 @@ import {
 } from "@common/models/calendar-event.entity";
 import { PendingEvent } from "@common/models/pending-event.entity";
 import { User } from "@common/models/user.entity";
+import { MailerService } from "@nestjs-modules/mailer";
 import {
   Inject,
   Injectable,
@@ -28,6 +29,7 @@ export class SchedulesService implements OnModuleInit {
   constructor(
     @Inject("Logger")
     private logger: LoggerService,
+    private readonly mailerService: MailerService,
     @InjectRepository(CalendarEvent)
     private events: Repository<CalendarEvent>,
     @InjectRepository(PendingEvent)
@@ -70,7 +72,7 @@ export class SchedulesService implements OnModuleInit {
     })
     return response.data["exists"];
   }
- 
+
   async findManyByLawyer(uid: string) {
     return this.events
       .createQueryBuilder("event")
@@ -143,6 +145,21 @@ export class SchedulesService implements OnModuleInit {
     }
     event.participants = pending.participants;
     event.roomStatus = Status.NEW;
+
+    this
+      .mailerService
+      .sendMail({
+        to: pending.from.email, // list of receivers
+        from: 'noreply@nestjs.com', // sender address
+        subject: 'ISConsultant meeting accepted', // Subject line
+        text: "Hello,\n\nYour meeting request has been accepted by our lawyers, please check your meetings page: https://consultant.infostrategic.com/meetings", // plaintext body
+      })
+      .then(() => {
+        this.logger.log(`Event transfer:`, `Sent an email for user ${pending.from.email}.`);
+      })
+      .catch((e) => {
+        this.logger.error(`Event transfer:`, `Failed to send email for user ${pending.from.email}.`, e);
+      });
 
     //await this.createRoom(event.roomId, event.roomPassword, event.roomSecret)
     await this.events.save(event);

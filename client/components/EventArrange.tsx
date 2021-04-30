@@ -5,6 +5,7 @@ import { GetUserDto } from "@common/dto/get-user.dto";
 import router from "next/router";
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import SemanticDatepicker from "react-semantic-ui-datepickers";
 import {
   Modal,
   Form,
@@ -37,6 +38,7 @@ export function EventArrange({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [time, setTime] = useState(new Date().toISOString());
   const [description, setDescription] = useState(descr);
   const [auth] = useAuth();
   const [users, setUsers] = useContext(UserCacheContext);
@@ -108,10 +110,6 @@ export function EventArrange({
     access_token: string;
     user: GetUserDto;
   }) => {
-    // TODO: choose time?
-    const timespan_end = new Date();
-    timespan_end.setDate(timespan_end.getDate() + 1);
-    timespan_end.setHours(0, 0, 0);
     try {
       const { status, data } = await api.post(
         "/events/request",
@@ -119,8 +117,7 @@ export function EventArrange({
           description,
           lawyer_id: auth.access_token ? lawyer : undefined,
           additional_ids: [auth.user?.id].filter((x) => x),
-          timespan_start: new Date().toISOString(),
-          timespan_end: timespan_end.toISOString(),
+          timespan_start: time,
         } as ArrangeEventDto,
         {
           headers: {
@@ -213,38 +210,76 @@ export function EventArrange({
                   </b>
                 </div>
               </Form.Field>
-              <Form.Field>
-                <label>To:</label>
-                <Dropdown
-                  placeholder="First available lawyer"
-                  fluid
-                  search
-                  selection
-                  onChange={(_e, d) => {
-                    setLawyer(d.value.toString());
-                  }}
-                  onSearchChange={(_e, d) => {
-                    api
-                      .get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`)
-                      .then(({ data }) => {
-                        setUsers([
-                          ...users.filter(
-                            (u) => !data.some((v) => v.id === u.id)
-                          ),
-                          ...data,
-                        ]);
-                      });
-                  }}
-                  options={users.map((user) => ({
-                    key: user.id,
-                    text: `${user.first_name} ${user.last_name}`,
-                    value: user.id,
-                  }))}
-                  value={lawyer ?? lawyerId}
-                />
-              </Form.Field>
             </>
           )}
+          <Form.Field>
+            <label>To:</label>
+            <Dropdown
+              placeholder="First available lawyer"
+              fluid
+              search
+              selection
+              onChange={(_e, d) => {
+                setLawyer(d.value.toString());
+              }}
+              onSearchChange={(_e, d) => {
+                api
+                  .get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`)
+                  .then(({ data }) => {
+                    setUsers([
+                      ...users.filter(
+                        (u) => !data.some((v) => v.id === u.id)
+                      ),
+                      ...data,
+                    ]);
+                  });
+              }}
+              options={users.map((user) => ({
+                key: user.id,
+                text: `${user.first_name} ${user.last_name}`,
+                value: user.id,
+              }))}
+              value={lawyer ?? lawyerId}
+            />
+          </Form.Field>
+          <Form.Field
+            inline
+            style={{ display: "flex", alignItems: "center" }}
+            className="date-picker"
+          >
+            <label>
+              Approximate date<span style={{ color: "red" }}>*</span>
+            </label>
+            <SemanticDatepicker
+              onChange={(_e, { value }) =>
+                setTime(((value as Date) ?? new Date()).toISOString())
+              }
+              value={
+                new Date(time)
+              }
+            />{" "}
+            &nbsp;
+            <input
+              onChange={(e) => {
+                const date = new Date(time);
+                const value = e.target.valueAsDate;
+                date.setHours(value.getUTCHours(), value.getUTCMinutes());
+                setTime(date.toISOString());
+              }}
+              type="time"
+              style={{ height: "38px" }}
+              value={
+                new Date(time).toLocaleTimeString(
+                  undefined,
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  }
+                )
+              }
+            />
+          </Form.Field>
           <Form.Field>
             <label>
               Description<span style={{ color: "red" }}>*</span>:

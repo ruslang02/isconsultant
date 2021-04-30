@@ -14,3 +14,10 @@ div.message:empty {
   opacity: 0 !important;
   visibility: hidden !important;
 }
+
+.rate_message {
+  position: fixed !important;
+  bottom: 5%;
+  left: 5%;
+  width: 300px;
+}

@@ -6,6 +6,7 @@ import { PatchUserDto } from '@common/dto/patch-user.dto';
 import { Report } from '@common/models/report.entity';
 import { User, UserType } from '@common/models/user.entity';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -272,5 +273,15 @@ export class UsersController {
     } catch (e) {
       throw new NotFoundException('The user does not exist.');
     }
+  }
+
+  @Post(':uid/rating')
+  async modifyUserRating(
+    @Param('uid') userId: string,
+    @Query('offset') offset: string
+  ) {
+    if (+offset < -2 || +offset > 2) throw new BadRequestException("Offset should be between -2 and 2.");
+    const user = await this.users.findOne(userId);
+    await this.users.updateOne(userId, { rating: user.rating + +offset });
   }
 }

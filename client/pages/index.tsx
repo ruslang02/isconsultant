@@ -64,16 +64,9 @@ function Promo() {
         >
           <h2>{t("pages.index.title")}</h2>
           <p style={{ fontSize: "13pt" }}>{t("pages.index.subtitle")}</p>
-          <TextArea
-            style={{ resize: "none" }}
-            onChange={(e) => setDescription(e.target.value)}
-            value={description}
-          ></TextArea>
-          <div style={{ textAlign: "right", marginTop: "1rem" }}>
-            <Button primary onClick={() => setOpen(true)}>
-              {t("pages.index.arrange_event")}
-            </Button>
-          </div>
+          <Button primary fluid size="big" onClick={() => setOpen(true)}>
+            {t("pages.index.arrange_event")}
+          </Button>
           <EventArrange
             open={open}
             onClose={() => setOpen(false)}
@@ -173,28 +166,13 @@ function Lawyers() {
   );
 }
 
-export default function Home() {
-  const router = useRouter();
-  const { verify } = router.query;
-  const [, setMessage] = useContext(MessageContext);
-
-  useEffect(() => {
-    if (verify == "success") {
-      setMessage("Your account was verified.");
-    } else if (verify) {
-      setMessage("There was an error verifying your account.");
-    }
-  }, [verify]);
-
+export function Footer() {
   return (
-    <section>
-      <Header />
-      <Promo />
-      <PromoAdvantages />
-      <Lawyers />
+    <>
+      <br />
       <div
         style={{
-          marginTop: "2rem",
+          marginTop: "auto",
           borderTop: "1px solid lightgray",
           padding: "2rem",
           textAlign: "center",
@@ -241,6 +219,29 @@ export default function Home() {
         </Container>
         <p style={{ fontSize: "16px" }}>&copy; 2020-2021. ISConsultant.</p>
       </div>
+    </>
+  )
+}
+
+export default function Home() {
+  const router = useRouter();
+  const { verify } = router.query;
+  const [, setMessage] = useContext(MessageContext);
+
+  useEffect(() => {
+    if (verify == "success") {
+      setMessage("Your account was verified.");
+    } else if (verify) {
+      setMessage("There was an error verifying your account.");
+    }
+  }, [verify]);
+
+  return (
+    <section>
+      <Header />
+      <Promo />
+      <PromoAdvantages />
+      <Lawyers />
     </section>
   );
 }
