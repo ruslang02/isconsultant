@@ -99,7 +99,7 @@ function PromoAdvantages() {
             </p>
           </Grid.Column>
           <Grid.Column floated="right" width={6}>
-            <Image size="medium" src="/assets/lawyer.png" />
+            <Image size="medium"  src="/assets/lawyer.png" />
           </Grid.Column>
         </Grid.Row>
       </Grid>

@@ -38,7 +38,11 @@ const Empty = () => {
 
   async function handleSubmit() {
     try {
-      await api.put(`/reports`, { author: auth?.user?.id, receiver: id, description });
+      await api.put(`/reports`, {
+        author: auth?.user?.id,
+        receiver: id,
+        description,
+      });
       setMessage("Report was sent to the moderator.");
       setOpen(false);
     } catch (e) {
@@ -48,20 +52,26 @@ const Empty = () => {
   }
 
   if (!user) {
-    return <Page hasMenu={false}>
-      <Head>
-        <title>User not found - ISConsultant</title>
-      </Head>
-      <br />
-      <h1 style={{ textAlign: "center" }}>User was not found!</h1>
-      <p style={{ textAlign: "center" }}>Please check the link you've been provided.</p>
-    </Page>
+    return (
+      <Page hasMenu={false}>
+        <Head>
+          <title>User not found - ISConsultant</title>
+        </Head>
+        <br />
+        <h1 style={{ textAlign: "center" }}>User was not found!</h1>
+        <p style={{ textAlign: "center" }}>
+          Please check the link you've been provided.
+        </p>
+      </Page>
+    );
   }
 
   return (
     <Page hasMenu={false}>
       <Head>
-        <title>{user?.first_name} {user?.last_name} - ISConsultant</title>
+        <title>
+          {user?.first_name} {user?.last_name} - ISConsultant
+        </title>
       </Head>
       <Segment.Group>
         <Segment style={{ background: "#efefef" }}>
@@ -75,10 +85,26 @@ const Empty = () => {
               textAlign: "center",
             }}
           >
-            <Image size="small" src={user?.avatar} avatar />
+            <Image size="small" src={user?.avatar} avatar style={{
+              height: "150px",
+              objectFit: "cover"
+            }} />
           </div>
 
-          {user?.type === "lawyer" && <Button primary size="massive" style={{ position: 'absolute', right: 0, top: 0, margin: "-30px 1rem" }}>Request a meeting</Button>}
+          {user?.type === "lawyer" && (
+            <Button
+              primary
+              size="massive"
+              style={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                margin: "-30px 1rem",
+              }}
+            >
+              Request a meeting
+            </Button>
+          )}
           <div style={{ padding: "1rem 0" }}>
             <h2>
               {user?.last_name} {user?.first_name} {user?.middle_name}
@@ -106,40 +132,48 @@ const Empty = () => {
             </p>
           </div>
           <div style={{ textAlign: "right", margin: "1rem" }}>
-            {auth?.access_token && user?.id !== auth?.user?.id &&
-              <a href="#" onClick={() => setOpen(true)} style={{ color: "red" }}>
+            {auth?.access_token && user?.id !== auth?.user?.id && (
+              <a
+                href="#"
+                onClick={() => setOpen(true)}
+                style={{ color: "red" }}
+              >
                 <Icon name="envelope" /> Report user
-              </a>}
+              </a>
+            )}
           </div>
         </Segment>
       </Segment.Group>
-
-      <Segment.Group>
-        <Segment style={{ background: "#efefef" }}>
-          <h3>Education</h3>
-        </Segment>
-        <Segment>
-          <h3>Qualification</h3>
-        </Segment>
-      </Segment.Group>
-
-      <Segment.Group>
-        <Segment style={{ background: "#efefef" }}>
-          <h3>Job experience</h3>
-        </Segment>
-        <Segment>
-          <h3>Qualification</h3>
-        </Segment>
-      </Segment.Group>
-
-      <Segment.Group>
-        <Segment style={{ background: "#efefef" }}>
-          <h3>Specialty</h3>
-        </Segment>
-        <Segment>
-          <h3>Qualification</h3>
-        </Segment>
-      </Segment.Group>
+      {user?.educationText && (
+        <Segment.Group>
+          <Segment style={{ background: "#efefef" }}>
+            <h3>Education</h3>
+          </Segment>
+          <Segment
+            dangerouslySetInnerHTML={{ __html: user?.educationText ?? "" }}
+          />
+        </Segment.Group>
+      )}
+      {user?.experienceText && (
+        <Segment.Group>
+          <Segment style={{ background: "#efefef" }}>
+            <h3>Job experience</h3>
+          </Segment>
+          <Segment
+            dangerouslySetInnerHTML={{ __html: user?.experienceText ?? "" }}
+          />
+        </Segment.Group>
+      )}
+      {user?.specialtyText && (
+        <Segment.Group>
+          <Segment style={{ background: "#efefef" }}>
+            <h3>Specialty</h3>
+          </Segment>
+          <Segment
+            dangerouslySetInnerHTML={{ __html: user?.specialtyText ?? "" }}
+          />
+        </Segment.Group>
+      )}
 
       <Modal open={open} onClose={() => setOpen(false)}>
         <Modal.Header>Report a lawyer</Modal.Header>
@@ -151,7 +185,7 @@ const Empty = () => {
                 <Image
                   src={auth?.user?.avatar}
                   size="tiny"
-                  style={{ width: "36px" }}
+                  style={{ width: "36px", height: "36px" }}
                   avatar
                 />{" "}
                 <b>
@@ -165,7 +199,7 @@ const Empty = () => {
                 <Image
                   src={user?.avatar}
                   size="tiny"
-                  style={{ width: "36px" }}
+                  style={{ width: "36px", height: "36px" }}
                   avatar
                 />{" "}
                 <b>

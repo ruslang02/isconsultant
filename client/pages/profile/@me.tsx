@@ -27,7 +27,10 @@ const Empty = () => {
     <Page>
       <Segment>
         <div style={{ float: "left", margin: "0 2rem 0 0", textAlign: "center", height: "500px" }}>
-          <Image size="small" src={avatar} avatar />
+          <Image size="small" src={avatar} avatar style={{
+              height: "150px",
+              objectFit: "cover"
+            }} />
           <br />
           <br />
           <div><a href="#" onClick={() => {

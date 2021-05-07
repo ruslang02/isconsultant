@@ -127,4 +127,13 @@ export class User {
 
   @OneToMany(() => PendingEvent, event => event.lawyer)
   requests: PendingEvent[]
+
+  @Column({ default: "" })
+  educationText: string
+
+  @Column({ default: "" })
+  experienceText: string
+
+  @Column({ default: "" })
+  specialtyText: string
 }

@@ -21,7 +21,10 @@ export class UserAdapter {
         `global.USER_TYPE_${user.type.toUpperCase()}` as LocalizedStringID
       ),
       created_timestamp: user.created_timestamp.toISOString(),
-      avatar: [null, undefined].indexOf(user.avatar) >= 0 ? "https://react.semantic-ui.com/images/avatar/large/matt.jpg" : user.avatar
+      avatar: [null, undefined].indexOf(user.avatar) >= 0 ? "https://react.semantic-ui.com/images/avatar/large/matt.jpg" : user.avatar,
+      educationText: user.educationText,
+      specialtyText: user.specialtyText,
+      experienceText: user.experienceText
     };
   }
 }

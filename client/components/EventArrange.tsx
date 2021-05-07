@@ -202,7 +202,7 @@ export function EventArrange({
                   <Image
                     src={auth?.user?.avatar}
                     size="tiny"
-                    style={{ width: "36px" }}
+                    style={{ width: "36px", height: "36px" }}
                     avatar
                   />{" "}
                   <b>

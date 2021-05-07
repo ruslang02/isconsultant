@@ -1,9 +1,7 @@
-import { GetUserContactsDto } from '@common/dto/get-user-contacts.dto';
 import { GetUserInfoDto } from '@common/dto/get-user-info.dto';
 import { GetUserDto } from '@common/dto/get-user.dto';
 import { PatchUserVerifiedDto } from '@common/dto/patch-user-verified.dto';
 import { PatchUserDto } from '@common/dto/patch-user.dto';
-import { Report } from '@common/models/report.entity';
 import { User, UserType } from '@common/models/user.entity';
 import {
   BadRequestException,
@@ -36,7 +34,6 @@ import { In } from 'typeorm';
 import { JwtAuthGuard } from '../guards/jwt.guard';
 import { Types } from '../guards/type.decorator';
 import { UserGuard } from '../guards/user.guard';
-import { ReportsService } from '../reports/reports.service';
 import { ExtendedRequest } from '../utils/ExtendedRequest';
 import { UserAdapter } from './user.adapter';
 import { UsersService } from './users.service';
@@ -45,7 +42,6 @@ import { UsersService } from './users.service';
 @Controller('/api/users')
 export class UsersController {
   constructor(
-    private reports: ReportsService,
     private users: UsersService,
     private adapter: UserAdapter
   ) { }
@@ -55,9 +51,9 @@ export class UsersController {
     description: 'Поиск пользователей.',
   })
   async searchUsers(
-    @Query("query") query: string,
-    @Query("ids") ids: string,
-    @I18n() i18n: I18nContext
+    @I18n() i18n: I18nContext,
+    @Query("query") query?: string,
+    @Query("ids") ids?: string,
   ) {
     const users = query ? await this.users.search(query) : ids ? await this.users.findMany({ where: { id: In(ids.split(',')) } }) : [];
     return Promise.all(users.map(u => this.adapter.transform(u, i18n)));
@@ -78,7 +74,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('@me')
   @ApiOperation({
-    description: 'Получение всех зарегистрированных пользователей.',
+    description: 'Получение текущего пользователя.',
   })
   @ApiBearerAuth()
   async getMe(
@@ -172,57 +168,6 @@ export class UsersController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':uid/contacts')
-  @ApiOkResponse({
-    description: 'Предоставлена информация о контактных данных пользователя.',
-    type: GetUserContactsDto,
-  })
-  @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
-  @ApiBearerAuth()
-  @ApiOperation({
-    description: 'Получение информации о контактных данных пользователя.',
-  })
-  async getUserContacts(
-    @Param('uid') userId: string
-  ): Promise<GetUserContactsDto> {
-    try {
-      const { id, phone, email } = await this.users.findOne(userId);
-      return { id, phone, email };
-    } catch (e) {
-      throw new NotFoundException('The user does not exist.');
-    }
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post(':uid/report')
-  @ApiOkResponse({
-    description: 'Жалоба успешно оставлена.',
-    type: Report,
-  })
-  @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
-  @ApiBearerAuth()
-  @ApiOperation({
-    description: 'Оставление жалобы на профиль.',
-  })
-  async createUserReport(
-    @Request() request: ExtendedRequest,
-    @Param('uid') receiverId: string,
-    @Body() data: Pick<Report, 'description'>
-  ) {
-    const authorId = request.user.toString();
-
-    const author = await this.users.findOne(authorId);
-    const reciever = await this.users.findOne(receiverId);
-
-    const report: Pick<Report, 'author' & 'description' & 'reciever'> = {
-      author,
-      description: data.description,
-      reciever,
-    };
-
-    this.reports.createOne(report);
-  }
 
   @Types(UserType.MODERATOR, UserType.ADMIN)
   @UseGuards(JwtAuthGuard, UserGuard)
