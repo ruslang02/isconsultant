@@ -24,7 +24,12 @@ export class UserAdapter {
       avatar: [null, undefined].indexOf(user.avatar) >= 0 ? "https://react.semantic-ui.com/images/avatar/large/matt.jpg" : user.avatar,
       educationText: user.educationText,
       specialtyText: user.specialtyText,
-      experienceText: user.experienceText
+      experienceText: user.experienceText,
+      time_slots: user.timeSlots.map($ => ({
+        ...$,
+        start: $.start.split(":", 2).join(":"),
+        end: $.end.split(":", 2).join(":"),
+      }))
     };
   }
 }

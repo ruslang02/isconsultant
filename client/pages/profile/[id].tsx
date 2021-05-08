@@ -1,5 +1,6 @@
 import { GetUserDto } from "@common/dto/get-user.dto";
 import { UserType } from "@common/models/user.entity";
+import { EventArrange } from "components/EventArrange";
 import { Header } from "components/Header";
 import { Page } from "components/Page";
 import Head from "next/head";
@@ -26,13 +27,19 @@ const Empty = () => {
   const [, setMessage] = useContext(MessageContext);
   const [description, setDescription] = useState("");
   const [open, setOpen] = useState(false);
+  const [arrangeOpen, setArrangeOpen] = useState(false);
+  const [error, setError] = useState("");
   console.log(router);
   const { id } = router.query;
 
   useEffect(() => {
     (async () => {
       const { data, status } = await api.get<GetUserDto>(`/users/${id}`);
-      setUser(status > 300 ? undefined : data);
+      if (status > 300) {
+        setError("User not found!");
+      } else {
+        setUser(data);
+      }
     })();
   }, [id]);
 
@@ -51,14 +58,14 @@ const Empty = () => {
     }
   }
 
-  if (!user) {
+  if (error) {
     return (
       <Page hasMenu={false}>
         <Head>
           <title>User not found - ISConsultant</title>
         </Head>
         <br />
-        <h1 style={{ textAlign: "center" }}>User was not found!</h1>
+        <h1 style={{ textAlign: "center" }}>{ error }</h1>
         <p style={{ textAlign: "center" }}>
           Please check the link you've been provided.
         </p>
@@ -73,6 +80,13 @@ const Empty = () => {
           {user?.first_name} {user?.last_name} - ISConsultant
         </title>
       </Head>
+      <EventArrange
+        open={arrangeOpen}
+        onClose={() => {
+          setArrangeOpen(false);
+        }}
+        lawyerId={user?.id}
+      />
       <Segment.Group>
         <Segment style={{ background: "#efefef" }}>
           <h3>Main information</h3>
@@ -100,6 +114,9 @@ const Empty = () => {
                 right: 0,
                 top: 0,
                 margin: "-30px 1rem",
+              }}
+              onClick={() => {
+                setArrangeOpen(true);
               }}
             >
               Request a meeting

@@ -14,6 +14,7 @@ import { File } from './file.entity';
 import { CalendarEvent } from './calendar-event.entity';
 import { ChatMessage } from './chat-message.entity';
 import { PendingEvent } from './pending-event.entity';
+import { TimeSlot } from './time-slot.entity';
 
 export enum UserType {
   ADMIN = 'admin',
@@ -136,4 +137,7 @@ export class User {
 
   @Column({ default: "" })
   specialtyText: string
+
+  @OneToMany(() => TimeSlot, slot => slot.user)
+  timeSlots: TimeSlot[]
 }
