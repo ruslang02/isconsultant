@@ -1,8 +1,9 @@
 import { CreateUserDto } from "@common/dto/create-user.dto";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { Form, Button, Segment, Message, Icon } from "semantic-ui-react";
+import { Form, Button, Segment, Message, Icon, Image } from "semantic-ui-react";
 import { api } from "utils/api";
 
 export default () => {
@@ -53,6 +54,11 @@ export default () => {
           maxWidth: "400px",
         }}
       >
+        <Link href="/">
+          <a style={{ margin: "20px auto" }}>
+            <Image src="/assets/logo.png" height="24" />
+          </a>
+        </Link>
         {!success && (
           <>
             <Message

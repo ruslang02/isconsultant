@@ -194,6 +194,8 @@ ${
                 Starts at<span style={{ color: "red" }}>*</span>
               </label>
               <SemanticDatepicker
+              required
+              clearable={false}
                 readOnly={!editable}
                 onChange={(_e, { value }) =>
                   setTemp({
@@ -213,6 +215,7 @@ ${
               &nbsp;
               <TimeSelect
                 readOnly={!editable}
+                disabled={!editable}
                 onChange={(e, { value }) => {
                   const date = new Date(temp.timespan_start);
                   const [hours, minutes] = value.toString().split(":", 2);
@@ -241,11 +244,12 @@ ${
             <Form.Field inline>
               <label>Participants</label>
               <Dropdown
-                readOnly={!editable}
+                disabled={!editable}
                 fluid
                 multiple
                 search
                 selection
+
                 onChange={(_e, d) => {
                   const nTemp = {
                     ...temp,

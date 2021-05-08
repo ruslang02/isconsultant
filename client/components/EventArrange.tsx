@@ -50,7 +50,10 @@ export function EventArrange({
   const [slots, setSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
-    if (open) setLawyer(lawyerId);
+    if (open) {
+      setLawyer(lawyerId);
+      setTime(new Date().toISOString());
+    }
   }, [open]);
 
   useEffect(() => {
@@ -206,7 +209,11 @@ export function EventArrange({
                   <Image
                     src={auth?.user?.avatar}
                     size="tiny"
-                    style={{ width: "36px", height: "36px" }}
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      objectFit: "cover",
+                    }}
                     avatar
                   />{" "}
                   <b>
@@ -254,24 +261,45 @@ export function EventArrange({
               Time<span style={{ color: "red" }}>*</span>
             </label>
             <SemanticDatepicker
-              onChange={(_e, { value }) => {
-                const nowDate = ((value as Date) ?? new Date());
+              required
+              clearable={false}
+              onChange={async (_e, { value }) => {
+                const nowDate = value as Date;
                 const date = nowDate.toISOString();
-                setTime(date);
-                setLoading(true);
-                (async() => {
-                  const { data, status } = await api.get<TimeSlot[]>(`/users/${lawyer ?? lawyerId}/time_slots?date=${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`)
-                  setSlots(data.filter(s => s.day === nowDate.getDay()));
+                if (time === date) return;
+                console.log("date picker change", time, value);
+                if (lawyer ?? lawyerId) {
+                  setLoading(true);
+                  const { data, status } = await api.get<TimeSlot[]>(
+                    `/users/${
+                      lawyer ?? lawyerId
+                    }/time_slots?date=${nowDate.getFullYear()}-${
+                      nowDate.getMonth() + 1
+                    }-${nowDate.getDate()}`
+                  );
+                  setSlots(data.filter((s) => s.day === nowDate.getDay()));
                   setLoading(false);
-                })();
+                  if (data && data.length) {
+                    const date = new Date(nowDate);
+                    const [hours, minutes] = data[0].start
+                      .toString()
+                      .split(":");
+                    date.setHours(+hours, +minutes, 0, 0);
+                    setTime(date.toISOString());
+                  }
+                } else {
+                  setTime(date);
+                }
               }}
               value={new Date(time)}
             />{" "}
             &nbsp;
             <TimeSelect
-              free={slots}
+              free={(lawyer ?? lawyerId) && slots}
               onChange={(e, { value }) => {
                 const date = new Date(time);
+                console.log("time select change", time, value);
+                if (!value) return;
                 const [hours, minutes] = value.toString().split(":");
                 date.setHours(+hours, +minutes, 0, 0);
                 setTime(date.toISOString());
@@ -296,7 +324,16 @@ export function EventArrange({
             <Button onClick={(e) => onClose()} type="button">
               Cancel
             </Button>
-            <Button primary type="submit">
+            <Button
+              primary
+              type="submit"
+              disabled={
+                !description ||
+                !time ||
+                ((lawyer ?? lawyerId) &&
+                  (!slots || !slots.filter((x) => x.start !== x.end).length))
+              }
+            >
               Send
             </Button>
           </div>

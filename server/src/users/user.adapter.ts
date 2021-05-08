@@ -25,7 +25,7 @@ export class UserAdapter {
       educationText: user.educationText,
       specialtyText: user.specialtyText,
       experienceText: user.experienceText,
-      time_slots: user.timeSlots.map($ => ({
+      time_slots: (user.timeSlots ?? []).map($ => ({
         ...$,
         start: $.start.split(":", 2).join(":"),
         end: $.end.split(":", 2).join(":"),

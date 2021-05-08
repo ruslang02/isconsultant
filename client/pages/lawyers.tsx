@@ -37,7 +37,7 @@ const LawyersPage = () => {
       <Item.Group>
         {lawyers?.map((u) => (
           <Item>
-            <Item.Image avatar size="tiny" src={u.avatar} style={{width: "80px", height: "80px", objectFit: "cover"}} />
+            <Item.Image avatar src={u.avatar}  style={{width: "80px", height: "80px", objectFit: "cover", overflow: "hidden", borderRadius: "50%"}} />
             <Item.Content>
               <Item.Header>
                 <Link href={`/profile/${u.id}`}>

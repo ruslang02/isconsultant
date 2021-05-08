@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 import { Calendar, Event, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Button, Header as SHeader, Icon } from "semantic-ui-react";
+import { Button, Header as SHeader, Icon, Message } from "semantic-ui-react";
 import { api } from "utils/api";
 import { MessageContext } from "utils/MessageContext";
 import { useAuth } from "utils/useAuth";
@@ -54,6 +54,7 @@ const CalendarPage = () => {
           Your personal control panel over your meeting sessions.
         </small>
       </h2>
+      <Message warning content="Do not forget to set your timetable to be able to receive requests!" style={{justifyItems: "reverse"}} icon={<Icon name="arrow down" size="tiny" style={{fontSize: "1.5em", order: 10}}/>} />
       <div style={{display: "flex"}}>
         <Button
           primary

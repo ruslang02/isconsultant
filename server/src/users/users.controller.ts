@@ -242,48 +242,54 @@ export class UsersController {
     @Param("uid") userId: string,
     @Query("date") date: string
   ) {
-    const user = await this.users.findOne(userId);
-    const events = (await this.schedules.findManyByLawyer(userId)).filter(
-      ({ start_timestamp }) =>
-        start_timestamp.toLocaleDateString() === new Date(date).toLocaleDateString()
-    );
-    const slots = [...user.timeSlots].map(($) => ({
-      ...$,
-      start: $.start.split(":", 2).join(":"),
-      end: $.end.split(":", 2).join(":"),
-    }));
-    events.forEach(({ start_timestamp, end_timestamp }) => {
-      const start = start_timestamp.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
+    try {
+      const user = await this.users.findOne(userId);
+      const events = (await this.schedules.findManyByLawyer(userId)).filter(
+        ({ start_timestamp }) =>
+          start_timestamp.toLocaleDateString() ===
+          new Date(date).toLocaleDateString()
+      );
+      const slots = [...user.timeSlots].map(($) => ({
+        ...$,
+        start: $.start.split(":", 2).join(":"),
+        end: $.end.split(":", 2).join(":"),
+      }));
+      events.forEach(({ start_timestamp, end_timestamp }) => {
+        const start = start_timestamp.toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+        const day = start_timestamp.getDay();
+        const end = end_timestamp.toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+
+        const slotIndex = slots
+          .filter((s) => s.day === day)
+          .findIndex((s) => s.start <= start && s.end >= end);
+        if (slotIndex === -1) return;
+        const spawnSlot: TimeSlot = { ...slots[slotIndex] };
+
+        slots[slotIndex].end = start;
+        spawnSlot.start = end;
+
+        if (slots[slotIndex].start === slots[slotIndex].end) {
+          slots.splice(slotIndex, 1);
+        }
+
+        if (spawnSlot.start !== spawnSlot.end) {
+          slots.push(spawnSlot);
+        }
       });
-      const day = start_timestamp.getDay();
-      const end = end_timestamp.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
 
-      const slotIndex = slots
-        .filter((s) => s.day === day)
-        .findIndex((s) => s.start <= start && s.end >= end);
-      if (slotIndex === -1) return;
-      const spawnSlot: TimeSlot = { ...slots[slotIndex] };
-
-      slots[slotIndex].end = start;
-      spawnSlot.start = end;
-
-      if (slots[slotIndex].start === slots[slotIndex].end) {
-        slots.splice(slotIndex, 1);
-      }
-
-      if (spawnSlot.start !== spawnSlot.end) {
-        slots.push(spawnSlot);
-      }
-    });
-
-    return slots;
+      return slots;
+    } catch (e) {
+      console.error(e);
+      throw new NotFoundException("User was not found.");
+    }
   }
 
   @Types(UserType.LAWYER, UserType.MODERATOR, UserType.ADMIN)
@@ -300,8 +306,8 @@ export class UsersController {
       const exUser = await this.users.findOne(user.id);
       await this.slots.remove(exUser.timeSlots);
       const uqSlots = [];
-      body.forEach(s => {
-        if (uqSlots.findIndex(u => u.day === s.day) === -1) {
+      body.forEach((s) => {
+        if (uqSlots.findIndex((u) => u.day === s.day) === -1) {
           uqSlots.push(s);
         }
       });

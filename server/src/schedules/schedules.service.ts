@@ -108,6 +108,7 @@ export class SchedulesService implements OnModuleInit {
     return this.pEvents
       .createQueryBuilder("event")
       .leftJoinAndSelect("event.from", "user")
+      .leftJoinAndSelect("event.lawyer", "lawyer")
       .where("event.lawyer_id = :uid", { uid })
       .orWhere("event.lawyer_id IS NULL")
       .getMany();
@@ -240,7 +241,7 @@ export class SchedulesService implements OnModuleInit {
     const event = new PendingEvent() as DeepPartial<PendingEvent>;
     event.description = data.description;
     event.start_timestamp = new Date(data.timespan_start);
-    event.end_timestamp = new Date(data.timespan_end);
+    event.end_timestamp = new Date(new Date(data.timespan_start).getTime() + 1800000);
     event.from = { id: Number(data.user_id) };
     event.lawyer = data.lawyer_id ? { id: Number(data.lawyer_id) } : undefined;
     event.participants = data.additional_ids.map((id) => ({ id: +id }));

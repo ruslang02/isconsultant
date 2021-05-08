@@ -401,15 +401,16 @@ const Chat: React.FC = () => {
                   message.user.avatar ??
                   "https://react.semantic-ui.com/images/avatar/small/matt.jpg"
                 }
+                style={{width: "35px", height: "35px", borderRadius: "50%", objectFit: "cover", overflow: "hidden"}}
               />
               <Comment.Content>
-                <Comment.Author>
+                <Comment.Author style={{display: "inline-block"}}>
                   <a href={`/profile/${message.user.id}`} target="_blank">
                     {message.user.last_name} {message.user.first_name}
                   </a>
                 </Comment.Author>
                 <Comment.Metadata>
-                  <div>{message.created_at.toLocaleTimeString()}</div>
+                  <span>{message.created_at.toLocaleTimeString()}</span>
                 </Comment.Metadata>
                 <Comment.Text>{message.content}</Comment.Text>
               </Comment.Content>

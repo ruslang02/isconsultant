@@ -25,7 +25,7 @@ const RequestsPage = () => {
         ? requests.map((r) => (
           <Comment.Group>
             <Comment>
-              <Comment.Avatar as="a" src={r.from.avatar} />
+              <Comment.Avatar as="a" src={r.from.avatar} style={{width: "35px", height: "35px", borderRadius: "50%", objectFit: "cover", overflow: "hidden"}} />
               <Comment.Content>
                 <Comment.Author as="a">
                   {r.from.first_name} {r.from.last_name}

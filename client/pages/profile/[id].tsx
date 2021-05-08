@@ -39,6 +39,7 @@ const Empty = () => {
         setError("User not found!");
       } else {
         setUser(data);
+        setError("");
       }
     })();
   }, [id]);
