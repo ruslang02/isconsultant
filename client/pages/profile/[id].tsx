@@ -47,7 +47,6 @@ const Empty = () => {
   async function handleSubmit() {
     try {
       await api.put(`/reports`, {
-        author: auth?.user?.id,
         receiver: id,
         description,
       });
@@ -66,7 +65,7 @@ const Empty = () => {
           <title>User not found - ISConsultant</title>
         </Head>
         <br />
-        <h1 style={{ textAlign: "center" }}>{ error }</h1>
+        <h1 style={{ textAlign: "center" }}>{error}</h1>
         <p style={{ textAlign: "center" }}>
           Please check the link you've been provided.
         </p>
