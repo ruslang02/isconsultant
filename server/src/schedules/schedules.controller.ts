@@ -153,7 +153,7 @@ export class SchedulesController {
   }
 
   @Types(UserType.ADMIN, UserType.MODERATOR, UserType.LAWYER)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserGuard)
   @ApiBearerAuth()
   @Get("/")
   @ApiOperation({

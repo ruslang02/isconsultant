@@ -2,7 +2,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 
 @Injectable()
-export class VerifyService {
+export class MailService {
   constructor(
     @Inject('Logger')
     private logger: LoggerService,
