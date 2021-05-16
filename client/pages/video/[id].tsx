@@ -473,6 +473,11 @@ const WaitingScreen: React.FC<{
   error: string;
 }> = ({ event, status, loaded, error }) => {
   const router = useRouter();
+  if (!error && loaded && status === Status.NEW) {
+    setTimeout(() => {
+      location.reload()
+    }, 3000);
+  }
   return (
     <div
       style={{
@@ -709,7 +714,7 @@ export default function Video() {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                height: "100%",
+                height: "100vh",
                 overflow: "hidden",
                 flexGrow: 1,
               }}
@@ -721,6 +726,7 @@ export default function Video() {
                   background: "linear-gradient(white, lightblue)",
                   borderBottom: "1px solid rgba(0, 0, 0, 0.3)",
                   flexGrow: 1,
+                  height: "100%",
                 }}
               >
                 <VideoContainer

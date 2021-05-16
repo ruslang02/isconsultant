@@ -9,6 +9,75 @@ const {
   DEVELOPMENT
 } = process.env;
 
+const mockUsers: Partial<User>[] = [{
+  email: "user@user.com",
+  first_name: "Ruslan",
+  last_name: "Garifullin",
+  middle_name: "Ilfatovich",
+  avatar: "https://sun1-20.userapi.com/s/v1/if1/QYezcXh38laVuk3S6bCq9gd96HWGT_s-nyKzawPEucGu2uxmZcuR0kwEygqemsKPnwHQMDbj.jpg?size=400x0&quality=96&crop=686,0,1264,1704&ava=1",
+  password: "user",
+  type: UserType.CLIENT,
+  verified: true
+}, {
+  email: "user1@user.com",
+  first_name: "Vlad",
+  middle_name: "",
+  last_name: "Dineev",
+  avatar: "https://i.imgur.com/KRRtxQB.png",
+  password: "user1",
+  type: UserType.CLIENT,
+  verified: true
+}, {
+  email: "user2@user.com",
+  first_name: "Egor",
+  last_name: "Dadugin",
+  middle_name: "",
+  avatar: "https://sun1-20.userapi.com/s/v1/if1/QYezcXh38laVuk3S6bCq9gd96HWGT_s-nyKzawPEucGu2uxmZcuR0kwEygqemsKPnwHQMDbj.jpg?size=400x0&quality=96&crop=686,0,1264,1704&ava=1",
+  password: "user2",
+  type: UserType.CLIENT,
+  verified: true
+}, {
+  email: "lawyer@lawyer.com",
+  first_name: "Evgeniy",
+  last_name: "Belyaev",
+  middle_name: "Evgenievich",
+  avatar: "https://balance2.pravoved.ru/userfiles/u1629277/preview_avatar.jpg",
+  password: "lawyer",
+  educationText: "<b>Алтайский государственный университет</b>, факультет - юридический (Барнаул, Россия, 1997)<br /><br />Проходил дополнительные курсы повышения квалификации.",
+  experienceText: "Руководитель - юридический кабинет Беляев Е.Е.. 25 лет стажа",
+  specialtyText: "Специализируюсь в 14 категориях: Гражданское право, Семейное право, Арбитраж, Налоговое право, Договорное право, Право собственности, Права детей, Взыскание задолженности, Кредитование, Заключение и расторжение брака, Алименты, Раздел имущества, Усыновление, опека и попечительство, Международное право",
+  type: UserType.LAWYER,
+  verified: true
+}, {
+  email: "lawyer2@lawyer.com",
+  first_name: "Darya",
+  last_name: "Gapina",
+  middle_name: "Ivanovna",
+  avatar: "https://balance2.pravoved.ru/userfiles/u1790299/preview_avatar.jpg",
+  password: "lawyer2",
+  educationText: "НИУ-ВШЭ, факультет - юридический (Санкт-Петербург, Россия, 2015)",
+  experienceText: "6 лет стажа",
+  specialtyText: "Специализируюсь в 14 категориях: Гражданское право, Арбитраж, Предпринимательское право, Тендеры, контрактная система в сфере закупок, Налоговое право, Интеллектуальная собственность, Договорное право, Право собственности, Взыскание задолженности, Кредитование, Авторские и смежные права, Товарные знаки, патенты, Интернет и право, Программы ЭВМ и базы данных",
+  type: UserType.LAWYER,
+  verified: true
+}, {
+  email: "moderator@moderator.com",
+  first_name: "Andrey",
+  last_name: "Tamanov",
+  middle_name: "",
+  password: "moderator",
+  type: UserType.MODERATOR,
+  verified: true
+}, {
+  email: "admin@admin.com",
+  first_name: "Hadi",
+  last_name: "Saleh",
+  middle_name: "",
+  password: "admin",
+  type: UserType.ADMIN,
+  verified: true
+}]
+
 @Injectable()
 export class AuthService implements OnApplicationBootstrap {
   constructor(
@@ -18,96 +87,9 @@ export class AuthService implements OnApplicationBootstrap {
     private jwt: JwtService
   ) { }
   onApplicationBootstrap() {
-    if (DEVELOPMENT == "true") {
-      let user = new User()
-      user.email = "user@user.com"
-      user.first_name = "Ruslan"
-      user.last_name = "Garifullin"
-      user.middle_name = "Ilfatovich"
-      user.avatar = "https://sun1-20.userapi.com/s/v1/if1/QYezcXh38laVuk3S6bCq9gd96HWGT_s-nyKzawPEucGu2uxmZcuR0kwEygqemsKPnwHQMDbj.jpg?size=400x0&quality=96&crop=686,0,1264,1704&ava=1"
-      user.password = "user"
+    if (DEVELOPMENT !== "true") return;
 
-      this.users.insertOne({ ...user, type: UserType.CLIENT, verified: true }).then((insertRes: any) => {
-        this.logger.log(`AuthService:`, 'Client test account created.');
-      }).catch(() => { });
-
-      user = new User()
-      user.email = "user1@user.com"
-      user.first_name = "Vlad"
-      user.last_name = "Dineev"
-      user.avatar = "https://i.imgur.com/KRRtxQB.png"
-      user.password = "user1"
-
-      this.users.insertOne({ ...user, type: UserType.CLIENT, verified: true }).then((insertRes: any) => {
-        this.logger.log(`AuthService:`, 'Client 1 test account created.');
-      }).catch(() => { });
-
-
-      user = new User()
-      user.email = "user2@user.com"
-      user.first_name = "Egor"
-      user.last_name = "Dadugin"
-      user.avatar = "https://sun1-19.userapi.com/s/v1/ig2/D3Tfz_RM8tmptskKYv3AgDpEZL6-2SDQMcSHZMOkmggPT-fYe2z7KUh_o-9HCLwYTIsGBqHtBWl2kzG91VBhXenf.jpg?size=400x0&quality=96&crop=51,608,1117,1117&ava=1"
-      user.password = "user2"
-
-      this.users.insertOne({ ...user, type: UserType.CLIENT, verified: true }).then((insertRes: any) => {
-        this.logger.log(`AuthService:`, 'Client 2 test account created.');
-      }).catch(() => { });
-
-
-      user = new User()
-      user.email = "lawyer@lawyer.com"
-      user.first_name = "Evgeniy"
-      user.last_name = "Belyaev"
-      user.middle_name = "Evgenievich"
-      user.avatar = "https://balance2.pravoved.ru/userfiles/u1629277/preview_avatar.jpg"
-      user.password = "lawyer"
-      user.educationText = "<b>Алтайский государственный университет</b>, факультет - юридический (Барнаул, Россия, 1997)<br /><br />Проходил дополнительные курсы повышения квалификации."
-      user.experienceText = "Руководитель - юридический кабинет Беляев Е.Е.. 25 лет стажа"
-      user.specialtyText = "Специализируюсь в 14 категориях: Гражданское право, Семейное право, Арбитраж, Налоговое право, Договорное право, Право собственности, Права детей, Взыскание задолженности, Кредитование, Заключение и расторжение брака, Алименты, Раздел имущества, Усыновление, опека и попечительство, Международное право"
-
-      this.users.insertOne({ ...user, type: UserType.LAWYER, verified: true }).then((insertRes: any) => {
-        this.logger.log(`AuthService:`, 'Lawyer test account created.');
-      }).catch(() => { });
-
-
-      user = new User()
-      user.email = "lawyer2@lawyer.com"
-      user.first_name = "Darya"
-      user.last_name = "Gapina"
-      user.middle_name = "Ivanovna"
-      user.avatar = "https://balance2.pravoved.ru/userfiles/u1790299/preview_avatar.jpg"
-      user.password = "lawyer2"
-      user.educationText = "НИУ-ВШЭ, факультет - юридический (Санкт-Петербург, Россия, 2015)"
-      user.experienceText = "6 лет стажа"
-      user.specialtyText = "Специализируюсь в 14 категориях: Гражданское право, Арбитраж, Предпринимательское право, Тендеры, контрактная система в сфере закупок, Налоговое право, Интеллектуальная собственность, Договорное право, Право собственности, Взыскание задолженности, Кредитование, Авторские и смежные права, Товарные знаки, патенты, Интернет и право, Программы ЭВМ и базы данных"
-
-      this.users.insertOne({ ...user, type: UserType.LAWYER, verified: true }).then((insertRes: any) => {
-        this.logger.log(`AuthService:`, 'Lawyer 2 test account created.');
-      }).catch(() => { });
-
-
-      user = new User()
-      user.email = "moderator@moderator.com"
-      user.first_name = "Andrey"
-      user.last_name = "Vlasov"
-      user.password = "moderator"
-
-      this.users.insertOne({ ...user, type: UserType.MODERATOR, verified: true }).then((insertRes: any) => {
-        this.logger.log(`AuthService:`, 'Moderator test account created.');
-      }).catch(() => { });
-
-
-      user = new User()
-      user.email = "admin@admin.com"
-      user.first_name = "Saleh"
-      user.last_name = "Hadi"
-      user.password = "admin"
-
-      this.users.insertOne({ ...user, type: UserType.ADMIN, verified: true }).then((insertRes: any) => {
-        this.logger.log(`AuthService:`, 'Admin test account created.');
-      }).catch(() => { });
-    }
+    mockUsers.forEach(u => this.users.insertOne(u).catch(() => {}));
   }
 
   async validateUser(

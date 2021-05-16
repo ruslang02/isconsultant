@@ -41,6 +41,14 @@ export class UsersService {
     return this.users.insert(user);
   }
 
+  save(user: Partial<User>);
+  save(user: Partial<User>[]);
+  save(user: any) {
+    return this.users.save(user);
+  }
+
+
+
   updateOne(uid: string | number, user: DeepPartial<User>) {
     return this.users.update(uid.toString(), user);
   }
