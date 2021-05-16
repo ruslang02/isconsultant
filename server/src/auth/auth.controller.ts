@@ -12,6 +12,7 @@ import {
   Param,
   Post,
   Request,
+  Response,
   UseGuards,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -23,6 +24,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { Response as ExpressResponse } from 'express';
 import { JwtAuthGuard } from 'guards/jwt.guard';
 import { UserGuard } from 'guards/user.guard';
 import { I18n, I18nContext, I18nService } from 'nestjs-i18n';
@@ -155,7 +157,7 @@ export class AuthController {
   }
 
   @Get('verify/:verifyToken')
-  async verify(@Param('verifyToken') token: string) {
+  async verify(@Param('verifyToken') token: string, @Response() response: ExpressResponse) {
     try {
       const { id, email } = this.jwt.verify<{ id: number, email: string }>(token);
       const user = await this.users.findOne(id)
@@ -164,7 +166,8 @@ export class AuthController {
       } else if (user.email != email) {
         throw new BadRequestException("Emails don't match!")
       } else {
-        await this.users.updateOne(id, { verified: true })
+        await this.users.updateOne(id, { verified: true });
+        response.redirect("/?verify=success");
       }
     } catch (e) {
       this.logger.error(`/api/auth/verify: `, '[ERROR]', e);

@@ -16,7 +16,7 @@ export class MailService {
         to: userEmail, // list of receivers
         from: 'noreply@nestjs.com', // sender address
         subject: 'ISC Email Verification', // Subject line
-        text: `Verify your email by clicking this link: https://consultant.infostrategic.com/verify/${verifyToken}`, // plaintext body
+        text: `Verify your email by clicking this link: https://consultant.infostrategic.com/api/auth/verify/${verifyToken}`, // plaintext body
       })
       .then(() => {
         this.logger.log(`VerifyService:`, `Sent an email for user ${userEmail}.`);
