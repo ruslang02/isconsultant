@@ -169,7 +169,7 @@ export class AuthController {
     } catch (e) {
       this.logger.error(`/api/auth/verify: `, '[ERROR]', e);
       throw new BadRequestException(
-        'Token for verification is wrong!'
+        'Token for verification is wrong! ' + e
       );
     }
   }
