@@ -1,7 +1,7 @@
 import { User } from '@common/models/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { DeepPartial, FindManyOptions, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +15,7 @@ export class UsersService {
   }
 
   findOne(uid: string | number): Promise<User> {
-    return this.users.findOne(uid.toString());
+    return this.users.findOneOrFail(uid.toString(), { relations: ['timeSlots'] });
   }
 
   async findEvents(uid: string) {
@@ -41,7 +41,7 @@ export class UsersService {
     return this.users.insert(user);
   }
 
-  updateOne(uid: string | number, user: Partial<User>) {
+  updateOne(uid: string | number, user: DeepPartial<User>) {
     return this.users.update(uid.toString(), user);
   }
 

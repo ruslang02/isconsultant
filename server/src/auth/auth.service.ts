@@ -31,6 +31,7 @@ export class AuthService implements OnApplicationBootstrap {
         this.logger.log(`AuthService:`, 'Client test account created.');
       }).catch(() => { });
 
+      user = new User()
       user.email = "user1@user.com"
       user.first_name = "Vlad"
       user.last_name = "Dineev"
@@ -41,6 +42,8 @@ export class AuthService implements OnApplicationBootstrap {
         this.logger.log(`AuthService:`, 'Client 1 test account created.');
       }).catch(() => { });
 
+
+      user = new User()
       user.email = "user2@user.com"
       user.first_name = "Egor"
       user.last_name = "Dadugin"
@@ -51,6 +54,8 @@ export class AuthService implements OnApplicationBootstrap {
         this.logger.log(`AuthService:`, 'Client 2 test account created.');
       }).catch(() => { });
 
+
+      user = new User()
       user.email = "lawyer@lawyer.com"
       user.first_name = "Evgeniy"
       user.last_name = "Belyaev"
@@ -65,6 +70,8 @@ export class AuthService implements OnApplicationBootstrap {
         this.logger.log(`AuthService:`, 'Lawyer test account created.');
       }).catch(() => { });
 
+
+      user = new User()
       user.email = "lawyer2@lawyer.com"
       user.first_name = "Darya"
       user.last_name = "Gapina"
@@ -79,6 +86,8 @@ export class AuthService implements OnApplicationBootstrap {
         this.logger.log(`AuthService:`, 'Lawyer 2 test account created.');
       }).catch(() => { });
 
+
+      user = new User()
       user.email = "moderator@moderator.com"
       user.first_name = "Andrey"
       user.last_name = "Vlasov"
@@ -88,6 +97,8 @@ export class AuthService implements OnApplicationBootstrap {
         this.logger.log(`AuthService:`, 'Moderator test account created.');
       }).catch(() => { });
 
+
+      user = new User()
       user.email = "admin@admin.com"
       user.first_name = "Saleh"
       user.last_name = "Hadi"

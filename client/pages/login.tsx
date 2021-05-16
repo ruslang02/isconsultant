@@ -1,8 +1,16 @@
 import { LoginUserSuccessDto } from "@common/dto/login-user-success.dto";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useContext, useState } from "react";
-import { Button, Card, Checkbox, Form, Message } from "semantic-ui-react";
+import {
+  Button,
+  Card,
+  Checkbox,
+  Form,
+  Image,
+  Message,
+} from "semantic-ui-react";
 import { api } from "utils/api";
 import { useAuth } from "utils/useAuth";
 
@@ -66,6 +74,11 @@ const Login: React.FC = () => {
           maxWidth: "400px",
         }}
       >
+        <Link href="/">
+          <a style={{ margin: "20px auto" }}>
+            <Image src="/assets/logo.png" height="24" />
+          </a>
+        </Link>
         <Message
           attached
           header="Sign in to ISConsultant"

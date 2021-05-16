@@ -8,11 +8,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'logger/logger.module';
 import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
 
 @Module({
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [],
   imports: [LoggerModule, TypeOrmModule.forFeature([Report, User, CalendarEvent, PendingEvent, Report, ChatMessage, File])],
 })
 export class AdminModule { }

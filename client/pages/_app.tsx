@@ -103,7 +103,7 @@ function MyApp({
 
   try {
     given = JSON.parse(localStorage.getItem("given_lawyers") ?? "[]") as string[];
-    if (given.includes(from.id)) {
+    if (given.includes(from.id) || from.id === auth?.user?.id) {
       from = undefined;
     }
   } catch (e) {

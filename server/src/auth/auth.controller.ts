@@ -32,7 +32,7 @@ import { generateId } from 'utils/IdGenerator';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { VerifyService } from './mail.service';
+import { MailService } from './mail.service';
 
 @ApiTags('Авторизация и регистрация пользователей')
 @Controller('/api/auth')
@@ -43,7 +43,7 @@ export class AuthController {
     private auth: AuthService,
     private i18n: I18nService,
     private users: UsersService,
-    private verifyMail: VerifyService,
+    private verifyMail: MailService,
     private jwt: JwtService,
     private adapter: UserAdapter
   ) { }

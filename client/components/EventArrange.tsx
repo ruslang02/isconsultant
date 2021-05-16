@@ -2,6 +2,7 @@ import { ArrangeEventDto } from "@common/dto/arrange-event.dto";
 import { CreateUserDto } from "@common/dto/create-user.dto";
 import { ErrorDto } from "@common/dto/error.dto";
 import { GetUserDto } from "@common/dto/get-user.dto";
+import { TimeSlot } from "@common/models/time-slot.entity";
 import router from "next/router";
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,6 +20,7 @@ import { api } from "utils/api";
 import { MessageContext } from "utils/MessageContext";
 import { useAuth } from "utils/useAuth";
 import { UserCacheContext } from "utils/UserCacheContext";
+import { TimeSelect } from "./TimeSelect";
 
 export function EventArrange({
   open,
@@ -44,9 +46,14 @@ export function EventArrange({
   const [users, setUsers] = useContext(UserCacheContext);
   const [lawyer, setLawyer] = useState<string | undefined>(lawyerId);
   const [, setMessage] = useContext(MessageContext);
+  const [loading, setLoading] = useState(false);
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
-    if (open) setLawyer(lawyerId);
+    if (open) {
+      setLawyer(lawyerId);
+      setTime(new Date().toISOString());
+    }
   }, [open]);
 
   useEffect(() => {
@@ -139,7 +146,7 @@ export function EventArrange({
     <Modal size="small" open={open} onClose={onClose}>
       <Modal.Header>Arrange a meeting</Modal.Header>
       <Modal.Content>
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} loading={loading}>
           {!auth?.access_token ? (
             <>
               <Form.Field>
@@ -202,7 +209,11 @@ export function EventArrange({
                   <Image
                     src={auth?.user?.avatar}
                     size="tiny"
-                    style={{ width: "36px", height: "36px" }}
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      objectFit: "cover",
+                    }}
                     avatar
                   />{" "}
                   <b>
@@ -219,6 +230,7 @@ export function EventArrange({
               fluid
               search
               selection
+              disabled={!!lawyerId}
               onChange={(_e, d) => {
                 setLawyer(d.value.toString());
               }}
@@ -227,9 +239,7 @@ export function EventArrange({
                   .get<GetUserDto[]>(`/users/search?query=${d.searchQuery}`)
                   .then(({ data }) => {
                     setUsers([
-                      ...users.filter(
-                        (u) => !data.some((v) => v.id === u.id)
-                      ),
+                      ...users.filter((u) => !data.some((v) => v.id === u.id)),
                       ...data,
                     ]);
                   });
@@ -248,36 +258,57 @@ export function EventArrange({
             className="date-picker"
           >
             <label>
-              Approximate date<span style={{ color: "red" }}>*</span>
+              Time<span style={{ color: "red" }}>*</span>
             </label>
             <SemanticDatepicker
-              onChange={(_e, { value }) =>
-                setTime(((value as Date) ?? new Date()).toISOString())
-              }
-              value={
-                new Date(time)
-              }
+              required
+              clearable={false}
+              onChange={async (_e, { value }) => {
+                const nowDate = value as Date;
+                const date = nowDate.toISOString();
+                if (time === date) return;
+                console.log("date picker change", time, value);
+                if (lawyer ?? lawyerId) {
+                  setLoading(true);
+                  const { data, status } = await api.get<TimeSlot[]>(
+                    `/users/${
+                      lawyer ?? lawyerId
+                    }/time_slots?date=${nowDate.getFullYear()}-${
+                      nowDate.getMonth() + 1
+                    }-${nowDate.getDate()}`
+                  );
+                  setSlots(data.filter((s) => s.day === nowDate.getDay()));
+                  setLoading(false);
+                  if (data && data.length) {
+                    const date = new Date(nowDate);
+                    const [hours, minutes] = data[0].start
+                      .toString()
+                      .split(":");
+                    date.setHours(+hours, +minutes, 0, 0);
+                    setTime(date.toISOString());
+                  }
+                } else {
+                  setTime(date);
+                }
+              }}
+              value={new Date(time)}
             />{" "}
             &nbsp;
-            <input
-              onChange={(e) => {
+            <TimeSelect
+              free={(lawyer ?? lawyerId) && slots}
+              onChange={(e, { value }) => {
                 const date = new Date(time);
-                const value = e.target.valueAsDate;
-                date.setHours(value.getUTCHours(), value.getUTCMinutes());
+                console.log("time select change", time, value);
+                if (!value) return;
+                const [hours, minutes] = value.toString().split(":");
+                date.setHours(+hours, +minutes, 0, 0);
                 setTime(date.toISOString());
               }}
-              type="time"
-              style={{ height: "38px" }}
-              value={
-                new Date(time).toLocaleTimeString(
-                  undefined,
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  }
-                )
-              }
+              value={new Date(time).toLocaleTimeString(undefined, {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
             />
           </Form.Field>
           <Form.Field>
@@ -293,7 +324,16 @@ export function EventArrange({
             <Button onClick={(e) => onClose()} type="button">
               Cancel
             </Button>
-            <Button primary type="submit">
+            <Button
+              primary
+              type="submit"
+              disabled={
+                !description ||
+                !time ||
+                ((lawyer ?? lawyerId) &&
+                  (!slots || !slots.filter((x) => x.start !== x.end).length))
+              }
+            >
               Send
             </Button>
           </div>

@@ -135,7 +135,7 @@ function Lawyers() {
             image={l.avatar}
             header={l.first_name + " " + l.last_name}
             meta={`Rating: ${l.rating}`}
-            style={{ margin: 0 }}
+            style={{ margin: 0, width: "260px" }}
             as="a"
             onClick={() => router.push(`/profile/${l.id}`)}
             description={

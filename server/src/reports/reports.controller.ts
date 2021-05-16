@@ -5,6 +5,7 @@ import { Report } from '@common/models/report.entity';
 import { UserType } from '@common/models/user.entity';
 import { LocalizedStringID } from '@common/utils/Locale';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -13,12 +14,14 @@ import {
   Patch,
   Put,
   Query,
+  Request,
   UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Types } from 'guards/type.decorator';
 import { UserGuard } from 'guards/user.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
+import { ExtendedRequest } from 'utils/ExtendedRequest';
 import { JwtAuthGuard } from '../guards/jwt.guard';
 import { ReportAdapter } from './report.adapter';
 import { ReportsService } from './reports.service';
@@ -70,10 +73,16 @@ export class ReportsController {
     description: "Создание жалобы."
   })
   @ApiBearerAuth()
-  createReport(
+  async createReport(
+    @Request() { user }: ExtendedRequest,
     @Body() report: CreateReportDto
   ) {
-    return this.reports.createOne(report);
+    try {
+      const entity = await this.reports.createOne({ ...report, author: user.id.toString() });
+      return entity;
+    } catch (e) {
+      throw new BadRequestException("The data provided did not meet the schema.");
+    }
   }
 
   @Types(UserType.ADMIN, UserType.MODERATOR)

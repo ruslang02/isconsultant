@@ -2,12 +2,13 @@ import { GetEventDto } from "@common/dto/get-event.dto";
 import { PatchEventDto } from "@common/dto/patch-event.dto";
 import { EventModal } from "components/EventModal";
 import { Page } from "components/Page";
+import { TimetableModal } from "components/TimetableModal";
 import moment from "moment";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 import { Calendar, Event, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Button, Header as SHeader, Icon } from "semantic-ui-react";
+import { Button, Header as SHeader, Icon, Message } from "semantic-ui-react";
 import { api } from "utils/api";
 import { MessageContext } from "utils/MessageContext";
 import { useAuth } from "utils/useAuth";
@@ -19,6 +20,8 @@ const CalendarPage = () => {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
+  const [ttOpen, setTtOpen] = useState(false);
+  const [startSlot, setStartSlot] = useState<string | undefined>(undefined);
   const [event, setEvent] = useState<GetEventDto | undefined>();
   const [, setMessage] = useContext(MessageContext);
 
@@ -51,49 +54,50 @@ const CalendarPage = () => {
           Your personal control panel over your meeting sessions.
         </small>
       </h2>
-      <Button.Group size="huge" fluid>
-        <Button size="huge" onClick={() => router.push("/calendar/requests")}>
-          <SHeader as="h2">
-            <Icon name="address book" />
-            <SHeader.Content style={{ textAlign: "left" }}>
-              Pending advice requests
-              <SHeader.Subheader>Click here to view</SHeader.Subheader>
-            </SHeader.Content>
-          </SHeader>
-        </Button>
-        <Button.Or style={{ height: "auto", width: "auto" }} />
+      <Message warning content="Do not forget to set your timetable to be able to receive requests!" style={{justifyItems: "reverse"}} icon={<Icon name="arrow down" size="tiny" style={{fontSize: "1.5em", order: 10}}/>} />
+      <div style={{display: "flex"}}>
         <Button
-          size="huge"
           primary
           onClick={() => {
             setOpen(true);
             setEvent(undefined);
+            setStartSlot(undefined);
           }}
+          style={{marginRight: "auto"}}
         >
-          <SHeader as="h2" style={{ color: "white" }}>
             <Icon name="plus" />
-            <SHeader.Content style={{ textAlign: "left" }}>
-              Create a new meeting
-              <SHeader.Subheader style={{ color: "white" }}>
-                Configure your meeting settings
-              </SHeader.Subheader>
-            </SHeader.Content>
-          </SHeader>
+              New meeting
         </Button>
-      </Button.Group>
-      <br />
+        <Button onClick={() => router.push("/calendar/requests")}>
+            <Icon name="address book" />
+              Advice requests
+        </Button>
+        <Button onClick={() => setTtOpen(true)}>
+            <Icon name="calendar alternate" />
+              Timetable
+        </Button>
+      </div>
       <br />
       <Calendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        onDoubleClickEvent={(e) => {
+        onSelectEvent={(e) => {
           setOpen(true);
           setEvent(e.resource);
         }}
+        onSelectSlot={({ start }) => {
+          setOpen(true);
+          setEvent(undefined);
+          setStartSlot(new Date(start).toISOString());
+        }}
+        timeslots={1}
+        selectable
+        step={30}
         style={{ height: 500 }}
       />
+      <TimetableModal open={ttOpen} onClose={() => setTtOpen(false)} />
       <EventModal
         editable
         onClose={() => {
@@ -103,6 +107,7 @@ const CalendarPage = () => {
         }}
         open={open}
         event={event}
+        startSlot={startSlot}
         onSubmit={async (temp: GetEventDto) => {
           if (event === undefined) {
             await api.put(`/events`, temp);

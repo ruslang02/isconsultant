@@ -35,3 +35,9 @@ a {
 .date-picker .field:nth-child(2) .field .input {
   width: 100% !important;
 }
+
+#lawyers img {
+  width: 260px;
+  height: 260px;
+  object-fit: cover;
+}

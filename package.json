@@ -7,6 +7,7 @@
     "type": "git"
   },
   "scripts": {
+    "build:server": "cd server/; npm run build",
     "proxy": "sudo nginx -p $PWD/proxy -c nginx.conf",
     "proxy:dev": "sudo nginx -p $PWD/proxy -c nginx.dev.conf",
     "start:server": "node dist/main",

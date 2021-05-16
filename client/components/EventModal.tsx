@@ -25,6 +25,7 @@ import { GetUserDto } from "@common/dto/get-user.dto";
 import { ChatMessage } from "@common/models/chat-message.entity";
 import { UserCacheContext } from "utils/UserCacheContext";
 import { useAuth } from "utils/useAuth";
+import { TimeSelect } from "./TimeSelect";
 
 interface EventModalProps {
   editable?: boolean;
@@ -32,6 +33,7 @@ interface EventModalProps {
   onClose: () => void;
   onSubmit: (e: PatchEventDto) => void;
   event: GetEventDto;
+  startSlot?: string
 }
 
 export function EventModal({
@@ -40,6 +42,7 @@ export function EventModal({
   onClose,
   event,
   onSubmit,
+  startSlot
 }: EventModalProps) {
   const [temp, setTemp] = useState<PatchEventDto | undefined>(event);
   const [files, setFiles] = useState<File[]>([]);
@@ -51,12 +54,16 @@ export function EventModal({
   const [, update] = useState();
 
   useEffect(() => {
+    setTemp({...temp, timespan_start: startSlot});
+  }, [startSlot]);
+
+  useEffect(() => {
     if (event === undefined && temp === undefined) {
       setTemp({
         title: "",
         description: "",
         timespan_start: new Date().toISOString(),
-        timespan_end: new Date().toISOString(),
+        timespan_end: new Date(new Date().getTime() + 1800000).toISOString(),
       });
     } else if (event) {
       (async () => {
@@ -90,7 +97,7 @@ export function EventModal({
         title: "",
         description: "",
         timespan_start: new Date().toISOString(),
-        timespan_end: new Date().toISOString(),
+        timespan_end: new Date(new Date().getTime() + 1800000).toISOString(),
       });
     }
   }, [open]);
@@ -153,7 +160,7 @@ ${
           />
         )}
       </Modal.Header>
-      <Modal.Content style={{ display: "flex" }}>
+      <Modal.Content style={{ display: "flex", minHeight: "600px" }}>
         <section style={{ width: "100%" }}>
           <Form>
             <Form.Field>
@@ -187,6 +194,8 @@ ${
                 Starts at<span style={{ color: "red" }}>*</span>
               </label>
               <SemanticDatepicker
+              required
+              clearable={false}
                 readOnly={!editable}
                 onChange={(_e, { value }) =>
                   setTemp({
@@ -194,6 +203,9 @@ ${
                     timespan_start: (
                       (value as Date) ?? new Date()
                     ).toISOString(),
+                    timespan_end: (
+                      new Date((value as Date ?? new Date()).getTime() + 1800000)
+                    ).toISOString()
                   })
                 }
                 value={
@@ -201,13 +213,16 @@ ${
                 }
               />{" "}
               &nbsp;
-              <input
+              <TimeSelect
                 readOnly={!editable}
-                onChange={(e) => {
+                disabled={!editable}
+                onChange={(e, { value }) => {
                   const date = new Date(temp.timespan_start);
-                  const value = e.target.valueAsDate;
-                  date.setHours(value.getUTCHours(), value.getUTCMinutes());
-                  setTemp({ ...temp, timespan_start: date.toISOString() });
+                  const [hours, minutes] = value.toString().split(":", 2);
+                  date.setHours(+hours, +minutes, 0, 0);
+                  const nev = { ...temp, timespan_start: date.toISOString() };
+                  nev.timespan_end = new Date(date.getTime() + 1800000).toISOString();
+                  setTemp(nev);
                 }}
                 type="time"
                 style={{ height: "38px" }}
@@ -229,11 +244,12 @@ ${
             <Form.Field inline>
               <label>Participants</label>
               <Dropdown
-                readOnly={!editable}
+                disabled={!editable}
                 fluid
                 multiple
                 search
                 selection
+
                 onChange={(_e, d) => {
                   const nTemp = {
                     ...temp,
@@ -265,7 +281,7 @@ ${
                 value={temp?.participants?.map((v) => {
                   const user = users.find((u) => u.id === v) as GetUserDto;
                   return user?.id;
-                })}
+                }) ?? []}
               />
             </Form.Field>
             <h4>Security</h4>
