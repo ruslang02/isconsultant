@@ -1,3 +1,3 @@
 export class PostChatMessageDto {
-  message: string;
+    message: string;
 }

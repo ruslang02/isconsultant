@@ -1,4 +1,4 @@
 export class ErrorDto {
-  message: string
-  statusCode: number
+    message: string;
+    statusCode: number;
 }

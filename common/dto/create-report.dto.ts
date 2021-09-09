@@ -1,4 +1,4 @@
 export class CreateReportDto {
-  receiver: string;
-  description: string;
+    receiver: string;
+    description: string;
 }

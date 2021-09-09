@@ -3,7 +3,7 @@
 
 type ValueOf<T> = T[keyof T];
 
-export type Locale = Record<string, string>;//(typeof en | typeof ru);
+export type Locale = Record<string, string>;
 
 export type LocalizedStringID = keyof Locale;
 

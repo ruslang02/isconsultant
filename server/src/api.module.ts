@@ -15,41 +15,41 @@ import { SchedulesModule } from "./schedules/schedules.module";
 import { UsersModule } from "./users/users.module";
 
 const {
-  POSTGRES_HOST,
-  POSTGRES_PORT,
-  POSTGRES_USER,
-  POSTGRES_PASSWORD,
-  POSTGRES_DB,
+    POSTGRES_HOST,
+    POSTGRES_PORT,
+    POSTGRES_USER,
+    POSTGRES_PASSWORD,
+    POSTGRES_DB,
 } = process.env;
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      type: "postgres",
-      host: POSTGRES_HOST,
-      port: +POSTGRES_PORT,
-      username: POSTGRES_USER,
-      password: POSTGRES_PASSWORD,
-      database: POSTGRES_DB,
-      entities: [
-        CalendarEvent,
-        ChatMessage,
-        File,
-        PendingEvent,
-        Report,
-        TimeSlot,
-        User,
-      ],
-      synchronize: true,
-    }),
-    UsersModule,
-    SchedulesModule,
-    AuthModule,
-    ChatModule,
-    ReportsModule,
-    AdminModule,
-  ],
-  controllers: [],
-  providers: [],
+    imports: [
+        TypeOrmModule.forRoot({
+            type: "postgres",
+            host: POSTGRES_HOST,
+            port: +POSTGRES_PORT,
+            username: POSTGRES_USER,
+            password: POSTGRES_PASSWORD,
+            database: POSTGRES_DB,
+            entities: [
+                CalendarEvent,
+                ChatMessage,
+                File,
+                PendingEvent,
+                Report,
+                TimeSlot,
+                User,
+            ],
+            synchronize: true,
+        }),
+        UsersModule,
+        SchedulesModule,
+        AuthModule,
+        ChatModule,
+        ReportsModule,
+        AdminModule,
+    ],
+    controllers: [],
+    providers: [],
 })
 export class ApiModule {}

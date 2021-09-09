@@ -1,3 +1,3 @@
 export class JoinChatRoomDto {
-  id: number;
+    id: number;
 }

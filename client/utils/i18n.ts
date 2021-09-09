@@ -12,14 +12,14 @@ i18next
         supportedLngs: ["en"],
         ns: ["global"],
         defaultNS: "global",
-        backend: { 
-            loadPath: `/locales/{{lng}}/{{ns}}.json`
+        backend: {
+            loadPath: "/locales/{{lng}}/{{ns}}.json"
         },
         interpolation: {
             escapeValue: false
         },
         react: {
-          useSuspense: false
+            useSuspense: false
         }
     });
 

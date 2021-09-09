@@ -1,4 +1,4 @@
 export class ReceiveChatMessageDto {
-  userId: number;
-  message: string;
+    userId: number;
+    message: string;
 }
