@@ -83,6 +83,15 @@
         "main"
       ],
       "restart":"always"
+    },
+    "redis": {
+      "image": "redis",
+      "command": ["redis-server", "--save 60 1", "--loglevel warning"],
+      "ports": ["6380:6380"],
+      "networks":[
+        "main"
+      ],
+      "restart":"always"
     }
   }
 }
