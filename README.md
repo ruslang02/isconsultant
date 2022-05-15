@@ -2,7 +2,7 @@
 
 Возможен запуск в виде Docker-образа.
 
-Бекенд-часть на базе Nest.js располагается в папке `/server`, клиентская часть на базе [Next.js](https://nextjs.org) - в `/client`. Используемая БД: PostgreSQL.
+Бекенд-часть на базе Nest.js располагается в папке `/server`, клиентская часть на базе [Next.js](https://nextjs.org) - в `/client`. Используемая БД: PostgreSQL, Redis.
 
 Быстрый запуск:
 
@@ -21,7 +21,6 @@ project/
 │   ├── locales/           Файлы локализаций (русский, английский)
 │   ├── models/            Описания моделей в базе данных
 │   └── utils/             Дополнительные типы, утилиты
-├── docs/                  Документация проекта
 ├── janus/                 Конфигурация видео-сервера
 ├── proxy/                 Конфигурация обратного прокси-сервера
 ├── server/                Серверная часть проекта (бекенд на Nest.js)
@@ -48,4 +47,5 @@ project/
 |         `CHAT_PORT` | Порт WebSocket-сервера чата                        | `8081`                                        |
 |  `STORAGE_LOCATION` | Директория на локальном диске для хранения файлов  | `/tmp/isc`                                    |
 |       `DEVELOPMENT` | Флаг о текущей среде выполнения                    | `false`                                       |
-|             `JANUS` | Директория на локальном диске для хранения файлов  | `wss://consultant.infostrategic.com/gateway2` |
+|             `JANUS` | URL инстанса Janus Gateway                         | `wss://consultant.infostrategic.com/gateway2` |
+|             `REDIS` | URL базы данных Redis                              | `redis://redis`                               |
