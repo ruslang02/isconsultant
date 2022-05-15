@@ -21,6 +21,8 @@
     "moduleResolution": "node",
     "isolatedModules": true,
     "strict": false,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "tsBuildInfoFile": "../dist/client.tsbuildinfo"
   },
   "include": [

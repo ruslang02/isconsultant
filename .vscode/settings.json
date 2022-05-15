@@ -30,5 +30,6 @@
             "username": "projecthse2",
             "password": "w$D+N.T?uZ9z*sS7"
         }
-    ]
+    ],
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

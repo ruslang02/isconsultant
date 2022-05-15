@@ -21,6 +21,7 @@
       "server/src"
     ],
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "incremental": true,
     "jsx": "react"
   }
