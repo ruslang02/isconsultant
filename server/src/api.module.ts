@@ -13,6 +13,7 @@ import { AuthModule } from "./auth/auth.module";
 import { ReportsModule } from "./reports/reports.module";
 import { SchedulesModule } from "./schedules/schedules.module";
 import { UsersModule } from "./users/users.module";
+import { RedisModule } from './redis/redis.module';
 
 const {
     POSTGRES_HOST,
@@ -48,6 +49,7 @@ const {
         ChatModule,
         ReportsModule,
         AdminModule,
+        RedisModule,
     ],
     controllers: [],
     providers: [],
