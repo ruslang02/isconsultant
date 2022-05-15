@@ -309,7 +309,7 @@ export class SchedulesController {
         messages
             .map(
                 _ => `${_.from.first_name} ${_.from.last_name} (${_.from.type
-                }) sent in ${_.created_timestamp.toString()}:
+                }) sent in ${_.created_timestamp + ""}:
 ${_.content}
 `
             )

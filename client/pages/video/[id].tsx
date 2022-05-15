@@ -326,7 +326,7 @@ const Chat: React.FC = () => {
             setMessages(
                 data.map(_ => ({
                     content: _.content,
-                    count: _.id,
+                    count: +_.id,
                     created_at: new Date(_.created_timestamp),
                     user: (_.from as unknown) as GetUserInfoDto,
                 }))

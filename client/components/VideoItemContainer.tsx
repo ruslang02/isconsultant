@@ -60,7 +60,7 @@ function processPublisher(publisher: any, roomSession: any, changeUser: React.Di
         }).catch(console.warn.bind(console));
 }
 
-function connect(userId: number, session: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin: any, roomNumber: any): User {
+function connect(userId: number, session: any, changeUser: React.Dispatch<React.SetStateAction<User>>, roomPin: any, roomNumber: any) {
     processPublisher(userId, session, changeUser, roomPin, roomNumber);
 
 }

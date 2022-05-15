@@ -1,6 +1,7 @@
 import { CreateUserDto } from "@common/dto/create-user.dto";
 import { LoginUserSuccessDto } from "@common/dto/login-user-success.dto";
 import { LoginUserDto } from "@common/dto/login-user.dto";
+import { TokenDto } from "@common/dto/token.dto";
 import { User, UserType } from "@common/models/user.entity";
 import {
     BadRequestException,
@@ -13,6 +14,7 @@ import {
     Post,
     Request,
     Response,
+    UnauthorizedException,
     UseGuards,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
@@ -28,6 +30,8 @@ import { Response as ExpressResponse } from "express";
 import { JwtAuthGuard } from "guards/jwt.guard";
 import { UserGuard } from "guards/user.guard";
 import { I18n, I18nContext, I18nService } from "nestjs-i18n";
+import { RedisService } from "redis/redis.service";
+import { SnowflakeService } from "schedules/snowflake.service";
 import { UserAdapter } from "users/user.adapter";
 import { ExtendedRequest } from "utils/ExtendedRequest";
 import { generateId } from "utils/IdGenerator";
@@ -46,8 +50,10 @@ export class AuthController {
         private i18n: I18nService,
         private users: UsersService,
         private verifyMail: MailService,
+        private snowflake: SnowflakeService,
         private jwt: JwtService,
-        private adapter: UserAdapter
+        private adapter: UserAdapter,
+        private redis: RedisService
     ) { }
 
     @UseGuards(LocalAuthGuard)
@@ -110,12 +116,61 @@ export class AuthController {
             const token = await this.auth.generateVerifyToken(data);
             this.verifyMail.send(data.email, token);
 
-            return { access_token: this.jwt.sign({ id: data.id, verified: false, type: data.type }), user: data };
+            return {
+                access_token: this.jwt.sign({ id: data.id, verified: false, type: data.type }, { expiresIn: "1d" }),
+                refresh_token: this.jwt.sign(this.snowflake.make()),
+                user: data
+            };
         } catch (e) {
             this.logger.error("/api/auth/register: ", "[ERROR]", e);
             throw new BadRequestException(
                 "User with this email already exists."
             );
+        }
+    }
+
+    @Post("refresh")
+    @ApiOperation({
+        description: "Обновление токена пользователя.",
+    })
+    @ApiBody({
+        type: TokenDto,
+    })
+    async refreshToken(@Body() t: TokenDto) {
+        const isInvalidated = (await this.redis.client.exists(`invalid_token-${t.refresh_token}`)) > 0;
+
+        if (isInvalidated) throw new UnauthorizedException("This refresh token was revoked.");
+
+        try {
+            const { id, type } = this.jwt.verify<{ id: number; type: string }>(t.access_token);
+            return {
+                access_token: this.jwt.sign({ id, verified: false, type }, { expiresIn: "1d" }),
+                refresh_token: this.jwt.sign(this.snowflake.make()),
+            };
+        } catch (e) {
+            this.logger.error("/api/auth/refreshToken: ", "[ERROR]", e);
+        }
+    }
+
+    @Post("invalidate")
+    @ApiOperation({
+        description: "Отзыв токена пользователя.",
+    })
+    @ApiBody({
+        type: TokenDto,
+    })
+    async invalidateToken(@Body() t: TokenDto) {
+        const isInvalidated = (await this.redis.client.exists(`invalid_token-${t.refresh_token}`)) > 0;
+
+        if (isInvalidated) throw new UnauthorizedException("This refresh token was revoked.");
+
+        try {
+            await this.redis.client.set(`invalid_token-${t.refresh_token}`, Date.now());
+            return {
+                message: "OK."
+            };
+        } catch (e) {
+            this.logger.error("/api/auth/refreshToken: ", "[ERROR]", e);
         }
     }
 

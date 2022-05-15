@@ -26,7 +26,7 @@ export class AdminController {
     @ApiBearerAuth()
     @Get("/log")
     getLog() {
-        return { log: this.logger.getMemory() };
+        return { log: this.logger.get() };
     }
 
     @Types(UserType.ADMIN)

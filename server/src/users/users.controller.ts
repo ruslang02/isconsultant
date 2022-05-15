@@ -64,9 +64,7 @@ export class UsersController {
         @Query("ids") ids?: string
     ) {
         const users = query
-            ? await this.users.search(query).catch(() => {
-                this.logger.error
-            })
+            ? await this.users.search(query).catch(() => [])
             : ids
                 ? await this.users.findMany({ where: { id: In(ids.split(",")) } })
                 : [];

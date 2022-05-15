@@ -51,7 +51,7 @@ export function useAuth() {
         };
         handleAuthChanged();
         target.on("authChanged", handleAuthChanged);
-        return () => target.off("authChanged", handleAuthChanged);
+        return () => { target.off("authChanged", handleAuthChanged); };
     }, []);
 
     return [auth, setAuth] as const;
